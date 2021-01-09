@@ -1,5 +1,15 @@
 #!/bin/bash
 
+RED='\033[0;31m' # Red
+GREEN='\033[0;32m' #Green
+NC='\033[0m' # No Color
+
+if ! command -v rename $> /dev/null ;then
+    echo -e "${RED}rename could not be found.${NC}"
+    echo "(http://plasmasturm.org/code/rename/)"
+    exit
+fi
+
 rename -v "s/\r//g"  *
 rename -v "s/\n//g"  *
 
