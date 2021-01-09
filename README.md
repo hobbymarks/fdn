@@ -1,9 +1,9 @@
 # UFn
 
-##Introduction_简介
+## Introduction_简介
 基于[rename](http://plasmasturm.org/code/rename/)的一个小工具，用于日常统一更改资料的文件名。
 
-##Install_安装
+## Install_安装
 
 内容为bash脚本，可以直接下载和执行;
 
