@@ -47,7 +47,6 @@ rename -vS "•" _ *
 rename -vS "，" _ *
 rename -vS "–" _ *
 rename -vS "—" _ *
-rename -vS "一" _ *
 rename -vS "、" _ *
 rename -vS "（" _ *
 rename -vS "）" _ *
@@ -65,6 +64,7 @@ rename -vS "！" _ *
 rename -vS "🚀" _ *
 rename -vS "🚴" _ *
 rename -vS "🌏" _ *
+rename -vS "🐾" _ *
 
 rename -vS "____" _ *
 rename -vS "___" _ *
