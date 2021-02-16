@@ -38,6 +38,7 @@ rename -vS "«" _ *
 rename -vS "\"" _ *
 rename -vS "*" _ *
 rename -vS "#" _ *
+rename -vS "®" _ *
 
 rename -vS "…" _ *
 rename -vS "“" _ *
@@ -52,6 +53,7 @@ rename -vS "（" _ *
 rename -vS "）" _ *
 rename -vS "《" _ *
 rename -vS "》" _ *
+rename -vS ">" _ *
 rename -vS "【" _ *
 rename -vS "】" _ *
 rename -vS "「" _ *
@@ -65,6 +67,8 @@ rename -vS "🚀" _ *
 rename -vS "🚴" _ *
 rename -vS "🌏" _ *
 rename -vS "🐾" _ *
+
+rename -vS "%2F" _ *
 
 rename -vS "____" _ *
 rename -vS "___" _ *
