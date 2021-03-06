@@ -1,11 +1,65 @@
 
+import hashlib
+import collections
 import os
+import pickle
+from datetime import datetime
+import string
+import click
 
-data_path = "./data/"
+dataPath = "./data/"
+historyRecordPath = os.path.join(dataPath, "hRdDir")
+
+globalParameterDictionary = {}
+globalFileNameHistoryRecordList = []
+
+
+class FileNameLog:
+
+    def __init__(self, filePath="", md5Value=""):
+        if not md5Value:
+            assert os.path.exists(filePath)
+            with open(filePath, "rb") as fhand:
+                data = fhand.read()
+                md5Value = hashlib.md5(data).hexdigest()
+        self.md5Value = str(md5Value)
+        self._currentName = os.path.basename(filePath)
+        self._nameRecord = collections.OrderedDict()
+
+    def changeFileName(self, newFileName="", stamp=""):
+        assert newFileName
+        if not stamp:
+            stamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+        self._nameRecord[stamp] = self._currentName
+        self._currentName = newFileName
+
+    def getFileNameHistory(self):
+        return {
+            self.md5Value: {
+                "currentName": self._currentName,
+                "nameRecord": self._nameRecord
+            }
+        }
+
+
+def createFileNameLog(filePath="", md5Value=""):
+    global historyRecordPath
+    if not md5Value:
+        assert os.path.isfile(filePath)
+        with open(filePath, "rb") as fhand:
+            data = fhand.read()
+            md5Value = hashlib.md5(data).hexdigest()
+    fRecordPath = os.path.join(historyRecordPath, str(md5Value) + "_HRd.pkl")
+    if os.path.isfile(fRecordPath):
+        with open(fRecordPath, "rb") as fhand:
+            rd = pickle.load(fhand)
+        return rd
+    else:
+        assert os.path.isfile(filePath)
+        return FileNameLog(filePath)
 
 
 def isHiddenFile(path):
-    import os
     if os.name == "nt":
         import win32api, win32con
     if os.name == "nt":
@@ -17,24 +71,21 @@ def isHiddenFile(path):
 
 
 def replaceChar(charDict={}, tgtString=""):
+    global globalFileNameHistoryRecordList
     assert charDict
     assert tgtString
-    import os
-    import click
     root, ext = os.path.splitext(tgtString)
     for key, value in charDict.items():
         if key in root:
             root = root.replace(key, value)
-
-
-#             click.echo("---%s" % root + ext)
+            if not globalParameterDictionary["simple"]:
+                globalFileNameHistoryRecordList.append(root + ext)
     return root + ext
 
 
 def processHeadTailChar(tgtString=""):
     assert tgtString
     specChar = "_"
-    import os
     root, ext = os.path.splitext(tgtString)
     if root.startswith(specChar):
         root = specChar.join(root.split(specChar)[1:])
@@ -47,7 +98,6 @@ def processTerminology(termDictionary={}, tgtString=""):
     assert termDictionary
     assert tgtString
     specChar = "_"
-    import os
     root, ext = os.path.splitext(tgtString)
     wordList = root.split(specChar)
     newWordList = []
@@ -63,8 +113,6 @@ def processWord(wordSet=set(), tgtString=""):
     assert wordSet
     assert tgtString
     specChar = "_"
-    import os
-    import string
     root, ext = os.path.splitext(tgtString)
     wordList = root.split(specChar)
     newWordList = []
@@ -77,48 +125,46 @@ def processWord(wordSet=set(), tgtString=""):
     return specChar.join(newWordList) + ext
 
 
-import click
-
-
 @click.command()
-@click.option("-p",
-              "--path",
+@click.option("--path",
               prompt="target path",
-              help="files in path will be changed name.")
-@click.option("-E",
-              "--exclude",
-              default="",
-              help="exclude all files in exclude path")
-@click.option("-d",
-              "--dry",
+              help="Recursively traverse path,All files will be changed name.")
+@click.option("--exclude", default="", help="Exclude all files in exclude path")
+@click.option("--dry",
               default=True,
               type=bool,
-              help="if dry is True will not change file name.Default is True.")
+              help="If dry is True will not change file name.Default is True.")
 @click.option(
-    "-s",
     "--simple",
     default=True,
     type=bool,
-    help="if simple is True Only print changed file name.Default is True.")
+    help="If simple is True Only print changed file name.Default is True.")
 def ufn(path, exclude, dry, simple):
+    global dataPath
+    global globalParameterDictionary
+    global globalFileNameHistoryRecordList
     """Files in PATH will be changed file names unified."""
+    globalParameterDictionary["path"] = path
+    globalParameterDictionary["exclude"] = exclude
+    globalParameterDictionary["dry"] = dry
+    globalParameterDictionary["simple"] = simple
     import os
-    if not os.path.isdir(path):
+    if not os.path.isdir(globalParameterDictionary["path"]):
         click.echo("%s is not valid path.")
         return -1
 
-    import pickle
-    with open(os.path.join(data_path, "CharDictionary.pkl"), "rb") as fhand:
+    with open(os.path.join(dataPath, "CharDictionary.pkl"), "rb") as fhand:
         CharDictionary = pickle.load(fhand)
-    with open(os.path.join(data_path, "TerminologyDictionary.pkl"),
+    with open(os.path.join(dataPath, "TerminologyDictionary.pkl"),
               "rb") as fhand:
         TerminologyDictionary = pickle.load(fhand)
-    with open(os.path.join(data_path, "LowerCaseWordSet.pkl"), "rb") as fhand:
+    with open(os.path.join(dataPath, "LowerCaseWordSet.pkl"), "rb") as fhand:
         LowerCaseWordSet = pickle.load(fhand)
     for subdir, dirs, files in os.walk(path):
         for file in files:
             #             if not os.path.isfile(file):
             #                 continue
+            globalFileNameHistoryRecordList = []
             oldNamePath = os.path.join(subdir, file)
             if isHiddenFile(oldNamePath):
                 continue
@@ -136,11 +182,24 @@ def ufn(path, exclude, dry, simple):
             newName = newName[0].upper() + newName[1:]
             # Create full path
             newNamePath = os.path.join(subdir, newName)
-            if not dry:
-                # rename file name
-                os.rename(oldNamePath, newNamePath)
-            if (not simple) or (newName != file):
+            if not globalParameterDictionary["dry"]:
+                # Create Or Update File Name Change Record and Save to File
+                # then rename file name
+                if newName != file:
+                    fileHistoryRecord = createFileNameLog(filePath=oldNamePath)
+                    with open(
+                            os.path.join(
+                                historyRecordPath,
+                                str(fileHistoryRecord.md5Value) + "_HRd.pkl"),
+                            "wb") as fhand:
+                        fileHistoryRecord.changeFileName(newFileName=newName)
+                        pickle.dump(fileHistoryRecord, fhand)
+                    os.rename(oldNamePath, newNamePath)
+
+            if (not globalParameterDictionary["simple"]) or (newName != file):
                 click.echo("   %s" % file)
+                for fName in globalFileNameHistoryRecordList:
+                    click.echo("---%s" % fName)
                 click.echo("==>%s" % newName)
 
     return 0
