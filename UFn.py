@@ -7,12 +7,6 @@ from datetime import datetime
 import string
 import click
 
-dataPath = "./data/"
-historyRecordPath = os.path.join(dataPath, "hRdDir")
-
-globalParameterDictionary = {}
-globalFileNameHistoryRecordList = []
-
 
 class FileNameLog:
 
@@ -43,13 +37,14 @@ class FileNameLog:
 
 
 def createFileNameLog(filePath="", md5Value=""):
-    global historyRecordPath
+    global globalHistoryRecordPath
     if not md5Value:
         assert os.path.isfile(filePath)
         with open(filePath, "rb") as fhand:
             data = fhand.read()
             md5Value = hashlib.md5(data).hexdigest()
-    fRecordPath = os.path.join(historyRecordPath, str(md5Value) + "_HRd.pkl")
+    fRecordPath = os.path.join(globalHistoryRecordPath,
+                               str(md5Value) + "_HRd.pkl")
     if os.path.isfile(fRecordPath):
         with open(fRecordPath, "rb") as fhand:
             rd = pickle.load(fhand)
@@ -140,7 +135,7 @@ def processWord(wordSet=set(), tgtString=""):
     type=bool,
     help="If simple is True Only print changed file name.Default is True.")
 def ufn(path, exclude, dry, simple):
-    global dataPath
+    global globalDataPath
     global globalParameterDictionary
     global globalFileNameHistoryRecordList
     """Files in PATH will be changed file names unified."""
@@ -153,12 +148,14 @@ def ufn(path, exclude, dry, simple):
         click.echo("%s is not valid path.")
         return -1
 
-    with open(os.path.join(dataPath, "CharDictionary.pkl"), "rb") as fhand:
+    with open(os.path.join(globalDataPath, "CharDictionary.pkl"),
+              "rb") as fhand:
         CharDictionary = pickle.load(fhand)
-    with open(os.path.join(dataPath, "TerminologyDictionary.pkl"),
+    with open(os.path.join(globalDataPath, "TerminologyDictionary.pkl"),
               "rb") as fhand:
         TerminologyDictionary = pickle.load(fhand)
-    with open(os.path.join(dataPath, "LowerCaseWordSet.pkl"), "rb") as fhand:
+    with open(os.path.join(globalDataPath, "LowerCaseWordSet.pkl"),
+              "rb") as fhand:
         LowerCaseWordSet = pickle.load(fhand)
     for subdir, dirs, files in os.walk(path):
         for file in files:
@@ -189,7 +186,7 @@ def ufn(path, exclude, dry, simple):
                     fileHistoryRecord = createFileNameLog(filePath=oldNamePath)
                     with open(
                             os.path.join(
-                                historyRecordPath,
+                                globalHistoryRecordPath,
                                 str(fileHistoryRecord.md5Value) + "_HRd.pkl"),
                             "wb") as fhand:
                         fileHistoryRecord.changeFileName(newFileName=newName)
@@ -206,4 +203,12 @@ def ufn(path, exclude, dry, simple):
 
 
 if __name__ == "__main__":
+    scriptDirPath = os.path.dirname(os.path.realpath(__file__))
+
+    globalDataPath = os.path.join(scriptDirPath, "data")
+    globalHistoryRecordPath = os.path.join(globalDataPath, "hRdDir")
+
+    globalParameterDictionary = {}
+    globalFileNameHistoryRecordList = []
+
     ufn()
