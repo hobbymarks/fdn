@@ -89,6 +89,13 @@ def processHeadTailChar(tgtString=""):
     return root + ext
 
 
+def checkStartsWithTerminology(termDictionary={}, word=""):
+    for key in termDictionary.keys():
+        if word.lower().startswith(key):
+            return key
+    return None
+
+
 def processTerminology(termDictionary={}, tgtString=""):
     assert termDictionary
     assert tgtString
@@ -99,6 +106,9 @@ def processTerminology(termDictionary={}, tgtString=""):
     for word in wordList:
         if word.lower() in termDictionary.keys():
             newWordList.append(termDictionary[word.lower()])
+        elif key := checkStartsWithTerminology(termDictionary, word):
+            newWord = termDictionary[key] + word[len(key):]
+            newWordList.append(newWord)
         else:
             newWordList.append(word)
     return specChar.join(newWordList) + ext
