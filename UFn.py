@@ -120,10 +120,39 @@ def processWord(wordSet=set(), tgtString=""):
     return specChar.join(newWordList) + ext
 
 
+def depthWalk(topPath, topDown=True, followLinks=False, maxDepth=1):
+    if str(maxDepth).isnumeric():
+        maxDepth = int(maxDepth)
+    else:
+        maxDepth = 1
+    names = os.listdir(topPath)
+    dirs, nondirs = [], []
+    for name in names:
+        if os.path.isdir(os.path.join(topPath, name)):
+            dirs.append(name)
+        else:
+            nondirs.append(name)
+    if topDown:
+        yield topPath, dirs, nondirs
+    if maxDepth is None or maxDepth > 1:
+        for name in dirs:
+            newPath = os.path.join(topPath, name)
+            if followLinks or not os.path.islink(newPath):
+                for x in depthWalk(newPath, topDown, followLinks,
+                                   None if maxDepth is None else maxDepth - 1):
+                    yield x
+    if not topDown:
+        yield topPath, dirs, nondirs
+
+
 @click.command()
 @click.option("--path",
               prompt="target path",
               help="Recursively traverse path,All files will be changed name.")
+@click.option("--maxdepth",
+              default=1,
+              type=str,
+              help="Set travel directory tree with max depth")
 @click.option("--exclude", default="", help="Exclude all files in exclude path")
 @click.option("--dry",
               default=True,
@@ -134,12 +163,13 @@ def processWord(wordSet=set(), tgtString=""):
     default=True,
     type=bool,
     help="If simple is True Only print changed file name.Default is True.")
-def ufn(path, exclude, dry, simple):
+def ufn(path, maxdepth, exclude, dry, simple):
     global globalDataPath
     global globalParameterDictionary
     global globalFileNameHistoryRecordList
     """Files in PATH will be changed file names unified."""
     globalParameterDictionary["path"] = path
+    globalParameterDictionary["maxdepth"] = maxdepth
     globalParameterDictionary["exclude"] = exclude
     globalParameterDictionary["dry"] = dry
     globalParameterDictionary["simple"] = simple
@@ -157,7 +187,9 @@ def ufn(path, exclude, dry, simple):
     with open(os.path.join(globalDataPath, "LowerCaseWordSet.pkl"),
               "rb") as fhand:
         LowerCaseWordSet = pickle.load(fhand)
-    for subdir, dirs, files in os.walk(path):
+    for subdir, dirs, files in depthWalk(
+            topPath=globalParameterDictionary["path"],
+            maxDepth=globalParameterDictionary["maxdepth"]):
         for file in files:
             #             if not os.path.isfile(file):
             #                 continue
