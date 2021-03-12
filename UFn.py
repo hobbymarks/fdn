@@ -1,4 +1,5 @@
 
+import difflib
 import hashlib
 import collections
 import os
@@ -6,6 +7,8 @@ import pickle
 from datetime import datetime
 import string
 import click
+from rich.console import Console
+from rich.theme import Theme
 
 
 class FileNameLog:
@@ -155,6 +158,36 @@ def depthWalk(topPath, topDown=True, followLinks=False, maxDepth=1):
         yield topPath, dirs, nondirs
 
 
+def richStyle(originString="", processedString=""):
+    richS1 = richS2 = ""
+    richS1DifPos = richS2DifPos = 0
+    for match in difflib.SequenceMatcher(0, originString,
+                                         processedString).get_matching_blocks():
+        if richS1DifPos < match.a:
+            richS1 += "[bold bright_red]" + originString[
+                richS1DifPos:match.a].replace(
+                    " ",
+                    "☐") + "[/bold bright_red]" + originString[match.a:match.a +
+                                                               match.size]
+            richS1DifPos = match.a + match.size
+        else:
+            richS1 += originString[match.a:match.a + match.size]
+            richS1DifPos = match.a + match.size
+
+        if richS2DifPos < match.b:
+            richS2 += "[bold bright_green]" + processedString[
+                richS2DifPos:match.b].replace(
+                    " ", "☐"
+                ) + "[/bold bright_green]" + processedString[match.b:match.b +
+                                                             match.size]
+            richS2DifPos = match.b + match.size
+        else:
+            richS2 += processedString[match.b:match.b + match.size]
+            richS2DifPos = match.b + match.size
+
+    return richS1, richS2
+
+
 @click.command()
 @click.option("--path",
               prompt="target path",
@@ -183,7 +216,10 @@ def ufn(path, maxdepth, exclude, dry, simple):
     globalParameterDictionary["exclude"] = exclude
     globalParameterDictionary["dry"] = dry
     globalParameterDictionary["simple"] = simple
-    import os
+
+    console = Console(width=240, theme=Theme(inherit=False))
+    style = "black on bright_white"
+
     if not os.path.isdir(globalParameterDictionary["path"]):
         click.echo("%s is not valid path.")
         return -1
@@ -236,10 +272,12 @@ def ufn(path, maxdepth, exclude, dry, simple):
                     os.rename(oldNamePath, newNamePath)
 
             if (not globalParameterDictionary["simple"]) or (newName != file):
-                click.echo("   %s" % file)
+
+                richFile, richNewName = richStyle(file, newName)
+                console.print(" " * 3 + richFile, style=style)
                 for fName in globalFileNameHistoryRecordList:
-                    click.echo("---%s" % fName)
-                click.echo("==>%s" % newName)
+                    console.print("---" + fName, style=style)
+                console.print("==>" + richNewName, style=style)
 
     return 0
 
