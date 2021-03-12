@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python
 import difflib
 import hashlib
 import collections
@@ -167,7 +167,7 @@ def richStyle(originString="", processedString=""):
             richS1 += "[bold bright_red]" + originString[
                 richS1DifPos:match.a].replace(
                     " ",
-                    "☐") + "[/bold bright_red]" + originString[match.a:match.a +
+                    "▯") + "[/bold bright_red]" + originString[match.a:match.a +
                                                                match.size]
             richS1DifPos = match.a + match.size
         else:
@@ -177,7 +177,7 @@ def richStyle(originString="", processedString=""):
         if richS2DifPos < match.b:
             richS2 += "[bold bright_green]" + processedString[
                 richS2DifPos:match.b].replace(
-                    " ", "☐"
+                    " ", "▯"
                 ) + "[/bold bright_green]" + processedString[match.b:match.b +
                                                              match.size]
             richS2DifPos = match.b + match.size
@@ -189,14 +189,19 @@ def richStyle(originString="", processedString=""):
 
 
 @click.command()
-@click.option("--path",
-              prompt="target path",
-              help="Recursively traverse path,All files will be changed name.")
+@click.option(
+    "--path",
+    #     prompt="target path",
+    default=".",
+    help="Recursively traverse the path,All files will be changed name.")
 @click.option("--maxdepth",
               default=1,
               type=str,
-              help="Set travel directory tree with max depth")
-@click.option("--exclude", default="", help="Exclude all files in exclude path")
+              help="Set travel directory tree with max depth.Default is 1.")
+@click.option(
+    "--exclude",
+    default="",
+    help="Exclude all files in exclude path.Not valid in current version.")
 @click.option("--dry",
               default=True,
               type=bool,
