@@ -6,6 +6,7 @@ import os
 import pickle
 from datetime import datetime
 import string
+import sys
 import click
 from rich.console import Console
 from rich.theme import Theme
@@ -288,6 +289,11 @@ def ufn(path, maxdepth, exclude, dry, simple):
 
 
 if __name__ == "__main__":
+    if (sys.version_info.major, sys.version_info.minor) < (3, 8):
+        console.print(
+            f"current Version is {sys.version},\n Please upgrade to at least 3.8."
+        )
+        sys.exit()
     scriptDirPath = os.path.dirname(os.path.realpath(__file__))
 
     globalDataPath = os.path.join(scriptDirPath, "data")
