@@ -189,67 +189,8 @@ def richStyle(originString="", processedString=""):
     return richS1, richS2
 
 
-@click.command()
-@click.argument("argpath", required=False)
-@click.option(
-    "--path",
-    #     prompt="target path",
-    default=".",
-    help="Recursively traverse the path,All files will be changed name.")
-@click.option("--maxdepth",
-              default=1,
-              type=str,
-              help="Set travel directory tree with max depth.Default is 1.")
-@click.option(
-    "--exclude",
-    default="",
-    help="Exclude all files in exclude path.Not valid in current version.")
-@click.option("--dry",
-              default=True,
-              type=bool,
-              help="If dry is True will not change file name.Default is True.")
-@click.option(
-    "--simple",
-    default=True,
-    type=bool,
-    help="If simple is True Only print changed file name.Default is True.")
-def ufn(argpath, path, maxdepth, exclude, dry, simple):
-    global globalDataPath
-    global globalParameterDictionary
-    global globalFileNameHistoryRecordList
-    """Files in PATH will be changed file names unified.
-    
-    You can direct set path such as UFn.py path ...
-    """
-    globalParameterDictionary["argpath"] = argpath
-    globalParameterDictionary["path"] = path
-    globalParameterDictionary["maxdepth"] = maxdepth
-    globalParameterDictionary["exclude"] = exclude
-    globalParameterDictionary["dry"] = dry
-    globalParameterDictionary["simple"] = simple
-
-    console = Console(width=240, theme=Theme(inherit=False))
-    style = "black on bright_white"
-
-    targetPath = ""
-
-    if globalParameterDictionary["argpath"]:
-        targetPath = globalParameterDictionary["argpath"]
-    else:
-        if not os.path.isdir(globalParameterDictionary["path"]):
-            click.echo("%s is not valid path.")
-            return -1
-        targetPath = globalParameterDictionary["path"]
-
-    with open(os.path.join(globalDataPath, "CharDictionary.pkl"),
-              "rb") as fhand:
-        CharDictionary = pickle.load(fhand)
-    with open(os.path.join(globalDataPath, "TerminologyDictionary.pkl"),
-              "rb") as fhand:
-        TerminologyDictionary = pickle.load(fhand)
-    with open(os.path.join(globalDataPath, "LowerCaseWordSet.pkl"),
-              "rb") as fhand:
-        LowerCaseWordSet = pickle.load(fhand)
+def onlyOnePathUFn(globalParameterDictionary, targetPath, CharDictionary,
+                   TerminologyDictionary, LowerCaseWordSet, console, style):
     for subdir, dirs, files in depthWalk(
             topPath=targetPath, maxDepth=globalParameterDictionary["maxdepth"]):
         for file in files:
@@ -294,6 +235,80 @@ def ufn(argpath, path, maxdepth, exclude, dry, simple):
                 for fName in globalFileNameHistoryRecordList:
                     console.print("---" + fName, style=style)
                 console.print("==>" + richNewName, style=style)
+
+
+@click.command(context_settings={"ignore_unknown_options": True})
+# @click.command()
+@click.argument("argpath",
+                required=False,
+                type=click.Path(exists=True),
+                nargs=-1)
+@click.option(
+    "--path",
+    #     prompt="target path",
+    default=".",
+    help="Recursively traverse the path,All file's name will be changed.",
+    show_default=True)
+@click.option("--maxdepth",
+              default=1,
+              type=str,
+              help="Set travel directory tree with max depth.",
+              show_default=True)
+@click.option(
+    "--exclude",
+    default="",
+    help="Exclude all files in exclude path.Not valid in current version.",
+    show_default=True)
+@click.option("--dry",
+              default=True,
+              type=bool,
+              help="If dry is True will not change file name.",
+              show_default=True)
+@click.option("--simple",
+              default=True,
+              type=bool,
+              help="If simple is True Only print changed file name.",
+              show_default=True)
+def ufn(argpath, path, maxdepth, exclude, dry, simple):
+    global globalDataPath
+    global globalParameterDictionary
+    global globalFileNameHistoryRecordList
+    """Files in PATH will be changed file names unified.
+    
+    You can direct set path such as UFn.py path ...
+    """
+    globalParameterDictionary["argpath"] = argpath
+    globalParameterDictionary["path"] = path
+    globalParameterDictionary["maxdepth"] = maxdepth
+    globalParameterDictionary["exclude"] = exclude
+    globalParameterDictionary["dry"] = dry
+    globalParameterDictionary["simple"] = simple
+
+    console = Console(width=240, theme=Theme(inherit=False))
+    style = "black on bright_white"
+
+    targetPath = ""
+
+    if globalParameterDictionary["argpath"]:
+        targetPath = globalParameterDictionary["argpath"]
+    else:
+        if not os.path.isdir(globalParameterDictionary["path"]):
+            click.echo("%s is not valid path.")
+            return -1
+        targetPath = globalParameterDictionary["path"]
+
+    with open(os.path.join(globalDataPath, "CharDictionary.pkl"),
+              "rb") as fhand:
+        CharDictionary = pickle.load(fhand)
+    with open(os.path.join(globalDataPath, "TerminologyDictionary.pkl"),
+              "rb") as fhand:
+        TerminologyDictionary = pickle.load(fhand)
+    with open(os.path.join(globalDataPath, "LowerCaseWordSet.pkl"),
+              "rb") as fhand:
+        LowerCaseWordSet = pickle.load(fhand)
+    for path in targetPath:
+        onlyOnePathUFn(globalParameterDictionary, path, CharDictionary,
+                       TerminologyDictionary, LowerCaseWordSet, console, style)
 
     return 0
 
