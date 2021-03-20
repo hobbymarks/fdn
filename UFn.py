@@ -190,6 +190,7 @@ def richStyle(originString="", processedString=""):
 
 
 @click.command()
+@click.argument("argpath", required=False)
 @click.option(
     "--path",
     #     prompt="target path",
@@ -212,11 +213,15 @@ def richStyle(originString="", processedString=""):
     default=True,
     type=bool,
     help="If simple is True Only print changed file name.Default is True.")
-def ufn(path, maxdepth, exclude, dry, simple):
+def ufn(argpath, path, maxdepth, exclude, dry, simple):
     global globalDataPath
     global globalParameterDictionary
     global globalFileNameHistoryRecordList
-    """Files in PATH will be changed file names unified."""
+    """Files in PATH will be changed file names unified.
+    
+    You can direct set path such as UFn.py path ...
+    """
+    globalParameterDictionary["argpath"] = argpath
     globalParameterDictionary["path"] = path
     globalParameterDictionary["maxdepth"] = maxdepth
     globalParameterDictionary["exclude"] = exclude
@@ -226,9 +231,15 @@ def ufn(path, maxdepth, exclude, dry, simple):
     console = Console(width=240, theme=Theme(inherit=False))
     style = "black on bright_white"
 
-    if not os.path.isdir(globalParameterDictionary["path"]):
-        click.echo("%s is not valid path.")
-        return -1
+    targetPath = ""
+
+    if globalParameterDictionary["argpath"]:
+        targetPath = globalParameterDictionary["argpath"]
+    else:
+        if not os.path.isdir(globalParameterDictionary["path"]):
+            click.echo("%s is not valid path.")
+            return -1
+        targetPath = globalParameterDictionary["path"]
 
     with open(os.path.join(globalDataPath, "CharDictionary.pkl"),
               "rb") as fhand:
@@ -240,8 +251,7 @@ def ufn(path, maxdepth, exclude, dry, simple):
               "rb") as fhand:
         LowerCaseWordSet = pickle.load(fhand)
     for subdir, dirs, files in depthWalk(
-            topPath=globalParameterDictionary["path"],
-            maxDepth=globalParameterDictionary["maxdepth"]):
+            topPath=targetPath, maxDepth=globalParameterDictionary["maxdepth"]):
         for file in files:
             #             if not os.path.isfile(file):
             #                 continue
