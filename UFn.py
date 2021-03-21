@@ -165,10 +165,10 @@ def richStyle(originString="", processedString=""):
     for match in difflib.SequenceMatcher(0, originString,
                                          processedString).get_matching_blocks():
         if richS1DifPos < match.a:
-            richS1 += "[bold bright_red]" + originString[
+            richS1 += "[bold red]" + originString[
                 richS1DifPos:match.a].replace(
                     " ",
-                    "▯") + "[/bold bright_red]" + originString[match.a:match.a +
+                    "▯") + "[/bold red]" + originString[match.a:match.a +
                                                                match.size]
             richS1DifPos = match.a + match.size
         else:
@@ -176,10 +176,10 @@ def richStyle(originString="", processedString=""):
             richS1DifPos = match.a + match.size
 
         if richS2DifPos < match.b:
-            richS2 += "[bold bright_green]" + processedString[
+            richS2 += "[bold green]" + processedString[
                 richS2DifPos:match.b].replace(
                     " ", "▯"
-                ) + "[/bold bright_green]" + processedString[match.b:match.b +
+                ) + "[/bold green]" + processedString[match.b:match.b +
                                                              match.size]
             richS2DifPos = match.b + match.size
         else:
@@ -285,7 +285,7 @@ def ufn(argpath, path, maxdepth, exclude, dry, simple):
     globalParameterDictionary["simple"] = simple
 
     console = Console(width=240, theme=Theme(inherit=False))
-    style = "black on bright_white"
+    style = "black on white"
 
     targetPath = ""
 
