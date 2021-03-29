@@ -165,11 +165,9 @@ def richStyle(originString="", processedString=""):
     for match in difflib.SequenceMatcher(0, originString,
                                          processedString).get_matching_blocks():
         if richS1DifPos < match.a:
-            richS1 += "[bold red]" + originString[
-                richS1DifPos:match.a].replace(
-                    " ",
-                    "▯") + "[/bold red]" + originString[match.a:match.a +
-                                                               match.size]
+            richS1 += "[bold red]" + originString[richS1DifPos:match.a].replace(
+                " ", "▯") + "[/bold red]" + originString[match.a:match.a +
+                                                         match.size]
             richS1DifPos = match.a + match.size
         else:
             richS1 += originString[match.a:match.a + match.size]
@@ -178,8 +176,8 @@ def richStyle(originString="", processedString=""):
         if richS2DifPos < match.b:
             richS2 += "[bold green]" + processedString[
                 richS2DifPos:match.b].replace(
-                    " ", "▯"
-                ) + "[/bold green]" + processedString[match.b:match.b +
+                    " ",
+                    "▯") + "[/bold green]" + processedString[match.b:match.b +
                                                              match.size]
             richS2DifPos = match.b + match.size
         else:
@@ -229,12 +227,14 @@ def onlyOnePathUFn(globalParameterDictionary, targetPath, CharDictionary,
                     os.rename(oldNamePath, newNamePath)
 
             if (not globalParameterDictionary["simple"]) or (newName != file):
-
                 richFile, richNewName = richStyle(file, newName)
                 console.print(" " * 3 + richFile, style=style)
                 for fName in globalFileNameHistoryRecordList:
                     console.print("---" + fName, style=style)
-                console.print("==>" + richNewName, style=style)
+                if globalParameterDictionary["dry"]:
+                    console.print("-->" + richNewName, style=style)
+                else:
+                    console.print("==>" + richNewName, style=style)
 
 
 @click.command(context_settings={"ignore_unknown_options": True})
@@ -309,6 +309,11 @@ def ufn(argpath, path, maxdepth, exclude, dry, simple):
     for path in targetPath:
         onlyOnePathUFn(globalParameterDictionary, path, CharDictionary,
                        TerminologyDictionary, LowerCaseWordSet, console, style)
+
+    if globalParameterDictionary["dry"]:
+        console.print("*" * 80)
+        console.print(
+            "In order to take effect,run the CLI add option '--dry False'")
 
     return 0
 
