@@ -1,13 +1,18 @@
 # UFn
-A Bash Script For Unify File Name Format
+A Tool For Unify File Name Format
 
 ## Introduction
+### Bach Version
 A tool base on [rename](http://plasmasturm.org/code/rename/) to unify file name。File name format：
 1. no space in file name（firstly all space will be replace by underline,then multiple consecutive underscores will be reduced to one）；
 2. only underscore allowed in file name，all other control characters will be replace by underscore；
 3. multiple consecutive underscores will be reduced to one；
 4. underscore at the beginning of file name will be deleted;
 5. underscore at the end of file name will be deleted;
+
+### Jupyter Notebook Version
+
+### Python Version
 
 ## Install
 
