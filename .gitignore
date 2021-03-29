@@ -1,6 +1,13 @@
 Pre.sh
+<<<<<<< HEAD
 data/hRdDir/
 draft/
 .ipynb_checkpoints/
 .virtual_documents/
 
+=======
+.ipynb_checkpoints/
+.virtual_documents/
+data/hRdDir/
+draft/
+>>>>>>> PythonVer
