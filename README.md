@@ -3,10 +3,12 @@ A Tool For Unify File Name Format
 
 ## Introduction
 ### Bash Version
-A tool base on [rename](http://plasmasturm.org/code/rename/) to unify file name。File name format：
-1. no space in file name（firstly all space will be replace by underline,then multiple consecutive underscores will be reduced to one）；
-2. only underscore allowed in file name，all other control characters will be replace by underscore；
-3. multiple consecutive underscores will be reduced to one；
+A tool base on [rename](http://plasmasturm.org/code/rename/) to unify file name.
+
+File name format:
+1. no space in file name（firstly every space will be replaced by an underscore,then multiple consecutive underscores will be reduced to one);
+2. only underscore allowed in file name，all other control characters will be replaced by underscore;
+3. multiple consecutive underscores will be reduced to one;
 4. underscore at the beginning of file name will be deleted;
 5. underscore at the end of file name will be deleted;
 
@@ -31,7 +33,9 @@ A tool base on [rename](http://plasmasturm.org/code/rename/) to unify file name�
 
 ## 简介
 ### Bash版
-基于[rename](http://plasmasturm.org/code/rename/)的一个小工具，用于日常统一更改资料的文件名。目前的具体格式：
+基于[rename](http://plasmasturm.org/code/rename/)的一个小工具，用于日常统一更改资料的文件名。
+
+目前的具体格式：
 1. 文件名不保留空格（首先空格会被替换为下划线，之后根据是否存在连续下划线来决定缩减）；
 2. 文件名中只保留下划线字符，其余的控制类字符会被替换为下划线；
 3. 多个连续的下划线字符会被缩减为一个下划线；
