@@ -77,19 +77,21 @@ def replaceChar(charDict={}, tgtString=""):
     for key, value in charDict.items():
         if key in root:
             root = root.replace(key, value)
-            if not globalParameterDictionary["simple"]:
-                globalFileNameHistoryRecordList.append(root + ext)
+            globalFileNameHistoryRecordList.append(root + ext)
     return root + ext
 
 
 def processHeadTailChar(tgtString=""):
+    global globalFileNameHistoryRecordList
     assert tgtString
     specChar = "_"
     root, ext = os.path.splitext(tgtString)
     if root.startswith(specChar):
         root = specChar.join(root.split(specChar)[1:])
+        globalFileNameHistoryRecordList.append(root + ext)
     if root.endswith(specChar):
         root = specChar.join(root.split(specChar)[0:-1])
+        globalFileNameHistoryRecordList.append(root + ext)
     return root + ext
 
 
@@ -101,6 +103,7 @@ def checkStartsWithTerminology(termDictionary={}, word=""):
 
 
 def processTerminology(termDictionary={}, tgtString=""):
+    global globalFileNameHistoryRecordList
     assert termDictionary
     assert tgtString
     specChar = "_"
@@ -115,6 +118,8 @@ def processTerminology(termDictionary={}, tgtString=""):
             newWordList.append(newWord)
         else:
             newWordList.append(word)
+    if newWordList != wordList:
+        globalFileNameHistoryRecordList.append(specChar.join(newWordList) + ext)
     return specChar.join(newWordList) + ext
 
 
@@ -189,6 +194,7 @@ def richStyle(originString="", processedString=""):
 
 def onlyOnePathUFn(globalParameterDictionary, targetPath, CharDictionary,
                    TerminologyDictionary, LowerCaseWordSet, console, style):
+    global globalFileNameHistoryRecordList
     for subdir, dirs, files in depthWalk(
             topPath=targetPath, maxDepth=globalParameterDictionary["maxdepth"]):
         for file in files:
@@ -209,7 +215,9 @@ def onlyOnePathUFn(globalParameterDictionary, targetPath, CharDictionary,
             newName = processTerminology(termDictionary=TerminologyDictionary,
                                          tgtString=newName)
             # Capitalize The First Letter
-            newName = newName[0].upper() + newName[1:]
+            if newName[0].islower():
+                newName = newName[0].upper() + newName[1:]
+                globalFileNameHistoryRecordList.append(newName)
             # Create full path
             newNamePath = os.path.join(subdir, newName)
             if not globalParameterDictionary["dry"]:
@@ -226,11 +234,12 @@ def onlyOnePathUFn(globalParameterDictionary, targetPath, CharDictionary,
                         pickle.dump(fileHistoryRecord, fhand)
                     os.rename(oldNamePath, newNamePath)
 
-            if (not globalParameterDictionary["simple"]) or (newName != file):
+            if newName != file:
                 richFile, richNewName = richStyle(file, newName)
                 console.print(" " * 3 + richFile, style=style)
-                for fName in globalFileNameHistoryRecordList:
-                    console.print("---" + fName, style=style)
+                if not globalParameterDictionary["simple"]:
+                    for fName in globalFileNameHistoryRecordList:
+                        console.print("---" + fName, style=style)
                 if globalParameterDictionary["dry"]:
                     console.print("-->" + richNewName, style=style)
                 else:
