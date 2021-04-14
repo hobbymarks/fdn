@@ -10,6 +10,7 @@ import sys
 import click
 from rich.console import Console
 from rich.theme import Theme
+import re
 
 
 class FileNameLog:
@@ -41,14 +42,14 @@ class FileNameLog:
 
 
 def createFileNameLog(filePath="", md5Value=""):
-    global globalHistoryRecordPath
+    global gParamDict
+    rdPath = gParamDict["recordPath"]
     if not md5Value:
         assert os.path.isfile(filePath)
         with open(filePath, "rb") as fhand:
             data = fhand.read()
             md5Value = hashlib.md5(data).hexdigest()
-    fRecordPath = os.path.join(globalHistoryRecordPath,
-                               str(md5Value) + "_HRd.pkl")
+    fRecordPath = os.path.join(rdPath, str(md5Value) + "_HRd.pkl")
     if os.path.isfile(fRecordPath):
         with open(fRecordPath, "rb") as fhand:
             rd = pickle.load(fhand)
@@ -69,74 +70,134 @@ def isHiddenFile(path):
         return os.path.basename(path).startswith('.')  #linux-osx
 
 
-def replaceChar(charDict={}, tgtString=""):
-    global globalFileNameHistoryRecordList
-    assert charDict
-    assert tgtString
-    root, ext = os.path.splitext(tgtString)
+def maskOriginal(s=""):
+    global gParamDict
+    kpOrgList = gParamDict["KeepOriginalList"]
+    sepChar = gParamDict["sepChar"]
+    reStr = "|".join([re.escape(sepStr) for sepStr in kpOrgList])
+    wordList = re.split(f'({reStr})', s)
+    maskList = []
+    for elm in wordList:
+        if elm in kpOrgList:
+            maskList.extend([True])
+        else:
+            maskList.extend([False])
+
+    return (wordList, maskList)
+
+
+def replaceChar(fNameStr=""):
+    global gParamDict
+    charDict = gParamDict["CharDictionary"]
+    root, ext = os.path.splitext(fNameStr)
+    wordList = []
+    maskList = []
+    wordList, maskList = maskOriginal(root)
     for key, value in charDict.items():
-        if key in root:
-            root = root.replace(key, value)
-            globalFileNameHistoryRecordList.append(root + ext)
+        newWordList = []
+        for word, mask in zip(wordList, maskList):
+            if not mask:
+                newWordList.append(word)
+        if key in "".join(newWordList):  #If need repalce ,then go ...
+            newWordList = []
+            for word, mask in zip(wordList, maskList):
+                if (key in word) and (not mask):
+                    newWordList.append(word.replace(key, value))
+                else:
+                    newWordList.append(word)
+            gParamDict["nameRdList"].append("".join(newWordList) + ext)
+            wordList = newWordList
+    return "".join(wordList) + ext
+
+
+def processHeadTailSepChar(fNameStr=""):
+    """
+    Process When globalSepChar at Head or Tail of the file name exclude extension.
+    """
+    global gParamDict
+    sepChar = gParamDict["sepChar"]
+    root, ext = os.path.splitext(fNameStr)
+    if root.startswith(sepChar):
+        root = sepChar.join(root.split(sepChar)[1:])
+        gParamDict["nameRdList"].append(root + ext)
+    if root.endswith(sepChar):
+        root = sepChar.join(root.split(sepChar)[0:-1])
+        gParamDict["nameRdList"].append(root + ext)
     return root + ext
 
 
-def processHeadTailChar(tgtString=""):
-    global globalFileNameHistoryRecordList
-    assert tgtString
-    specChar = "_"
-    root, ext = os.path.splitext(tgtString)
-    if root.startswith(specChar):
-        root = specChar.join(root.split(specChar)[1:])
-        globalFileNameHistoryRecordList.append(root + ext)
-    if root.endswith(specChar):
-        root = specChar.join(root.split(specChar)[0:-1])
-        globalFileNameHistoryRecordList.append(root + ext)
-    return root + ext
+def processHeadTail(fNameStr=""):
+    """
+    Process Head and Tail of the file name.
+    """
+    global gParamDict
+    assert fNameStr
+    newName = processHeadTailSepChar(fNameStr=fNameStr)
+    # Capitalize The First Letter
+    if newName[0].islower():
+        newName = newName[0].upper() + newName[1:]
+        gParamDict["nameRdList"].append(newName)
+
+    return newName
 
 
-def checkStartsWithTerminology(termDictionary={}, word=""):
-    for key in termDictionary.keys():
+def processWhiteSpace(fNameStr=""):
+    """
+    Process all whitespace char ...
+    """
+    global gParamDict
+    sepChar = gParamDict["sepChar"]
+    root, ext = os.path.splitext(fNameStr)
+    newName = sepChar.join(root.split()) + ext
+    if newName != fNameStr:
+        gParamDict["nameRdList"].append(newName)
+    return newName
+
+
+def checkStartsWithTerminology(word=""):
+    global gParamDict
+    termDict = gParamDict["TerminologyDictionary"]
+    for key in termDict.keys():
         if word.lower().startswith(key):
             return key
     return None
 
 
-def processTerminology(termDictionary={}, tgtString=""):
-    global globalFileNameHistoryRecordList
-    assert termDictionary
-    assert tgtString
-    specChar = "_"
-    root, ext = os.path.splitext(tgtString)
-    wordList = root.split(specChar)
+def processTerminology(fNameStr=""):
+    global gParamDict
+
+    root, ext = os.path.splitext(fNameStr)
+    wordList = root.split(gParamDict["sepChar"])
     newWordList = []
+    termDict = gParamDict["TerminologyDictionary"]
+    sepChar = gParamDict["sepChar"]
     for word in wordList:
-        if word.lower() in termDictionary.keys():
-            newWordList.append(termDictionary[word.lower()])
-        elif key := checkStartsWithTerminology(termDictionary, word):
-            newWord = termDictionary[key] + word[len(key):]
+        if word.lower() in termDict.keys():
+            newWordList.append(termDict[word.lower()])
+        elif key := checkStartsWithTerminology(word):
+            newWord = termDict[key] + word[len(key):]
             newWordList.append(newWord)
         else:
             newWordList.append(word)
     if newWordList != wordList:
-        globalFileNameHistoryRecordList.append(specChar.join(newWordList) + ext)
-    return specChar.join(newWordList) + ext
+        gParamDict["nameRdList"].append(sepChar.join(newWordList) + ext)
+    return sepChar.join(newWordList) + ext
 
 
-def processWord(wordSet=set(), tgtString=""):
-    assert wordSet
-    assert tgtString
-    specChar = "_"
-    root, ext = os.path.splitext(tgtString)
-    wordList = root.split(specChar)
+def processWord(fNameStr=""):
+    global gParamDict
+    sepChar = gParamDict["sepChar"]
+    root, ext = os.path.splitext(fNameStr)
+    wordList = root.split(sepChar)
     newWordList = []
+    wordSet = gParamDict["LowerCaseWordSet"]
     for word in wordList:
         if word.lower() in wordSet:
             newWordList.append(string.capwords(word))
         else:
             newWordList.append(word)
 
-    return specChar.join(newWordList) + ext
+    return sepChar.join(newWordList) + ext
 
 
 def depthWalk(topPath, topDown=True, followLinks=False, maxDepth=1):
@@ -192,42 +253,51 @@ def richStyle(originString="", processedString=""):
     return richS1, richS2
 
 
-def onlyOnePathUFn(globalParameterDictionary, targetPath, CharDictionary,
-                   TerminologyDictionary, LowerCaseWordSet, console, style):
-    global globalFileNameHistoryRecordList
-    for subdir, dirs, files in depthWalk(
-            topPath=targetPath, maxDepth=globalParameterDictionary["maxdepth"]):
+def oneFileNameUFn(fNameStr=""):
+    """
+    Process Only one file name
+    """
+    global gParamDict
+    newName = fNameStr
+    # all whitespace replace by sepChar
+    newName = processWhiteSpace(fNameStr=newName)
+    # replace characters by defined Dictionary
+    newName = replaceChar(fNameStr=newName)
+    # Capwords only when word in wordsSet
+    newName = processWord(fNameStr=newName)
+    # Pretty Terminology
+    newName = processTerminology(fNameStr=newName)
+    # process Head and Tail
+    newName = processHeadTail(fNameStr=newName)
+
+    return newName
+
+
+def oneDirPathUFn(targetPath, console, style):
+    """
+    Process Only one Directory Path
+    """
+    global gParamDict
+    for subdir, dirs, files in depthWalk(topPath=targetPath,
+                                         maxDepth=gParamDict["maxdepth"]):
         for file in files:
             #             if not os.path.isfile(file):
             #                 continue
-            globalFileNameHistoryRecordList = []
+            gParamDict["nameRdList"] = []
             oldNamePath = os.path.join(subdir, file)
             if isHiddenFile(oldNamePath):
                 continue
-            newName = file
-            # replace characters by defined Dictionary
-            newName = replaceChar(charDict=CharDictionary, tgtString=newName)
-            # process Head and Tail character exclude file name extension
-            newName = processHeadTailChar(tgtString=newName)
-            # Capwords only when word in wordsSet
-            newName = processWord(wordSet=LowerCaseWordSet, tgtString=newName)
-            # Pretty Terminology
-            newName = processTerminology(termDictionary=TerminologyDictionary,
-                                         tgtString=newName)
-            # Capitalize The First Letter
-            if newName[0].islower():
-                newName = newName[0].upper() + newName[1:]
-                globalFileNameHistoryRecordList.append(newName)
+            newName = oneFileNameUFn(fNameStr=file)
             # Create full path
             newNamePath = os.path.join(subdir, newName)
-            if not globalParameterDictionary["dry"]:
+            if not gParamDict["dry"]:
                 # Create Or Update File Name Change Record and Save to File
                 # then rename file name
                 if newName != file:
                     fileHistoryRecord = createFileNameLog(filePath=oldNamePath)
                     with open(
                             os.path.join(
-                                globalHistoryRecordPath,
+                                gParamDict["recordPath"],
                                 str(fileHistoryRecord.md5Value) + "_HRd.pkl"),
                             "wb") as fhand:
                         fileHistoryRecord.changeFileName(newFileName=newName)
@@ -237,10 +307,10 @@ def onlyOnePathUFn(globalParameterDictionary, targetPath, CharDictionary,
             if newName != file:
                 richFile, richNewName = richStyle(file, newName)
                 console.print(" " * 3 + richFile, style=style)
-                if not globalParameterDictionary["simple"]:
-                    for fName in globalFileNameHistoryRecordList:
+                if not gParamDict["simple"]:
+                    for fName in gParamDict["nameRdList"]:
                         console.print("---" + fName, style=style)
-                if globalParameterDictionary["dry"]:
+                if gParamDict["dry"]:
                     console.print("-->" + richNewName, style=style)
                 else:
                     console.print("==>" + richNewName, style=style)
@@ -279,47 +349,47 @@ def onlyOnePathUFn(globalParameterDictionary, targetPath, CharDictionary,
               help="If simple is True Only print changed file name.",
               show_default=True)
 def ufn(argpath, path, maxdepth, exclude, dry, simple):
-    global globalDataPath
-    global globalParameterDictionary
-    global globalFileNameHistoryRecordList
     """Files in PATH will be changed file names unified.
     
     You can direct set path such as UFn.py path ...
     """
-    globalParameterDictionary["argpath"] = argpath
-    globalParameterDictionary["path"] = path
-    globalParameterDictionary["maxdepth"] = maxdepth
-    globalParameterDictionary["exclude"] = exclude
-    globalParameterDictionary["dry"] = dry
-    globalParameterDictionary["simple"] = simple
+    global gParamDict
+    gParamDict["argpath"] = argpath
+    gParamDict["path"] = path
+    gParamDict["maxdepth"] = maxdepth
+    gParamDict["exclude"] = exclude
+    gParamDict["dry"] = dry
+    gParamDict["simple"] = simple
 
     console = Console(width=240, theme=Theme(inherit=False))
     style = "black on white"
 
     targetPath = ""
 
-    if globalParameterDictionary["argpath"]:
-        targetPath = globalParameterDictionary["argpath"]
+    if gParamDict["argpath"]:
+        targetPath = gParamDict["argpath"]
     else:
-        if not os.path.isdir(globalParameterDictionary["path"]):
+        if not os.path.isdir(gParamDict["path"]):
             click.echo("%s is not valid path.")
             return -1
-        targetPath = globalParameterDictionary["path"]
+        targetPath = gParamDict["path"]
 
-    with open(os.path.join(globalDataPath, "CharDictionary.pkl"),
+    with open(os.path.join(gParamDict["dataPath"], "CharDictionary.pkl"),
               "rb") as fhand:
-        CharDictionary = pickle.load(fhand)
-    with open(os.path.join(globalDataPath, "TerminologyDictionary.pkl"),
+        gParamDict["CharDictionary"] = pickle.load(fhand)
+    with open(os.path.join(gParamDict["dataPath"], "TerminologyDictionary.pkl"),
               "rb") as fhand:
-        TerminologyDictionary = pickle.load(fhand)
-    with open(os.path.join(globalDataPath, "LowerCaseWordSet.pkl"),
+        gParamDict["TerminologyDictionary"] = pickle.load(fhand)
+    with open(os.path.join(gParamDict["dataPath"], "LowerCaseWordSet.pkl"),
               "rb") as fhand:
-        LowerCaseWordSet = pickle.load(fhand)
+        gParamDict["LowerCaseWordSet"] = pickle.load(fhand)
+    with open(os.path.join(gParamDict["dataPath"], "KeepOriginalList.pkl"),
+              "rb") as fhand:
+        gParamDict["KeepOriginalList"] = pickle.load(fhand)
     for path in targetPath:
-        onlyOnePathUFn(globalParameterDictionary, path, CharDictionary,
-                       TerminologyDictionary, LowerCaseWordSet, console, style)
+        oneDirPathUFn(path, console, style)
 
-    if globalParameterDictionary["dry"]:
+    if gParamDict["dry"]:
         console.print("*" * 80)
         console.print(
             "In order to take effect,run the CLI add option '--dry False'")
@@ -335,10 +405,10 @@ if __name__ == "__main__":
         sys.exit()
     scriptDirPath = os.path.dirname(os.path.realpath(__file__))
 
-    globalDataPath = os.path.join(scriptDirPath, "data")
-    globalHistoryRecordPath = os.path.join(globalDataPath, "hRdDir")
-
-    globalParameterDictionary = {}
-    globalFileNameHistoryRecordList = []
+    gParamDict = {}
+    gParamDict["sepChar"] = "_"
+    gParamDict["dataPath"] = os.path.join(scriptDirPath, "data")
+    gParamDict["recordPath"] = os.path.join(gParamDict["dataPath"], "hRdDir")
+    gParamDict["nameRdList"] = []
 
     ufn()
