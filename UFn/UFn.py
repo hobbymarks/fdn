@@ -7,24 +7,45 @@ import pickle
 from datetime import datetime
 import string
 import sys
+from unidecode import unidecode
 import click
 from rich.console import Console
 from rich.theme import Theme
 import re
 
 
+# TODO: split to standalone file
 class FileNameLog:
     def __init__(self, file_path="", md5_value=""):
+        """
+
+        :param file_path:
+        :type file_path:
+        :param md5_value:
+        :type md5_value:
+        """
         if not md5_value:
             assert os.path.exists(file_path)
             with open(file_path, "rb") as fh:
                 data = fh.read()
                 md5_value = hashlib.md5(data).hexdigest()
+        # TODO:should add version info for save data structure
         self.md5_value = str(md5_value)
         self._currentName = os.path.basename(file_path)
         self._nameRecord = collections.OrderedDict()
 
     def change_file_name(self, new_name="", stamp=""):
+        """Change file name
+
+        This function will add the operation 'Change File Name' to record
+
+        :param new_name: String,new file name
+        :type new_name:
+        :param stamp:
+        :type stamp:
+        :return:
+        :rtype:
+        """
         assert new_name
         if not stamp:
             stamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
@@ -32,6 +53,11 @@ class FileNameLog:
         self._currentName = new_name
 
     def get_history(self):
+        """
+
+        :return:
+        :rtype:
+        """
         return {
             self.md5_value: {
                 "currentName": self._currentName,
@@ -41,6 +67,15 @@ class FileNameLog:
 
 
 def create_name_log(file_path="", md5_value=""):
+    """
+
+    :param file_path:
+    :type file_path:
+    :param md5_value:
+    :type md5_value:
+    :return:
+    :rtype:
+    """
     global gParamDict
     record_path = gParamDict["record_path"]
     if not md5_value:
@@ -59,6 +94,13 @@ def create_name_log(file_path="", md5_value=""):
 
 
 def is_hidden(path):
+    """
+
+    :param path:
+    :type path:
+    :return:
+    :rtype:
+    """
     if os.name == "nt":
         import win32api
         import win32con
@@ -71,6 +113,13 @@ def is_hidden(path):
 
 
 def mask_original(s=""):
+    """
+
+    :param s:
+    :type s:
+    :return:
+    :rtype:
+    """
     global gParamDict
     keep_original_list = gParamDict["KeepOriginalList"]
     re_str = "|".join([re.escape(sepStr) for sepStr in keep_original_list])
@@ -86,6 +135,13 @@ def mask_original(s=""):
 
 
 def replace_char(file_str=""):
+    """
+
+    :param file_str:
+    :type file_str:
+    :return:
+    :rtype:
+    """
     global gParamDict
     char_dict = gParamDict["CharDictionary"]
     root, ext = os.path.splitext(file_str)
@@ -109,7 +165,11 @@ def replace_char(file_str=""):
 
 def process_head_tail_sep_char(file_str=""):
     """
-    To process When sep char at Head or Tail of the file name exclude extension.
+
+    :param file_str:
+    :type file_str:
+    :return:
+    :rtype:
     """
     global gParamDict
     sep_char = gParamDict["sep_char"]
@@ -125,7 +185,11 @@ def process_head_tail_sep_char(file_str=""):
 
 def process_head_tail(file_str=""):
     """
-    Process Head and Tail of the file name.
+
+    :param file_str:
+    :type file_str:
+    :return:
+    :rtype:
     """
     global gParamDict
     assert file_str
@@ -140,7 +204,11 @@ def process_head_tail(file_str=""):
 
 def process_white_space(file_str=""):
     """
-    Process all whitespace char ...
+
+    :param file_str:
+    :type file_str:
+    :return:
+    :rtype:
     """
     global gParamDict
     sep_char = gParamDict["sep_char"]
@@ -152,6 +220,13 @@ def process_white_space(file_str=""):
 
 
 def check_starts_with_terminology(word=""):
+    """
+
+    :param word:
+    :type word:
+    :return:
+    :rtype:
+    """
     global gParamDict
     term_dict = gParamDict["TerminologyDictionary"]
     for key in term_dict.keys():
@@ -161,6 +236,13 @@ def check_starts_with_terminology(word=""):
 
 
 def process_terminology(file_str=""):
+    """
+
+    :param file_str:
+    :type file_str:
+    :return:
+    :rtype:
+    """
     global gParamDict
 
     root, ext = os.path.splitext(file_str)
@@ -181,7 +263,40 @@ def process_terminology(file_str=""):
     return sep_char.join(new_word_list) + ext
 
 
+def asc_head(file_str=""):
+    """
+
+    :param file_str:file name string
+    :type file_str:string
+    :return:
+    :rtype:string
+    """
+    global gParamDict
+    lmt_len = gParamDict["asc_len"]
+    sep_char = gParamDict["sep_char"]
+    head_chars = gParamDict["head_chars"]
+    if file_str[0] in head_chars:
+        return ""
+    word = file_str.split(sep_char)[0]
+    if len(word) > lmt_len:
+        word = word[0:lmt_len]
+    new_word = ""
+    for c in word:
+        if not c in head_chars:
+            new_word += c
+        else:
+            break
+    return "".join([elm[0] for elm in unidecode(new_word).split()])
+
+
 def process_word(file_str=""):
+    """
+
+    :param file_str:
+    :type file_str:
+    :return:
+    :rtype:
+    """
     global gParamDict
     sep_char = gParamDict["sep_char"]
     root, ext = os.path.splitext(file_str)
@@ -198,6 +313,19 @@ def process_word(file_str=""):
 
 
 def depth_walk(top_path, top_down=True, follow_links=False, max_depth=1):
+    """
+
+    :param top_path:
+    :type top_path:
+    :param top_down:
+    :type top_down:
+    :param follow_links:
+    :type follow_links:
+    :param max_depth:
+    :type max_depth:
+    :return:
+    :rtype:
+    """
     if str(max_depth).isnumeric():
         max_depth = int(max_depth)
     else:
@@ -223,6 +351,15 @@ def depth_walk(top_path, top_down=True, follow_links=False, max_depth=1):
 
 
 def rich_style(org_str="", proc_str=""):
+    """
+
+    :param org_str:
+    :type org_str:
+    :param proc_str:
+    :type proc_str:
+    :return:
+    :rtype:
+    """
     rich_org = rich_proc = ""
     rich_org_dif_pos = rich_proc_dif_pos = 0
     for match in difflib.SequenceMatcher(a=org_str,
@@ -252,7 +389,11 @@ def rich_style(org_str="", proc_str=""):
 
 def one_file_ufn(file_str=""):
     """
-    Process Only one file name
+
+    :param file_str:
+    :type file_str:
+    :return:
+    :rtype:
     """
     global gParamDict
     new_name = file_str
@@ -266,13 +407,23 @@ def one_file_ufn(file_str=""):
     new_name = process_terminology(file_str=new_name)
     # process Head and Tail
     new_name = process_head_tail(file_str=new_name)
+    # ascii head
+    new_name = asc_head(new_name) + new_name
 
     return new_name
 
 
 def one_dir_uf(tgt_path, console, style):
     """
-    Process Only one Directory Path
+
+    :param tgt_path:
+    :type tgt_path:
+    :param console:
+    :type console:
+    :param style:
+    :type style:
+    :return:
+    :rtype:
     """
     global gParamDict
     for subdir, dirs, files in depth_walk(top_path=tgt_path,
@@ -341,7 +492,10 @@ def ufn(path, max_depth, exclude, dry_run, simple):
     You can direct set path such as UFn.py path ...
     """
     global gParamDict
-    gParamDict["path"] = path
+    if not path:
+        gParamDict["path"] = "."
+    else:
+        gParamDict["path"] = path
     if str(max_depth).isnumeric():
         gParamDict["max_depth"] = int(str(max_depth))
     else:
@@ -399,7 +553,12 @@ if __name__ == "__main__":
         "sep_char": "_",
         "data_path": os.path.join(scriptDirPath, "data"),
         "record_path": os.path.join(scriptDirPath, "data", "hRdDir"),
-        "record_list": []
+        "record_list": [],
+        "asc_len": 5,
+        "head_chars": string.ascii_letters + string.digits + string.punctuation
     }
     ############################################################################
     ufn()
+
+# TODO: add verify before change take effect
+# TODO: support undo operation
