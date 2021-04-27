@@ -6,10 +6,10 @@ import pickle
 import re
 import string
 import sys
-
+# From Third party
 import click
 from unidecode import unidecode
-
+# From This Project
 import config
 import utils
 
@@ -208,8 +208,11 @@ def rich_style(org_str="", proc_str=""):
     return rich_org, rich_proc
 
 
-def one_file_ufn(file_str=""):
-    new_name = file_str
+def one_file_ufn(file_path=""):
+    config.gParamDict["record_list"] = []
+    console, style = config.gParamDict["console"]
+    subdir, file = os.path.split(file_path)
+    new_name = file
     # all whitespace replace by sep_char
     new_name = process_white_space(file_str=new_name)
     # replace characters by defined Dictionary
@@ -223,39 +226,37 @@ def one_file_ufn(file_str=""):
     # ascii head
     new_name = asc_head(new_name) + new_name
 
-    return new_name
+    # Create full path
+    new_path = os.path.join(subdir, new_name)
+    if not config.gParamDict["dry_run"]:
+        # Create Or Update File Name Change Record and Save to File
+        # then rename file name
+        if new_name != file:
+            utils.log_to_file(cur_name=file, new_name=new_name)
+            os.rename(file_path, new_path)
+
+    if new_name != file:
+        rich_org, rich_proc = rich_style(file, new_name)
+        console.print(" " * 3 + rich_org, style=style)
+        if not config.gParamDict["simple"]:
+            for fName in config.gParamDict["record_list"]:
+                console.print("---" + fName, style=style)
+        if config.gParamDict["dry_run"]:
+            console.print("-->" + rich_proc, style=style)
+        else:
+            console.print("==>" + rich_proc, style=style)
 
 
-def one_dir_ufn(tgt_path, console, style):
+def one_dir_ufn(tgt_path):
     for subdir, dirs, files in depth_walk(
             top_path=tgt_path, max_depth=config.gParamDict["max_depth"]):
         for file in files:
-            #             if not os.path.isfile(file):
-            #                 continue
-            config.gParamDict["record_list"] = []
-            old_path = os.path.join(subdir, file)
-            if is_hidden(old_path):
+            f_path = os.path.join(subdir, file)
+            if is_hidden(f_path):
                 continue
-            new_name = one_file_ufn(file_str=file)
-            # Create full path
-            new_path = os.path.join(subdir, new_name)
-            if not config.gParamDict["dry_run"]:
-                # Create Or Update File Name Change Record and Save to File
-                # then rename file name
-                if new_name != file:
-                    utils.log_to_file(cur_name=file, new_name=new_name)
-                    os.rename(old_path, new_path)
-
-            if new_name != file:
-                rich_org, rich_proc = rich_style(file, new_name)
-                console.print(" " * 3 + rich_org, style=style)
-                if not config.gParamDict["simple"]:
-                    for fName in config.gParamDict["record_list"]:
-                        console.print("---" + fName, style=style)
-                if config.gParamDict["dry_run"]:
-                    console.print("-->" + rich_proc, style=style)
-                else:
-                    console.print("==>" + rich_proc, style=style)
+            if not os.path.isfile(f_path):
+                continue
+            one_file_ufn(file_path=f_path)
 
 
 @click.command(context_settings={"ignore_unknown_options": True})
@@ -291,7 +292,7 @@ def ufn(path, max_depth, exclude, dry_run, force_run, simple):
     You can direct set path such as UFn.py path ...
     """
     if not path:
-        config.gParamDict["path"] = "."
+        config.gParamDict["path"] = ["."]
     else:
         config.gParamDict["path"] = path
     if str(max_depth).isnumeric():
@@ -302,14 +303,6 @@ def ufn(path, max_depth, exclude, dry_run, force_run, simple):
     config.gParamDict["dry_run"] = dry_run
     config.gParamDict["force_run"] = force_run
     config.gParamDict["simple"] = simple
-
-    if config.gParamDict["path"]:
-        tgt_path = config.gParamDict["path"]
-    else:
-        if not os.path.isdir(config.gParamDict["path"]):
-            click.echo("%s is not valid path.")
-            return -1
-        tgt_path = config.gParamDict["path"]
 
     with open(
             os.path.join(config.gParamDict["data_path"], "CharDictionary.pkl"),
@@ -327,8 +320,14 @@ def ufn(path, max_depth, exclude, dry_run, force_run, simple):
             os.path.join(config.gParamDict["data_path"],
                          "KeepOriginalList.pkl"), "rb") as fh:
         config.gParamDict["KeepOriginalList"] = pickle.load(fh)
+    tgt_path = config.gParamDict["path"]
     for path in tgt_path:
-        one_dir_ufn(path, console, style)
+        if os.path.isfile(path):
+            one_file_ufn(path)
+        elif os.path.isdir(path):
+            one_dir_ufn(path)
+        else:
+            print(f"Not valid:{path}")
 
     if config.gParamDict["dry_run"]:
         console.print("*" * 80)
@@ -352,6 +351,9 @@ if __name__ == "__main__":
     Path(config.gParamDict["record_path"]).mkdir(parents=True, exist_ok=True)
     ############################################################################
     ufn()
-# TODO: add verify before change take effect
+
 # TODO: support undo operation
+# TODO: support one file undo change name
+
+# TODO: add verify before change take effect
 # TODO: undo default not include extension or manually set include extension
