@@ -1,106 +1,20 @@
 #!/usr/bin/env python
 import difflib
-import hashlib
-import collections
 import os
+from pathlib import Path
 import pickle
-from datetime import datetime
+import re
 import string
 import sys
-from unidecode import unidecode
+
 import click
-from rich.console import Console
-from rich.theme import Theme
-import re
+from unidecode import unidecode
 
-
-# TODO: split to standalone file
-class FileNameLog:
-    def __init__(self, file_path="", md5_value=""):
-        """
-
-        :param file_path:
-        :type file_path:
-        :param md5_value:
-        :type md5_value:
-        """
-        if not md5_value:
-            assert os.path.exists(file_path)
-            with open(file_path, "rb") as fh:
-                data = fh.read()
-                md5_value = hashlib.md5(data).hexdigest()
-        # TODO:should add version info for save data structure
-        self.md5_value = str(md5_value)
-        self._currentName = os.path.basename(file_path)
-        self._nameRecord = collections.OrderedDict()
-
-    def change_file_name(self, new_name="", stamp=""):
-        """Change file name
-
-        This function will add the operation 'Change File Name' to record
-
-        :param new_name: String,new file name
-        :type new_name:
-        :param stamp:
-        :type stamp:
-        :return:
-        :rtype:
-        """
-        assert new_name
-        if not stamp:
-            stamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
-        self._nameRecord[stamp] = self._currentName
-        self._currentName = new_name
-
-    def get_history(self):
-        """
-
-        :return:
-        :rtype:
-        """
-        return {
-            self.md5_value: {
-                "currentName": self._currentName,
-                "nameRecord": self._nameRecord
-            }
-        }
-
-
-def create_name_log(file_path="", md5_value=""):
-    """
-
-    :param file_path:
-    :type file_path:
-    :param md5_value:
-    :type md5_value:
-    :return:
-    :rtype:
-    """
-    global gParamDict
-    record_path = gParamDict["record_path"]
-    if not md5_value:
-        assert os.path.isfile(file_path)
-        with open(file_path, "rb") as fh:
-            data = fh.read()
-            md5_value = hashlib.md5(data).hexdigest()
-    file_record_path = os.path.join(record_path, str(md5_value) + "_HRd.pkl")
-    if os.path.isfile(file_record_path):
-        with open(file_record_path, "rb") as fh:
-            rd = pickle.load(fh)
-        return rd
-    else:
-        assert os.path.isfile(file_path)
-        return FileNameLog(file_path)
+import config
+import utils
 
 
 def is_hidden(path):
-    """
-
-    :param path:
-    :type path:
-    :return:
-    :rtype:
-    """
     if os.name == "nt":
         import win32api
         import win32con
@@ -113,15 +27,7 @@ def is_hidden(path):
 
 
 def mask_original(s=""):
-    """
-
-    :param s:
-    :type s:
-    :return:
-    :rtype:
-    """
-    global gParamDict
-    keep_original_list = gParamDict["KeepOriginalList"]
+    keep_original_list = config.gParamDict["KeepOriginalList"]
     re_str = "|".join([re.escape(sepStr) for sepStr in keep_original_list])
     word_list = re.split(f'({re_str})', s)
     mask_list = []
@@ -135,15 +41,7 @@ def mask_original(s=""):
 
 
 def replace_char(file_str=""):
-    """
-
-    :param file_str:
-    :type file_str:
-    :return:
-    :rtype:
-    """
-    global gParamDict
-    char_dict = gParamDict["CharDictionary"]
+    char_dict = config.gParamDict["CharDictionary"]
     root, ext = os.path.splitext(file_str)
     word_list, mask_list = mask_original(root)
     for key, value in char_dict.items():
@@ -158,77 +56,46 @@ def replace_char(file_str=""):
                     new_word_list.append(word.replace(key, value))
                 else:
                     new_word_list.append(word)
-            gParamDict["record_list"].append("".join(new_word_list) + ext)
+            config.gParamDict["record_list"].append("".join(new_word_list) +
+                                                    ext)
             word_list = new_word_list
     return "".join(word_list) + ext
 
 
 def process_head_tail_sep_char(file_str=""):
-    """
-
-    :param file_str:
-    :type file_str:
-    :return:
-    :rtype:
-    """
-    global gParamDict
-    sep_char = gParamDict["sep_char"]
+    sep_char = config.gParamDict["sep_char"]
     root, ext = os.path.splitext(file_str)
     if root.startswith(sep_char):
         root = sep_char.join(root.split(sep_char)[1:])
-        gParamDict["record_list"].append(root + ext)
+        config.gParamDict["record_list"].append(root + ext)
     if root.endswith(sep_char):
         root = sep_char.join(root.split(sep_char)[0:-1])
-        gParamDict["record_list"].append(root + ext)
+        config.gParamDict["record_list"].append(root + ext)
     return root + ext
 
 
 def process_head_tail(file_str=""):
-    """
-
-    :param file_str:
-    :type file_str:
-    :return:
-    :rtype:
-    """
-    global gParamDict
     assert file_str
     new_name = process_head_tail_sep_char(file_str=file_str)
     # Capitalize The First Letter
     if new_name[0].islower():
         new_name = new_name[0].upper() + new_name[1:]
-        gParamDict["record_list"].append(new_name)
+        config.gParamDict["record_list"].append(new_name)
 
     return new_name
 
 
 def process_white_space(file_str=""):
-    """
-
-    :param file_str:
-    :type file_str:
-    :return:
-    :rtype:
-    """
-    global gParamDict
-    sep_char = gParamDict["sep_char"]
+    sep_char = config.gParamDict["sep_char"]
     root, ext = os.path.splitext(file_str)
     new_name = sep_char.join(root.split()) + ext
     if new_name != file_str:
-        gParamDict["record_list"].append(new_name)
+        config.gParamDict["record_list"].append(new_name)
     return new_name
 
 
 def check_starts_with_terminology(word=""):
-    """
-
-    :param word:
-    :type word:
-    :return:
-    :rtype:
-    """
-    global gParamDict
-    term_dict = gParamDict["TerminologyDictionary"]
+    term_dict = config.gParamDict["TerminologyDictionary"]
     for key in term_dict.keys():
         if word.lower().startswith(key):
             return key
@@ -236,20 +103,11 @@ def check_starts_with_terminology(word=""):
 
 
 def process_terminology(file_str=""):
-    """
-
-    :param file_str:
-    :type file_str:
-    :return:
-    :rtype:
-    """
-    global gParamDict
-
     root, ext = os.path.splitext(file_str)
-    word_list = root.split(gParamDict["sep_char"])
+    word_list = root.split(config.gParamDict["sep_char"])
     new_word_list = []
-    term_dict = gParamDict["TerminologyDictionary"]
-    sep_char = gParamDict["sep_char"]
+    term_dict = config.gParamDict["TerminologyDictionary"]
+    sep_char = config.gParamDict["sep_char"]
     for word in word_list:
         if word.lower() in term_dict.keys():
             new_word_list.append(term_dict[word.lower()])
@@ -259,22 +117,15 @@ def process_terminology(file_str=""):
         else:
             new_word_list.append(word)
     if new_word_list != word_list:
-        gParamDict["record_list"].append(sep_char.join(new_word_list) + ext)
+        config.gParamDict["record_list"].append(
+            sep_char.join(new_word_list) + ext)
     return sep_char.join(new_word_list) + ext
 
 
 def asc_head(file_str=""):
-    """
-
-    :param file_str:file name string
-    :type file_str:string
-    :return:
-    :rtype:string
-    """
-    global gParamDict
-    lmt_len = gParamDict["asc_len"]
-    sep_char = gParamDict["sep_char"]
-    head_chars = gParamDict["head_chars"]
+    lmt_len = config.gParamDict["asc_len"]
+    sep_char = config.gParamDict["sep_char"]
+    head_chars = config.gParamDict["head_chars"]
     if file_str[0] in head_chars:
         return ""
     word = file_str.split(sep_char)[0]
@@ -282,7 +133,7 @@ def asc_head(file_str=""):
         word = word[0:lmt_len]
     new_word = ""
     for c in word:
-        if not c in head_chars:
+        if c not in head_chars:
             new_word += c
         else:
             break
@@ -290,19 +141,11 @@ def asc_head(file_str=""):
 
 
 def process_word(file_str=""):
-    """
-
-    :param file_str:
-    :type file_str:
-    :return:
-    :rtype:
-    """
-    global gParamDict
-    sep_char = gParamDict["sep_char"]
+    sep_char = config.gParamDict["sep_char"]
     root, ext = os.path.splitext(file_str)
     word_list = root.split(sep_char)
     new_word_list = []
-    word_set = gParamDict["LowerCaseWordSet"]
+    word_set = config.gParamDict["LowerCaseWordSet"]
     for word in word_list:
         if word.lower() in word_set:
             new_word_list.append(string.capwords(word))
@@ -313,19 +156,6 @@ def process_word(file_str=""):
 
 
 def depth_walk(top_path, top_down=True, follow_links=False, max_depth=1):
-    """
-
-    :param top_path:
-    :type top_path:
-    :param top_down:
-    :type top_down:
-    :param follow_links:
-    :type follow_links:
-    :param max_depth:
-    :type max_depth:
-    :return:
-    :rtype:
-    """
     if str(max_depth).isnumeric():
         max_depth = int(max_depth)
     else:
@@ -351,15 +181,6 @@ def depth_walk(top_path, top_down=True, follow_links=False, max_depth=1):
 
 
 def rich_style(org_str="", proc_str=""):
-    """
-
-    :param org_str:
-    :type org_str:
-    :param proc_str:
-    :type proc_str:
-    :return:
-    :rtype:
-    """
     rich_org = rich_proc = ""
     rich_org_dif_pos = rich_proc_dif_pos = 0
     for match in difflib.SequenceMatcher(a=org_str,
@@ -388,14 +209,6 @@ def rich_style(org_str="", proc_str=""):
 
 
 def one_file_ufn(file_str=""):
-    """
-
-    :param file_str:
-    :type file_str:
-    :return:
-    :rtype:
-    """
-    global gParamDict
     new_name = file_str
     # all whitespace replace by sep_char
     new_name = process_white_space(file_str=new_name)
@@ -413,52 +226,33 @@ def one_file_ufn(file_str=""):
     return new_name
 
 
-def one_dir_uf(tgt_path, console, style):
-    """
-
-    :param tgt_path:
-    :type tgt_path:
-    :param console:
-    :type console:
-    :param style:
-    :type style:
-    :return:
-    :rtype:
-    """
-    global gParamDict
-    for subdir, dirs, files in depth_walk(top_path=tgt_path,
-                                          max_depth=gParamDict["max_depth"]):
+def one_dir_ufn(tgt_path, console, style):
+    for subdir, dirs, files in depth_walk(
+            top_path=tgt_path, max_depth=config.gParamDict["max_depth"]):
         for file in files:
             #             if not os.path.isfile(file):
             #                 continue
-            gParamDict["record_list"] = []
+            config.gParamDict["record_list"] = []
             old_path = os.path.join(subdir, file)
             if is_hidden(old_path):
                 continue
             new_name = one_file_ufn(file_str=file)
             # Create full path
             new_path = os.path.join(subdir, new_name)
-            if not gParamDict["dry_run"]:
+            if not config.gParamDict["dry_run"]:
                 # Create Or Update File Name Change Record and Save to File
                 # then rename file name
                 if new_name != file:
-                    history_record = create_name_log(file_path=old_path)
-                    with open(
-                            os.path.join(
-                                gParamDict["record_path"],
-                                str(history_record.md5_value) + "_HRd.pkl"),
-                            "wb") as fh:
-                        history_record.change_file_name(new_name=new_name)
-                        pickle.dump(history_record, fh)
+                    utils.log_to_file(cur_name=file, new_name=new_name)
                     os.rename(old_path, new_path)
 
             if new_name != file:
                 rich_org, rich_proc = rich_style(file, new_name)
                 console.print(" " * 3 + rich_org, style=style)
-                if not gParamDict["simple"]:
-                    for fName in gParamDict["record_list"]:
+                if not config.gParamDict["simple"]:
+                    for fName in config.gParamDict["record_list"]:
                         console.print("---" + fName, style=style)
-                if gParamDict["dry_run"]:
+                if config.gParamDict["dry_run"]:
                     console.print("-->" + rich_proc, style=style)
                 else:
                     console.print("==>" + rich_proc, style=style)
@@ -481,56 +275,62 @@ def one_dir_uf(tgt_path, console, style):
               type=bool,
               help="If dry_run is True will not change file name.",
               show_default=True)
+@click.option("--force_run",
+              default=False,
+              type=bool,
+              help="If force_run is True will change file name forcefully.",
+              show_default=True)
 @click.option("--simple",
               default=True,
               type=bool,
               help="If simple is True Only print changed file name.",
               show_default=True)
-def ufn(path, max_depth, exclude, dry_run, simple):
+def ufn(path, max_depth, exclude, dry_run, force_run, simple):
     """Files in PATH will be changed file names unified.
     
     You can direct set path such as UFn.py path ...
     """
-    global gParamDict
     if not path:
-        gParamDict["path"] = "."
+        config.gParamDict["path"] = "."
     else:
-        gParamDict["path"] = path
+        config.gParamDict["path"] = path
     if str(max_depth).isnumeric():
-        gParamDict["max_depth"] = int(str(max_depth))
+        config.gParamDict["max_depth"] = int(str(max_depth))
     else:
-        gParamDict["max_depth"] = 1
-    gParamDict["exclude"] = exclude
-    gParamDict["dry_run"] = dry_run
-    gParamDict["simple"] = simple
+        config.gParamDict["max_depth"] = 1
+    config.gParamDict["exclude"] = exclude
+    config.gParamDict["dry_run"] = dry_run
+    config.gParamDict["force_run"] = force_run
+    config.gParamDict["simple"] = simple
 
-    tgt_path = ""
-
-    if gParamDict["path"]:
-        tgt_path = gParamDict["path"]
+    if config.gParamDict["path"]:
+        tgt_path = config.gParamDict["path"]
     else:
-        if not os.path.isdir(gParamDict["path"]):
+        if not os.path.isdir(config.gParamDict["path"]):
             click.echo("%s is not valid path.")
             return -1
-        tgt_path = gParamDict["path"]
+        tgt_path = config.gParamDict["path"]
 
-    with open(os.path.join(gParamDict["data_path"], "CharDictionary.pkl"),
-              "rb") as fh:
-        gParamDict["CharDictionary"] = pickle.load(fh)
     with open(
-            os.path.join(gParamDict["data_path"], "TerminologyDictionary.pkl"),
+            os.path.join(config.gParamDict["data_path"], "CharDictionary.pkl"),
             "rb") as fh:
-        gParamDict["TerminologyDictionary"] = pickle.load(fh)
-    with open(os.path.join(gParamDict["data_path"], "LowerCaseWordSet.pkl"),
-              "rb") as fh:
-        gParamDict["LowerCaseWordSet"] = pickle.load(fh)
-    with open(os.path.join(gParamDict["data_path"], "KeepOriginalList.pkl"),
-              "rb") as fh:
-        gParamDict["KeepOriginalList"] = pickle.load(fh)
+        config.gParamDict["CharDictionary"] = pickle.load(fh)
+    with open(
+            os.path.join(config.gParamDict["data_path"],
+                         "TerminologyDictionary.pkl"), "rb") as fh:
+        config.gParamDict["TerminologyDictionary"] = pickle.load(fh)
+    with open(
+            os.path.join(config.gParamDict["data_path"],
+                         "LowerCaseWordSet.pkl"), "rb") as fh:
+        config.gParamDict["LowerCaseWordSet"] = pickle.load(fh)
+    with open(
+            os.path.join(config.gParamDict["data_path"],
+                         "KeepOriginalList.pkl"), "rb") as fh:
+        config.gParamDict["KeepOriginalList"] = pickle.load(fh)
     for path in tgt_path:
-        one_dir_uf(path, console, style)
+        one_dir_ufn(path, console, style)
 
-    if gParamDict["dry_run"]:
+    if config.gParamDict["dry_run"]:
         console.print("*" * 80)
         console.print(
             "In order to take effect,run the CLI add option '--dry_run False'")
@@ -539,26 +339,19 @@ def ufn(path, max_depth, exclude, dry_run, simple):
 
 
 if __name__ == "__main__":
-    console = Console(width=240, theme=Theme(inherit=False))
-    style = "black on white"
+    console, style = config.gParamDict["console"]
 
     if (sys.version_info.major, sys.version_info.minor) < (3, 8):
         console.print(
             f"current Version is {sys.version},\n Please upgrade to >= 3.8.")
         sys.exit()
     scriptDirPath = os.path.dirname(os.path.realpath(__file__))
-
-    gParamDict = {
-        "console": (console, style),
-        "sep_char": "_",
-        "data_path": os.path.join(scriptDirPath, "data"),
-        "record_path": os.path.join(scriptDirPath, "data", "hRdDir"),
-        "record_list": [],
-        "asc_len": 5,
-        "head_chars": string.ascii_letters + string.digits + string.punctuation
-    }
+    config.gParamDict["data_path"] = os.path.join(scriptDirPath, "data")
+    config.gParamDict["record_path"] = os.path.join(scriptDirPath, "data",
+                                                    "rd")
+    Path(config.gParamDict["record_path"]).mkdir(parents=True, exist_ok=True)
     ############################################################################
     ufn()
-
 # TODO: add verify before change take effect
 # TODO: support undo operation
+# TODO: undo default not include extension or manually set include extension
