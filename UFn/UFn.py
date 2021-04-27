@@ -352,8 +352,8 @@ if __name__ == "__main__":
     ############################################################################
     ufn()
 
-# TODO: support undo operation
 # TODO: support one file undo change name
+# TODO: support undo operation
 
 # TODO: add verify before change take effect
 # TODO: undo default not include extension or manually set include extension
