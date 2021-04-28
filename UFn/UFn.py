@@ -8,6 +8,7 @@ import string
 import sys
 # From Third party
 import click
+from click_default_group import DefaultGroup
 from unidecode import unidecode
 # From This Project
 import config
@@ -238,9 +239,6 @@ def one_file_ufn(file_path=""):
     if new_name != file:
         rich_org, rich_proc = rich_style(file, new_name)
         console.print(" " * 3 + rich_org, style=style)
-        if not config.gParamDict["simple"]:
-            for fName in config.gParamDict["record_list"]:
-                console.print("---" + fName, style=style)
         if config.gParamDict["dry_run"]:
             console.print("-->" + rich_proc, style=style)
         else:
@@ -259,7 +257,82 @@ def one_dir_ufn(tgt_path):
             one_file_ufn(file_path=f_path)
 
 
-@click.command(context_settings={"ignore_unknown_options": True})
+def one_file_rbk(file_path=""):
+    subdir, file = os.path.split(file_path)
+    rlt_dict = utils.old_name(cur_name=file)
+    if len(rlt_dict) == 0:
+        return None
+    _, new_name = sorted(rlt_dict.items())[0]
+    # Create full path
+    new_path = os.path.join(subdir, new_name)
+    if not config.gParamDict["dry_run"]:
+        # Create Or Update File Name Change Record and Save to File
+        # then rename file name
+        if new_name != file:
+            os.rename(file_path, new_path)
+    if new_name != file:
+        rich_org, rich_proc = rich_style(file, new_name)
+        console.print(" " * 3 + rich_org, style=style)
+        if config.gParamDict["dry_run"]:
+            console.print("-->" + rich_proc, style=style)
+        else:
+            console.print("==>" + rich_proc, style=style)
+
+
+def one_dir_rbk(tgt_path):
+    for subdir, dirs, files in depth_walk(
+            top_path=tgt_path, max_depth=config.gParamDict["max_depth"]):
+        for file in files:
+            f_path = os.path.join(subdir, file)
+            if is_hidden(f_path):
+                continue
+            if not os.path.isfile(f_path):
+                continue
+            one_file_rbk(file_path=f_path)
+
+
+@click.group(cls=DefaultGroup, default="ufn", default_if_no_args=True)
+def cli():
+    pass
+
+
+@cli.command(context_settings={"ignore_unknown_options": True})
+@click.argument("path", required=False, type=click.Path(exists=True), nargs=-1)
+@click.option("--max_depth",
+              default=1,
+              type=int,
+              help="Set travel directory tree with max depth.",
+              show_default=True)
+@click.option("--dry_run",
+              default=True,
+              type=bool,
+              help="If dry_run is True will not change file name.",
+              show_default=True)
+def rbk(path, max_depth, dry_run):
+    if not path:
+        config.gParamDict["path"] = ["."]
+    else:
+        config.gParamDict["path"] = path
+    if str(max_depth).isnumeric():
+        config.gParamDict["max_depth"] = int(str(max_depth))
+    else:
+        config.gParamDict["max_depth"] = 1
+    config.gParamDict["dry_run"] = dry_run
+    for pth in config.gParamDict["path"]:
+        if os.path.isfile(pth):
+            one_file_rbk(pth)
+        elif os.path.isdir(pth):
+            one_dir_rbk(pth)
+        else:
+            print(f"Not valid:{pth}")
+
+    if config.gParamDict["dry_run"]:
+        console.print("*" * 80)
+        console.print(
+            "In order to take effect,run the CLI add option '--dry_run False'")
+
+
+@cli.command(context_settings={"ignore_unknown_options": True})
 @click.argument("path", required=False, type=click.Path(exists=True), nargs=-1)
 @click.option("--max_depth",
               default=1,
@@ -276,17 +349,7 @@ def one_dir_ufn(tgt_path):
               type=bool,
               help="If dry_run is True will not change file name.",
               show_default=True)
-@click.option("--force_run",
-              default=False,
-              type=bool,
-              help="If force_run is True will change file name forcefully.",
-              show_default=True)
-@click.option("--simple",
-              default=True,
-              type=bool,
-              help="If simple is True Only print changed file name.",
-              show_default=True)
-def ufn(path, max_depth, exclude, dry_run, force_run, simple):
+def ufn(path, max_depth, exclude, dry_run):
     """Files in PATH will be changed file names unified.
     
     You can direct set path such as UFn.py path ...
@@ -301,8 +364,6 @@ def ufn(path, max_depth, exclude, dry_run, force_run, simple):
         config.gParamDict["max_depth"] = 1
     config.gParamDict["exclude"] = exclude
     config.gParamDict["dry_run"] = dry_run
-    config.gParamDict["force_run"] = force_run
-    config.gParamDict["simple"] = simple
 
     with open(
             os.path.join(config.gParamDict["data_path"], "CharDictionary.pkl"),
@@ -320,14 +381,14 @@ def ufn(path, max_depth, exclude, dry_run, force_run, simple):
             os.path.join(config.gParamDict["data_path"],
                          "KeepOriginalList.pkl"), "rb") as fh:
         config.gParamDict["KeepOriginalList"] = pickle.load(fh)
-    tgt_path = config.gParamDict["path"]
-    for path in tgt_path:
-        if os.path.isfile(path):
-            one_file_ufn(path)
-        elif os.path.isdir(path):
-            one_dir_ufn(path)
+
+    for pth in config.gParamDict["path"]:
+        if os.path.isfile(pth):
+            one_file_ufn(pth)
+        elif os.path.isdir(pth):
+            one_dir_ufn(pth)
         else:
-            print(f"Not valid:{path}")
+            print(f"Not valid:{pth}")
 
     if config.gParamDict["dry_run"]:
         console.print("*" * 80)
@@ -339,21 +400,21 @@ def ufn(path, max_depth, exclude, dry_run, force_run, simple):
 
 if __name__ == "__main__":
     console, style = config.gParamDict["console"]
-
     if (sys.version_info.major, sys.version_info.minor) < (3, 8):
         console.print(
             f"current Version is {sys.version},\n Please upgrade to >= 3.8.")
         sys.exit()
+    ############################################################################
     scriptDirPath = os.path.dirname(os.path.realpath(__file__))
     config.gParamDict["data_path"] = os.path.join(scriptDirPath, "data")
     config.gParamDict["record_path"] = os.path.join(scriptDirPath, "data",
                                                     "rd")
     Path(config.gParamDict["record_path"]).mkdir(parents=True, exist_ok=True)
+    config.gParamDict["stamp_id_crypt_dict"] = utils.get_stamp_id_crypt()
     ############################################################################
-    ufn()
+    cli()
 
-# TODO: support one file undo change name
-# TODO: support undo operation
+# TODO: unify message output way
 
 # TODO: add verify before change take effect
 # TODO: undo default not include extension or manually set include extension

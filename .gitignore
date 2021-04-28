@@ -1,8 +1,6 @@
-Pre.sh
 draft/
-data/hRdDir/
 .ipynb_checkpoints/
 .virtual_documents/
 UFn/.ipynb_checkpoints/
 UFn/__pycache__/
-UFn/data/hRdDir/
+tests/__pycache__/
