@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 import difflib
 import os
-from pathlib import Path
 import pickle
 import re
 import string
 import sys
+from pathlib import Path
+
 # From Third party
 import click
 from click_default_group import DefaultGroup
 from unidecode import unidecode
+
 # From This Project
 import config
 import utils
@@ -365,23 +367,6 @@ def ufn(path, max_depth, exclude, dry_run):
     config.gParamDict["exclude"] = exclude
     config.gParamDict["dry_run"] = dry_run
 
-    with open(
-            os.path.join(config.gParamDict["data_path"], "CharDictionary.pkl"),
-            "rb") as fh:
-        config.gParamDict["CharDictionary"] = pickle.load(fh)
-    with open(
-            os.path.join(config.gParamDict["data_path"],
-                         "TerminologyDictionary.pkl"), "rb") as fh:
-        config.gParamDict["TerminologyDictionary"] = pickle.load(fh)
-    with open(
-            os.path.join(config.gParamDict["data_path"],
-                         "LowerCaseWordSet.pkl"), "rb") as fh:
-        config.gParamDict["LowerCaseWordSet"] = pickle.load(fh)
-    with open(
-            os.path.join(config.gParamDict["data_path"],
-                         "KeepOriginalList.pkl"), "rb") as fh:
-        config.gParamDict["KeepOriginalList"] = pickle.load(fh)
-
     for pth in config.gParamDict["path"]:
         if os.path.isfile(pth):
             one_file_ufn(pth)
@@ -391,7 +376,7 @@ def ufn(path, max_depth, exclude, dry_run):
             print(f"Not valid:{pth}")
 
     if config.gParamDict["dry_run"]:
-        console.print("*" * 80)
+        console.print("*" * 79)
         console.print(
             "In order to take effect,run the CLI add option '--dry_run False'")
 
@@ -404,14 +389,28 @@ if __name__ == "__main__":
         console.print(
             f"current Version is {sys.version},\n Please upgrade to >= 3.8.")
         sys.exit()
-    ############################################################################
-    scriptDirPath = os.path.dirname(os.path.realpath(__file__))
-    config.gParamDict["data_path"] = os.path.join(scriptDirPath, "data")
-    config.gParamDict["record_path"] = os.path.join(scriptDirPath, "data",
-                                                    "rd")
+    ###########################################################################
+    app_path = os.path.dirname(os.path.realpath(__file__))
+    nltk_path = os.path.join(app_path, "nltk_data")
+    import nltk
+    if os.path.isdir(nltk_path):
+        nltk.data.path.append(nltk_path)
+        if not os.path.isfile(os.path.join(nltk_path, "corpora", "words.zip")):
+            nltk.download("words", download_dir=nltk_path)
+    else:
+        try:
+            from nltk.corpus import words
+            config.gParamDict["LowerCaseWordSet"] = set(
+                list(map(lambda x: x.lower(), words.words())))
+        except LookupError:
+            nltk.download("words")
+    from nltk.corpus import words
+    config.gParamDict["LowerCaseWordSet"] = set(
+        list(map(lambda x: x.lower(), words.words())))
+    config.gParamDict["record_path"] = os.path.join(app_path, "rd_data")
     Path(config.gParamDict["record_path"]).mkdir(parents=True, exist_ok=True)
     config.gParamDict["stamp_id_crypt_dict"] = utils.get_stamp_id_crypt()
-    ############################################################################
+    ###########################################################################
     cli()
 
 # TODO: unify message output way

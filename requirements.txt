@@ -7,3 +7,4 @@ rich~=10.1.0
 setuptools>=49.6.0
 unidecode>=1.2.0
 cryptography>=3.4.7
+nltk>=3.6.2
