@@ -3,8 +3,8 @@
 # platform: linux-64
 
 click~=7.1.2
-rich~=10.1.0
 setuptools>=49.6.0
 unidecode>=1.2.0
 cryptography>=3.4.7
 nltk>=3.6.2
+colorama>=0.4.4

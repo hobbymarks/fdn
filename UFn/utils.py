@@ -4,6 +4,10 @@ import os
 import re
 import sys
 import pickle
+
+# From Third Party
+import click
+
 # From This Project
 import config
 import ucrypt
@@ -34,10 +38,10 @@ def get_stamp(enc_str=""):
 
 def load_log(rd_path=""):
     if not rd_path:
-        print(f"Parameters not set,please check again.")
+        click.echo(f"Parameters not set,please check again.")
         sys.exit()
     if not os.path.isfile(rd_path):
-        print(f"No file found:{rd_path},\nPlease check again.")
+        click.echo(f"No file found:{rd_path},\nPlease check again.")
         sys.exit()
     try:
         with open(rd_path, "rb") as fh:
@@ -47,16 +51,16 @@ def load_log(rd_path=""):
             return None
 
     except EOFError as e:
-        print(f"EOFError:{e}\n"
-              f"Please check again\n"
-              f"or delete {rd_path}\n "
-              f"or with option --force_run True")
+        click.echo(f"EOFError:{e}\n"
+                   f"Please check again\n"
+                   f"or delete {rd_path}\n "
+                   f"or with option --force_run True")
         return None
     except pickle.UnpicklingError as e:
-        print(f"pickle.UnpicklingError:{e}\n"
-              f"Please check again\n"
-              f"or delete {rd_path}\n "
-              f"or with option --force_run True")
+        click.echo(f"pickle.UnpicklingError:{e}\n"
+                   f"Please check again\n"
+                   f"or delete {rd_path}\n "
+                   f"or with option --force_run True")
         return None
 
 
@@ -108,7 +112,7 @@ def old_name(cur_name=""):
         if st_id[0] not in stamp_nm_dict.keys():
             stamp_nm_dict[st_id[0]] = nm_str
         else:
-            print(f"Skipping duplicate record found,{st_id}")
+            click.echo(f"Skipping duplicate record found,{st_id}")
 
     return stamp_nm_dict
 
@@ -116,7 +120,7 @@ def old_name(cur_name=""):
 def log_to_file(cur_name="", new_name="", rd_path=""):
     id_nm, enc_str = get_id_enc(cur_name, new_name)
     if (not id_nm) or (not enc_str):
-        print(f"Parameters not set,please check again.")
+        click.echo(f"Parameters not set,please check again.")
         sys.exit()
     if not rd_path:
         stamp = datetime.now().strftime("%Y%m%d%H%M%S%f")

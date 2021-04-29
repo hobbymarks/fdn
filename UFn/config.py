@@ -1,18 +1,12 @@
 import string
-# From Third Party
-from rich.console import Console
-from rich.theme import Theme
-
-console = Console(width=240, theme=Theme(inherit=False))
-style = "black on white"
 
 _gSC = "_"
 
 gParamDict = {
-    "console": (console, style),
-    "sep_char": _gSC,
-    "asc_len": 3,
-    "head_chars": string.ascii_letters + string.digits + string.punctuation
+    "SeparatorChar": _gSC,
+    "ASCLen": 3,
+    "AlternateFlag":True,
+    "HeadChars": string.ascii_letters + string.digits + string.punctuation
 }
 
 rd_prefix_str = "CNSH_ONCrypt_dict"

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import difflib
 import os
-import pickle
 import re
 import string
 import sys
@@ -9,7 +8,11 @@ from pathlib import Path
 
 # From Third party
 import click
+import colorama
 from click_default_group import DefaultGroup
+from colorama import Back
+from colorama import Fore
+from colorama import Style
 from unidecode import unidecode
 
 # From This Project
@@ -66,7 +69,7 @@ def replace_char(file_str=""):
 
 
 def process_head_tail_sep_char(file_str=""):
-    sep_char = config.gParamDict["sep_char"]
+    sep_char = config.gParamDict["SeparatorChar"]
     root, ext = os.path.splitext(file_str)
     if root.startswith(sep_char):
         root = sep_char.join(root.split(sep_char)[1:])
@@ -89,7 +92,7 @@ def process_head_tail(file_str=""):
 
 
 def process_white_space(file_str=""):
-    sep_char = config.gParamDict["sep_char"]
+    sep_char = config.gParamDict["SeparatorChar"]
     root, ext = os.path.splitext(file_str)
     new_name = sep_char.join(root.split()) + ext
     if new_name != file_str:
@@ -107,10 +110,10 @@ def check_starts_with_terminology(word=""):
 
 def process_terminology(file_str=""):
     root, ext = os.path.splitext(file_str)
-    word_list = root.split(config.gParamDict["sep_char"])
+    word_list = root.split(config.gParamDict["SeparatorChar"])
     new_word_list = []
     term_dict = config.gParamDict["TerminologyDictionary"]
-    sep_char = config.gParamDict["sep_char"]
+    sep_char = config.gParamDict["SeparatorChar"]
     for word in word_list:
         if word.lower() in term_dict.keys():
             new_word_list.append(term_dict[word.lower()])
@@ -126,9 +129,9 @@ def process_terminology(file_str=""):
 
 
 def asc_head(file_str=""):
-    lmt_len = config.gParamDict["asc_len"]
-    sep_char = config.gParamDict["sep_char"]
-    head_chars = config.gParamDict["head_chars"]
+    lmt_len = config.gParamDict["ASCLen"]
+    sep_char = config.gParamDict["SeparatorChar"]
+    head_chars = config.gParamDict["HeadChars"]
     if file_str[0] in head_chars:
         return ""
     word = file_str.split(sep_char)[0]
@@ -144,7 +147,7 @@ def asc_head(file_str=""):
 
 
 def process_word(file_str=""):
-    sep_char = config.gParamDict["sep_char"]
+    sep_char = config.gParamDict["SeparatorChar"]
     root, ext = os.path.splitext(file_str)
     word_list = root.split(sep_char)
     new_word_list = []
@@ -189,20 +192,18 @@ def rich_style(org_str="", proc_str=""):
     for match in difflib.SequenceMatcher(a=org_str,
                                          b=proc_str).get_matching_blocks():
         if rich_org_dif_pos < match.a:
-            rich_org += "[bold red]" + org_str[
-                rich_org_dif_pos:match.a].replace(
-                    " ", "▯") + "[/bold red]" + org_str[match.a:match.a +
-                                                        match.size]
+            rich_org += Fore.RED + org_str[rich_org_dif_pos:match.a].replace(
+                " ", "▯") + Fore.RESET + org_str[match.a:match.a + match.size]
             rich_org_dif_pos = match.a + match.size
         else:
             rich_org += org_str[match.a:match.a + match.size]
             rich_org_dif_pos = match.a + match.size
 
         if rich_proc_dif_pos < match.b:
-            rich_proc += "[bold green]" + proc_str[
+            rich_proc += Fore.GREEN + proc_str[
                 rich_proc_dif_pos:match.b].replace(
-                    " ", "▯") + "[/bold green]" + proc_str[match.b:match.b +
-                                                           match.size]
+                    " ",
+                    "▯") + Fore.RESET + proc_str[match.b:match.b + match.size]
             rich_proc_dif_pos = match.b + match.size
         else:
             rich_proc += proc_str[match.b:match.b + match.size]
@@ -211,9 +212,27 @@ def rich_style(org_str="", proc_str=""):
     return rich_org, rich_proc
 
 
+def out_info(file, new_name):
+    rich_org, rich_proc = rich_style(file, new_name)
+    if config.gParamDict["AlternateFlag"]:
+        click.echo(Back.WHITE + " " * 3 + rich_org + Style.RESET_ALL)
+    else:
+        click.echo(" " * 3 + rich_org)
+    if config.gParamDict["dry_run"]:
+        if config.gParamDict["AlternateFlag"]:
+            click.echo(Back.WHITE + "-->" + rich_proc + Style.RESET_ALL)
+        else:
+            click.echo("-->" + rich_proc)
+    else:
+        if config.gParamDict["AlternateFlag"]:
+            click.echo(Back.WHITE + "==>" + rich_proc + Style.RESET_ALL)
+        else:
+            click.echo("==>" + rich_proc)
+    config.gParamDict["AlternateFlag"] = not config.gParamDict["AlternateFlag"]
+
+
 def one_file_ufn(file_path=""):
     config.gParamDict["record_list"] = []
-    console, style = config.gParamDict["console"]
     subdir, file = os.path.split(file_path)
     new_name = file
     # all whitespace replace by sep_char
@@ -239,12 +258,7 @@ def one_file_ufn(file_path=""):
             os.rename(file_path, new_path)
 
     if new_name != file:
-        rich_org, rich_proc = rich_style(file, new_name)
-        console.print(" " * 3 + rich_org, style=style)
-        if config.gParamDict["dry_run"]:
-            console.print("-->" + rich_proc, style=style)
-        else:
-            console.print("==>" + rich_proc, style=style)
+        out_info(file, new_name)
 
 
 def one_dir_ufn(tgt_path):
@@ -273,12 +287,7 @@ def one_file_rbk(file_path=""):
         if new_name != file:
             os.rename(file_path, new_path)
     if new_name != file:
-        rich_org, rich_proc = rich_style(file, new_name)
-        console.print(" " * 3 + rich_org, style=style)
-        if config.gParamDict["dry_run"]:
-            console.print("-->" + rich_proc, style=style)
-        else:
-            console.print("==>" + rich_proc, style=style)
+        out_info(file, new_name)
 
 
 def one_dir_rbk(tgt_path):
@@ -326,11 +335,11 @@ def rbk(path, max_depth, dry_run):
         elif os.path.isdir(pth):
             one_dir_rbk(pth)
         else:
-            print(f"Not valid:{pth}")
+            click.echo(f"{Fore.RED}Not valid:{pth}{Fore.RESET}")
 
     if config.gParamDict["dry_run"]:
-        console.print("*" * 80)
-        console.print(
+        click.echo("*" * 79)
+        click.echo(
             "In order to take effect,run the CLI add option '--dry_run False'")
 
 
@@ -373,47 +382,58 @@ def ufn(path, max_depth, exclude, dry_run):
         elif os.path.isdir(pth):
             one_dir_ufn(pth)
         else:
-            print(f"Not valid:{pth}")
+            click.echo(f"{Fore.RED}Not valid:{pth}{Fore.RESET}")
 
     if config.gParamDict["dry_run"]:
-        console.print("*" * 79)
-        console.print(
+        click.echo("*" * 79)
+        click.echo(
             "In order to take effect,run the CLI add option '--dry_run False'")
 
     return 0
 
 
 if __name__ == "__main__":
-    console, style = config.gParamDict["console"]
-    if (sys.version_info.major, sys.version_info.minor) < (3, 8):
-        console.print(
-            f"current Version is {sys.version},\n Please upgrade to >= 3.8.")
-        sys.exit()
-    ###########################################################################
-    app_path = os.path.dirname(os.path.realpath(__file__))
-    nltk_path = os.path.join(app_path, "nltk_data")
-    import nltk
-    if os.path.isdir(nltk_path):
-        nltk.data.path.append(nltk_path)
-        if not os.path.isfile(os.path.join(nltk_path, "corpora", "words.zip")):
-            nltk.download("words", download_dir=nltk_path)
-    else:
-        try:
-            from nltk.corpus import words
-            config.gParamDict["LowerCaseWordSet"] = set(
-                list(map(lambda x: x.lower(), words.words())))
-        except LookupError:
-            nltk.download("words")
-    from nltk.corpus import words
-    config.gParamDict["LowerCaseWordSet"] = set(
-        list(map(lambda x: x.lower(), words.words())))
-    config.gParamDict["record_path"] = os.path.join(app_path, "rd_data")
-    Path(config.gParamDict["record_path"]).mkdir(parents=True, exist_ok=True)
-    config.gParamDict["stamp_id_crypt_dict"] = utils.get_stamp_id_crypt()
-    ###########################################################################
-    cli()
+    try:
+        colorama.init()
+        if (sys.version_info.major, sys.version_info.minor) < (3, 8):
+            click.echo(
+                f"{Fore.RED}current is {sys.version},\n"
+                f"{Back.WHITE}Please upgrade to >=3.8.{Style.RESET_ALL}")
+            sys.exit()
+        #######################################################################
+        app_path = os.path.dirname(os.path.realpath(__file__))
+        nltk_path = os.path.join(app_path, "nltk_data")
+        import nltk
 
-# TODO: unify message output way
+        if os.path.isdir(nltk_path):
+            nltk.data.path.append(nltk_path)
+            if not os.path.isfile(
+                    os.path.join(nltk_path, "corpora", "words.zip")):
+                nltk.download("words", download_dir=nltk_path)
+        else:
+            try:
+                from nltk.corpus import words
+
+                config.gParamDict["LowerCaseWordSet"] = set(
+                    list(map(lambda x: x.lower(), words.words())))
+            except LookupError:
+                nltk.download("words")
+        from nltk.corpus import words
+
+        config.gParamDict["LowerCaseWordSet"] = set(
+            list(map(lambda x: x.lower(), words.words())))
+        config.gParamDict["record_path"] = os.path.join(app_path, "rd_data")
+        Path(config.gParamDict["record_path"]).mkdir(parents=True,
+                                                     exist_ok=True)
+        config.gParamDict["stamp_id_crypt_dict"] = utils.get_stamp_id_crypt()
+        #######################################################################
+        cli()
+    finally:
+        colorama.deinit()
+
 
 # TODO: add verify before change take effect
 # TODO: undo default not include extension or manually set include extension
+# TODO: support interactive operation
+# TODO: display config data
+# TODO: support edit config data
