@@ -20,83 +20,85 @@ import config
 import utils
 
 
-def is_hidden(path):
+def is_hidden(f_path):
+    """
+    Check file is hidden or not
+    :param f_path: string,file path
+    :return: True if is hidden file,False if is not hidden file
+    """
     if os.name == "nt":
         import win32api
         import win32con
     if os.name == "nt":
-        attribute = win32api.GetFileAttributes(path)
+        attribute = win32api.GetFileAttributes(f_path)
         return attribute & (win32con.FILE_ATTRIBUTE_HIDDEN
                             | win32con.FILE_ATTRIBUTE_SYSTEM)
     else:
-        return os.path.basename(path).startswith('.')  # linux, osx
+        return os.path.basename(f_path).startswith(".")  # linux, osx
 
 
-def mask_original(s=""):
-    keep_original_list = config.gParamDict["KeepOriginalList"]
-    re_str = "|".join([re.escape(sepStr) for sepStr in keep_original_list])
-    word_list = re.split(f'({re_str})', s)
+def mask_RUW(s):
+    """
+    Mask a input string by RemainUnchangedWordList value
+    :param s: string,input string to be masked
+    :return: word list and mask list,if joined the word list,you will get the
+    intact s.
+    """
+    ruw_list = config.gParamDict["RemainUnchangedWordList"]
+    re_str = "|".join([re.escape(ruw) for ruw in ruw_list])
+    word_list = re.split(f"({re_str})", s)
     mask_list = []
     for elm in word_list:
-        if elm in keep_original_list:
-            mask_list.extend([True])
+        if elm in ruw_list:
+            mask_list.append(True)
         else:
-            mask_list.extend([False])
-
+            mask_list.append(False)
     return word_list, mask_list
 
 
-def replace_char(file_str=""):
-    char_dict = config.gParamDict["CharDictionary"]
-    root, ext = os.path.splitext(file_str)
-    word_list, mask_list = mask_original(root)
-    for key, value in char_dict.items():
+def replace_char(f_path):
+    c_dict = config.gParamDict["BeReplacedCharDictionary"]
+    root, ext = os.path.splitext(f_path)
+    word_list, mask_list = mask_RUW(root)
+    for c_key, c_value in c_dict.items():
         new_word_list = []
         for word, mask in zip(word_list, mask_list):
             if not mask:
                 new_word_list.append(word)
-        if key in "".join(new_word_list):  # If need to replace ,then go ...
+        if c_key in "".join(new_word_list):  # If need replace ,then go ...
             new_word_list = []
             for word, mask in zip(word_list, mask_list):
-                if (key in word) and (not mask):
-                    new_word_list.append(word.replace(key, value))
+                if (c_key in word) and (not mask):
+                    new_word_list.append(word.replace(c_key, c_value))
                 else:
                     new_word_list.append(word)
-            config.gParamDict["record_list"].append("".join(new_word_list) +
-                                                    ext)
             word_list = new_word_list
     return "".join(word_list) + ext
 
 
-def process_head_tail_sep_char(file_str=""):
+def process_head_tail_sep_char(f_path):
     sep_char = config.gParamDict["SeparatorChar"]
-    root, ext = os.path.splitext(file_str)
+    root, ext = os.path.splitext(f_path)
     if root.startswith(sep_char):
         root = sep_char.join(root.split(sep_char)[1:])
-        config.gParamDict["record_list"].append(root + ext)
     if root.endswith(sep_char):
         root = sep_char.join(root.split(sep_char)[0:-1])
-        config.gParamDict["record_list"].append(root + ext)
     return root + ext
 
 
-def process_head_tail(file_str=""):
-    assert file_str
-    new_name = process_head_tail_sep_char(file_str=file_str)
+def process_head_tail(f_path=""):
+    assert f_path
+    new_name = process_head_tail_sep_char(f_path=f_path)
     # Capitalize The First Letter
     if new_name[0].islower():
         new_name = new_name[0].upper() + new_name[1:]
-        config.gParamDict["record_list"].append(new_name)
-
     return new_name
 
 
-def process_white_space(file_str=""):
+def process_white_space(f_path=""):
     sep_char = config.gParamDict["SeparatorChar"]
-    root, ext = os.path.splitext(file_str)
+    root, ext = os.path.splitext(f_path)
     new_name = sep_char.join(root.split()) + ext
-    if new_name != file_str:
-        config.gParamDict["record_list"].append(new_name)
     return new_name
 
 
@@ -108,8 +110,8 @@ def check_starts_with_terminology(word=""):
     return None
 
 
-def process_terminology(file_str=""):
-    root, ext = os.path.splitext(file_str)
+def process_terminology(f_path=""):
+    root, ext = os.path.splitext(f_path)
     word_list = root.split(config.gParamDict["SeparatorChar"])
     new_word_list = []
     term_dict = config.gParamDict["TerminologyDictionary"]
@@ -122,19 +124,16 @@ def process_terminology(file_str=""):
             new_word_list.append(new_word)
         else:
             new_word_list.append(word)
-    if new_word_list != word_list:
-        config.gParamDict["record_list"].append(
-            sep_char.join(new_word_list) + ext)
     return sep_char.join(new_word_list) + ext
 
 
-def asc_head(file_str=""):
+def asc_head(f_path=""):
     lmt_len = config.gParamDict["ASCLen"]
     sep_char = config.gParamDict["SeparatorChar"]
     head_chars = config.gParamDict["HeadChars"]
-    if file_str[0] in head_chars:
+    if f_path[0] in head_chars:
         return ""
-    word = file_str.split(sep_char)[0]
+    word = f_path.split(sep_char)[0]
     if len(word) > lmt_len:
         word = word[0:lmt_len]
     new_word = ""
@@ -146,9 +145,9 @@ def asc_head(file_str=""):
     return "".join([elm[0] for elm in unidecode(new_word).split()])
 
 
-def process_word(file_str=""):
+def process_word(f_path=""):
     sep_char = config.gParamDict["SeparatorChar"]
-    root, ext = os.path.splitext(file_str)
+    root, ext = os.path.splitext(f_path)
     word_list = root.split(sep_char)
     new_word_list = []
     word_set = config.gParamDict["LowerCaseWordSet"]
@@ -157,7 +156,6 @@ def process_word(file_str=""):
             new_word_list.append(string.capwords(word))
         else:
             new_word_list.append(word)
-
     return sep_char.join(new_word_list) + ext
 
 
@@ -208,7 +206,6 @@ def rich_style(original="", processed=""):
         else:
             rich_proc += processed[match.b:match.b + match.size]
             rich_proc_dif_pos = match.b + match.size
-
     return rich_org, rich_proc
 
 
@@ -231,20 +228,19 @@ def out_info(file, new_name):
     config.gParamDict["AlternateFlag"] = not config.gParamDict["AlternateFlag"]
 
 
-def one_file_ufn(file_path=""):
-    config.gParamDict["record_list"] = []
-    subdir, file = os.path.split(file_path)
+def one_file_ufn(f_path=""):
+    subdir, file = os.path.split(f_path)
     new_name = file
     # all whitespace replace by sep_char
-    new_name = process_white_space(file_str=new_name)
+    new_name = process_white_space(f_path=new_name)
     # replace characters by defined Dictionary
-    new_name = replace_char(file_str=new_name)
+    new_name = replace_char(f_path=new_name)
     # Capwords only when word in wordsSet
-    new_name = process_word(file_str=new_name)
+    new_name = process_word(f_path=new_name)
     # Pretty Terminology
-    new_name = process_terminology(file_str=new_name)
+    new_name = process_terminology(f_path=new_name)
     # process Head and Tail
-    new_name = process_head_tail(file_str=new_name)
+    new_name = process_head_tail(f_path=new_name)
     # ascii head
     new_name = asc_head(new_name) + new_name
 
@@ -255,8 +251,7 @@ def one_file_ufn(file_path=""):
         # then rename file name
         if new_name != file:
             utils.log_to_db(cur_name=file, new_name=new_name)
-            os.rename(file_path, new_path)
-
+            os.rename(f_path, new_path)
     if new_name != file:
         out_info(file, new_name)
 
@@ -270,11 +265,11 @@ def one_dir_ufn(tgt_path):
                 continue
             if not os.path.isfile(f_path):
                 continue
-            one_file_ufn(file_path=f_path)
+            one_file_ufn(f_path=f_path)
 
 
-def one_file_rbk(file_path=""):
-    subdir, file = os.path.split(file_path)
+def one_file_rbk(f_path=""):
+    subdir, file = os.path.split(f_path)
     new_name = utils.used_name_lookup(file)
     if new_name is None:
         return None
@@ -284,7 +279,7 @@ def one_file_rbk(file_path=""):
         # Create Or Update File Name Change Record and Save to File
         # then rename file name
         if new_name != file:
-            os.rename(file_path, new_path)
+            os.rename(f_path, new_path)
     if new_name != file:
         out_info(file, new_name)
 
@@ -298,7 +293,7 @@ def one_dir_rbk(tgt_path):
                 continue
             if not os.path.isfile(f_path):
                 continue
-            one_file_rbk(file_path=f_path)
+            one_file_rbk(f_path=f_path)
 
 
 @click.group(cls=DefaultGroup, default="ufn", default_if_no_args=True)
@@ -428,6 +423,9 @@ if __name__ == "__main__":
         cli()
     finally:
         colorama.deinit()
+
+# TODO: not input file path when in processing only file path exclude ext is
+#       enough
 
 # TODO: add verify before change take effect
 # TODO: undo default not include extension or manually set include extension

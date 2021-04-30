@@ -6,7 +6,7 @@
 #     assert False
 #
 #
-# def test_mask_original():
+# def test_mask_RUW():
 #     assert False
 #
 #

@@ -11,7 +11,7 @@ gParamDict = {
 
 rd_prefix_str = "CNSH_ONCrypt_dict"
 
-gParamDict["CharDictionary"] = {
+gParamDict["BeReplacedCharDictionary"] = {
     "\r": _gSC,
     "\n": _gSC,
     "?": _gSC,
@@ -105,7 +105,7 @@ gParamDict["TerminologyDictionary"] = {
     "vishay": "VISHAY",
 }
 
-gParamDict["KeepOriginalList"] = [
+gParamDict["RemainUnchangedWordList"] = [
     "$*", "$@", "$#", "$?", "$-", "$$", "$!", "$0"
 ]
 
