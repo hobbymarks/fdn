@@ -5,7 +5,7 @@ _gSC = "_"
 gParamDict = {
     "SeparatorChar": _gSC,
     "ASCLen": 3,
-    "AlternateFlag":True,
+    "AlternateFlag": True,
     "HeadChars": string.ascii_letters + string.digits + string.punctuation
 }
 

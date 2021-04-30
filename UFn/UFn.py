@@ -186,27 +186,27 @@ def depth_walk(top_path, top_down=True, follow_links=False, max_depth=1):
         yield top_path, dirs, non_dirs
 
 
-def rich_style(org_str="", proc_str=""):
+def rich_style(original="", processed=""):
     rich_org = rich_proc = ""
     rich_org_dif_pos = rich_proc_dif_pos = 0
-    for match in difflib.SequenceMatcher(a=org_str,
-                                         b=proc_str).get_matching_blocks():
+    for match in difflib.SequenceMatcher(a=original,
+                                         b=processed).get_matching_blocks():
         if rich_org_dif_pos < match.a:
-            rich_org += Fore.RED + org_str[rich_org_dif_pos:match.a].replace(
-                " ", "▯") + Fore.RESET + org_str[match.a:match.a + match.size]
+            rich_org += Fore.RED + original[rich_org_dif_pos:match.a].replace(
+                " ", "▯") + Fore.RESET + original[match.a:match.a + match.size]
             rich_org_dif_pos = match.a + match.size
         else:
-            rich_org += org_str[match.a:match.a + match.size]
+            rich_org += original[match.a:match.a + match.size]
             rich_org_dif_pos = match.a + match.size
 
         if rich_proc_dif_pos < match.b:
-            rich_proc += Fore.GREEN + proc_str[
+            rich_proc += Fore.GREEN + processed[
                 rich_proc_dif_pos:match.b].replace(
                     " ",
-                    "▯") + Fore.RESET + proc_str[match.b:match.b + match.size]
+                    "▯") + Fore.RESET + processed[match.b:match.b + match.size]
             rich_proc_dif_pos = match.b + match.size
         else:
-            rich_proc += proc_str[match.b:match.b + match.size]
+            rich_proc += processed[match.b:match.b + match.size]
             rich_proc_dif_pos = match.b + match.size
 
     return rich_org, rich_proc
@@ -254,7 +254,7 @@ def one_file_ufn(file_path=""):
         # Create Or Update File Name Change Record and Save to File
         # then rename file name
         if new_name != file:
-            utils.log_to_file(cur_name=file, new_name=new_name)
+            utils.log_to_db(cur_name=file, new_name=new_name)
             os.rename(file_path, new_path)
 
     if new_name != file:
@@ -275,10 +275,9 @@ def one_dir_ufn(tgt_path):
 
 def one_file_rbk(file_path=""):
     subdir, file = os.path.split(file_path)
-    rlt_dict = utils.old_name(cur_name=file)
-    if len(rlt_dict) == 0:
+    new_name = utils.used_name_lookup(file)
+    if new_name is None:
         return None
-    _, new_name = sorted(rlt_dict.items())[0]
     # Create full path
     new_path = os.path.join(subdir, new_name)
     if not config.gParamDict["dry_run"]:
@@ -425,15 +424,15 @@ if __name__ == "__main__":
         config.gParamDict["record_path"] = os.path.join(app_path, "rd_data")
         Path(config.gParamDict["record_path"]).mkdir(parents=True,
                                                      exist_ok=True)
-        config.gParamDict["stamp_id_crypt_dict"] = utils.get_stamp_id_crypt()
         #######################################################################
         cli()
     finally:
         colorama.deinit()
-
 
 # TODO: add verify before change take effect
 # TODO: undo default not include extension or manually set include extension
 # TODO: support interactive operation
 # TODO: display config data
 # TODO: support edit config data
+# TODO: display total summary
+# TODO: display progress bar at bottom ...
