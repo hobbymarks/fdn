@@ -9,7 +9,10 @@ from pathlib import Path
 # From Third party
 import click
 import colorama
-from click_default_group import DefaultGroup
+try:
+    from click_default_group import DefaultGroup
+except:
+    from utils import DefaultGroup
 from colorama import Back
 from colorama import Fore
 from colorama import Style
@@ -212,17 +215,19 @@ def rich_style(original="", processed=""):
 def out_info(file, new_name):
     rich_org, rich_proc = rich_style(file, new_name)
     if config.gParamDict["AlternateFlag"]:
-        click.echo(Back.WHITE + " " * 3 + rich_org + Style.RESET_ALL)
+        click.echo(Back.LIGHTWHITE_EX + " " * 3 + rich_org + Style.RESET_ALL)
     else:
         click.echo(" " * 3 + rich_org)
     if config.gParamDict["dry_run"]:
         if config.gParamDict["AlternateFlag"]:
-            click.echo(Back.WHITE + "-->" + rich_proc + Style.RESET_ALL)
+            click.echo(Back.LIGHTWHITE_EX + "-->" + rich_proc +
+                       Style.RESET_ALL)
         else:
             click.echo("-->" + rich_proc)
     else:
         if config.gParamDict["AlternateFlag"]:
-            click.echo(Back.WHITE + "==>" + rich_proc + Style.RESET_ALL)
+            click.echo(Back.LIGHTWHITE_EX + "==>" + rich_proc +
+                       Style.RESET_ALL)
         else:
             click.echo("==>" + rich_proc)
     config.gParamDict["AlternateFlag"] = not config.gParamDict["AlternateFlag"]
