@@ -22,6 +22,8 @@ gParamDict["BeReplacedCharDictionary"] = {
     "@": _gSC,
     "·": _gSC,  # at the middle height of row
     "\`": _gSC,
+    "`": _gSC,
+    "\\": _gSC,
     " ": _gSC,  # space
     "(": _gSC,
     ")": _gSC,
@@ -40,15 +42,17 @@ gParamDict["BeReplacedCharDictionary"] = {
     "*": _gSC,
     "#": _gSC,
     "®": _gSC,
+    "™": _gSC,
     "…": _gSC,
     "“": _gSC,
     "”": _gSC,
     #     ".": _gSC,
     "•": _gSC,
     "，": _gSC,
+    "。": _gSC,
     "–": _gSC,
     "—": _gSC,
-    #     "一": _gSC,#It is a chinese number character, means one
+    #     "一": _gSC,# It is a chinese number character, means one
     "、": _gSC,
     "（": _gSC,
     "）": _gSC,
@@ -70,9 +74,9 @@ gParamDict["BeReplacedCharDictionary"] = {
     "🐾": _gSC,
     "❤️": _gSC,
     "%2F": _gSC,
-    "____": _gSC,
-    "___": _gSC,
-    "__": _gSC,
+    # "____": _gSC,# This is a rougher way to deal with continuous separator
+    # "___": _gSC,# character.
+    # "__": _gSC,# Now replaced by a regex,so delete them
     "._": _gSC,
     "What’s": "What_is",
     "what’s": "what_is"

@@ -5,7 +5,6 @@ import warnings
 # From Third Party
 import click
 
-
 # From This Project
 import config
 import ucrypt
@@ -87,12 +86,13 @@ class DefaultCommandFormatter(object):
 
     def write_dl(self, rows, *args, **kwargs):
         rows_ = []
-        for cmd_name, help in rows:
+        for cmd_name, hlp in rows:
             if cmd_name == self.group.default_cmd_name:
-                rows_.insert(0, (cmd_name + self.mark, help))
+                rows_.insert(0, (cmd_name + self.mark, hlp))
             else:
-                rows_.append((cmd_name, help))
+                rows_.append((cmd_name, hlp))
         return self.formatter.write_dl(rows_, *args, **kwargs)
+
 
 def sha2_id(s):
     if (not s) or (not type(s) is str):
