@@ -256,9 +256,9 @@ def rich_style(original="", processed=""):
 
         if rich_proc_dif_pos < match.b:
             rich_proc += Fore.GREEN + processed[
-                                      rich_proc_dif_pos:match.b].replace(
-                " ",
-                "▯") + Fore.RESET + processed[match.b:match.b + match.size]
+                rich_proc_dif_pos:match.b].replace(
+                    " ",
+                    "▯") + Fore.RESET + processed[match.b:match.b + match.size]
             rich_proc_dif_pos = match.b + match.size
         else:
             rich_proc += processed[match.b:match.b + match.size]
@@ -269,19 +269,19 @@ def rich_style(original="", processed=""):
 def out_info(file, new_name):
     rich_org, rich_proc = rich_style(file, new_name)
     if config.gParamDict["AlternateFlag"]:
-        click.echo(Back.LIGHTWHITE_EX + " " * 3 + rich_org + Style.RESET_ALL)
+        click.echo(Back.LIGHTWHITE_EX + " " * 3 + Style.RESET_ALL + rich_org)
     else:
         click.echo(" " * 3 + rich_org)
     if config.gParamDict["dry_run"]:
         if config.gParamDict["AlternateFlag"]:
-            click.echo(Back.LIGHTWHITE_EX + "-->" + rich_proc +
-                       Style.RESET_ALL)
+            click.echo(Back.LIGHTWHITE_EX + "-->" + Style.RESET_ALL +
+                       rich_proc)
         else:
             click.echo("-->" + rich_proc)
     else:
         if config.gParamDict["AlternateFlag"]:
-            click.echo(Back.LIGHTWHITE_EX + "==>" + rich_proc +
-                       Style.RESET_ALL)
+            click.echo(Back.LIGHTWHITE_EX + "==>" + Style.RESET_ALL +
+                       rich_proc)
         else:
             click.echo("==>" + rich_proc)
     config.gParamDict["AlternateFlag"] = not config.gParamDict["AlternateFlag"]
