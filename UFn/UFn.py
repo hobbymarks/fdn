@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 import difflib
 import os
+from pathlib import Path
 import re
 import string
 import sys
-from pathlib import Path
 
 # From Third party
 import click
@@ -235,33 +235,39 @@ def depth_walk(top_path, top_down=True, follow_links=False, max_depth=1):
         yield top_path, dirs, non_dirs
 
 
-def rich_style(original="", processed=""):
+def rich_style(original, processed):
     """
 
     :param original:
     :param processed:
     :return:
     """
+    if (type(original) is not str) or (type(processed) is not str):
+        return None, None
     rich_org = rich_proc = ""
     rich_org_dif_pos = rich_proc_dif_pos = 0
     for match in difflib.SequenceMatcher(a=original,
                                          b=processed).get_matching_blocks():
         if rich_org_dif_pos < match.a:
             rich_org += Fore.RED + original[rich_org_dif_pos:match.a].replace(
-                " ", "▯") + Fore.RESET + original[match.a:match.a + match.size]
+                " ", "▯"
+            ) + Fore.RESET + Fore.BLACK + original[match.a:match.a +
+                                                   match.size] + Fore.RESET
             rich_org_dif_pos = match.a + match.size
         else:
-            rich_org += original[match.a:match.a + match.size]
+            rich_org += Fore.BLACK + original[match.a:match.a +
+                                              match.size] + Fore.RESET
             rich_org_dif_pos = match.a + match.size
 
         if rich_proc_dif_pos < match.b:
             rich_proc += Fore.GREEN + processed[
                 rich_proc_dif_pos:match.b].replace(
-                    " ",
-                    "▯") + Fore.RESET + processed[match.b:match.b + match.size]
+                    " ", "▯") + Fore.RESET + Fore.BLACK + processed[
+                        match.b:match.b + match.size] + Fore.RESET
             rich_proc_dif_pos = match.b + match.size
         else:
-            rich_proc += processed[match.b:match.b + match.size]
+            rich_proc += Fore.BLACK + processed[match.b:match.b +
+                                                match.size] + Fore.RESET
             rich_proc_dif_pos = match.b + match.size
     return rich_org, rich_proc
 
@@ -269,21 +275,21 @@ def rich_style(original="", processed=""):
 def out_info(file, new_name):
     rich_org, rich_proc = rich_style(file, new_name)
     if config.gParamDict["AlternateFlag"]:
-        click.echo(Back.LIGHTWHITE_EX + " " * 3 + Style.RESET_ALL + rich_org)
+        click.echo(" " * 3 + Back.WHITE + rich_org + Style.RESET_ALL)
     else:
-        click.echo(" " * 3 + rich_org)
+        click.echo(" " * 3 + Back.LIGHTWHITE_EX + rich_org + Style.RESET_ALL)
     if config.gParamDict["dry_run"]:
         if config.gParamDict["AlternateFlag"]:
-            click.echo(Back.LIGHTWHITE_EX + "-->" + Style.RESET_ALL +
-                       rich_proc)
+            click.echo("-->" + Back.WHITE + rich_proc + Style.RESET_ALL)
         else:
-            click.echo("-->" + rich_proc)
+            click.echo("-->" + Back.LIGHTWHITE_EX + rich_proc +
+                       Style.RESET_ALL)
     else:
         if config.gParamDict["AlternateFlag"]:
-            click.echo(Back.LIGHTWHITE_EX + "==>" + Style.RESET_ALL +
-                       rich_proc)
+            click.echo("==>" + Back.WHITE + rich_proc + Style.RESET_ALL)
         else:
-            click.echo("==>" + rich_proc)
+            click.echo("==>" + Back.LIGHTWHITE_EX + rich_proc +
+                       Style.RESET_ALL)
     config.gParamDict["AlternateFlag"] = not config.gParamDict["AlternateFlag"]
 
 
