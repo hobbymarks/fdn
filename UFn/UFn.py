@@ -302,6 +302,8 @@ def type_matched(f_path):
 
 
 def one_file_ufn(f_path):
+    if os.path.islink(f_path) != config.gParamDict["is_link"]:
+        return None
     subdir, file = os.path.split(f_path)
     root, ext = os.path.splitext(file)
     # all whitespace replace by sep_char
@@ -326,7 +328,11 @@ def one_file_ufn(f_path):
             utils.log_to_db(cur_name=file, new_name=new_name)
             os.rename(f_path, new_path)
     if new_name != file:
-        out_info(file, new_name)
+        if config.gParamDict["full_path"]:
+            out_info(os.path.join(subdir, file),
+                     os.path.join(subdir, new_name))
+        else:
+            out_info(file, new_name)
 
 
 def one_dir_ufn(tgt_path):
@@ -337,16 +343,20 @@ def one_dir_ufn(tgt_path):
                 f_path = os.path.join(subdir, file)
                 if is_hidden(f_path):
                     continue
-                one_file_ufn(f_path=f_path)
+                if os.path.isfile(f_path):
+                    one_file_ufn(f_path=f_path)
         elif config.gParamDict["type"] == "dir":
             for d in dirs:
                 f_path = os.path.join(subdir, d)
                 if is_hidden(f_path):
                     continue
-                one_file_ufn(f_path)
+                if os.path.isdir(f_path):
+                    one_file_ufn(f_path)
 
 
 def one_file_rbk(f_path):
+    if os.path.islink(f_path) != config.gParamDict["is_link"]:
+        return None
     subdir, file = os.path.split(f_path)
     new_name = utils.used_name_lookup(file)
     if new_name is None:
@@ -359,7 +369,11 @@ def one_file_rbk(f_path):
         if new_name != file:
             os.rename(f_path, new_path)
     if new_name != file:
-        out_info(file, new_name)
+        if config.gParamDict["full_path"]:
+            out_info(os.path.join(subdir, file),
+                     os.path.join(subdir, new_name))
+        else:
+            out_info(file, new_name)
 
 
 def one_dir_rbk(tgt_path):
@@ -403,7 +417,20 @@ def cli():
               type=bool,
               help="If dry_run is True will not change file name.",
               show_default=True)
-def rbk(path, max_depth, type, dry_run):
+@click.option(
+    "--is_link",
+    default=False,
+    type=bool,
+    help=
+    "If is_link is True will follow the real path of link.Default is False.",
+    show_default=True)
+@click.option(
+    "--full_path",
+    default=False,
+    type=bool,
+    help="If full_path is True will show full path.Default is False.",
+    show_default=True)
+def rbk(path, max_depth, type, dry_run, is_link, full_path):
     if not path:
         config.gParamDict["path"] = ["."]
     else:
@@ -414,6 +441,8 @@ def rbk(path, max_depth, type, dry_run):
         config.gParamDict["max_depth"] = 1
     config.gParamDict["type"] = type
     config.gParamDict["dry_run"] = dry_run
+    config.gParamDict["is_link"] = is_link
+    config.gParamDict["full_path"] = full_path
     for pth in config.gParamDict["path"]:
         if os.path.isfile(pth) and type_matched(pth):
             one_file_rbk(pth)
@@ -452,7 +481,20 @@ def rbk(path, max_depth, type, dry_run):
               type=bool,
               help="If dry_run is True will not change file name.",
               show_default=True)
-def ufn(path, max_depth, type, exclude, dry_run):
+@click.option(
+    "--is_link",
+    default=False,
+    type=bool,
+    help=
+    "If is_link is True will follow the real path of link.Default is False.",
+    show_default=True)
+@click.option(
+    "--full_path",
+    default=False,
+    type=bool,
+    help="If full_path is True will show full path.Default is False.",
+    show_default=True)
+def ufn(path, max_depth, type, exclude, dry_run, is_link, full_path):
     """Files in PATH will be changed file names unified.
     
     You can direct set path such as UFn.py path ...
@@ -468,7 +510,8 @@ def ufn(path, max_depth, type, exclude, dry_run):
     config.gParamDict["type"] = type
     config.gParamDict["exclude"] = exclude
     config.gParamDict["dry_run"] = dry_run
-
+    config.gParamDict["is_link"] = is_link
+    config.gParamDict["full_path"] = full_path
     for pth in config.gParamDict["path"]:
         if os.path.isfile(pth) and type_matched(pth):
             one_file_ufn(pth)
@@ -532,5 +575,4 @@ if __name__ == "__main__":
 # TODO: display progress bar at bottom ...
 
 # TODO: support regular expression input path or directory as path argument
-# TODO: support directory change name
 # TODO: support directory change name only by interactive way
