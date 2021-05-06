@@ -202,7 +202,7 @@ def process_word(s):
     return sep_char.join(new_word_list)
 
 
-def depth_walk(top_path, top_down=True, follow_links=False, max_depth=1):
+def depth_walk(top_path, top_down=False, follow_links=False, max_depth=1):
     """
 
     :param top_path:
@@ -293,6 +293,14 @@ def out_info(file, new_name):
     config.gParamDict["AlternateFlag"] = not config.gParamDict["AlternateFlag"]
 
 
+def type_matched(f_path):
+    if (config.gParamDict["type"] == "file") and (os.path.isfile(f_path)):
+        return True
+    if (config.gParamDict["type"] == "dir") and (os.path.isdir(f_path)):
+        return True
+    return False
+
+
 def one_file_ufn(f_path):
     subdir, file = os.path.split(f_path)
     root, ext = os.path.splitext(file)
@@ -324,13 +332,18 @@ def one_file_ufn(f_path):
 def one_dir_ufn(tgt_path):
     for subdir, dirs, files in depth_walk(
             top_path=tgt_path, max_depth=config.gParamDict["max_depth"]):
-        for file in files:
-            f_path = os.path.join(subdir, file)
-            if is_hidden(f_path):
-                continue
-            if not os.path.isfile(f_path):
-                continue
-            one_file_ufn(f_path=f_path)
+        if config.gParamDict["type"] == "file":
+            for file in files:
+                f_path = os.path.join(subdir, file)
+                if is_hidden(f_path):
+                    continue
+                one_file_ufn(f_path=f_path)
+        elif config.gParamDict["type"] == "dir":
+            for d in dirs:
+                f_path = os.path.join(subdir, d)
+                if is_hidden(f_path):
+                    continue
+                one_file_ufn(f_path)
 
 
 def one_file_rbk(f_path):
@@ -352,13 +365,18 @@ def one_file_rbk(f_path):
 def one_dir_rbk(tgt_path):
     for subdir, dirs, files in depth_walk(
             top_path=tgt_path, max_depth=config.gParamDict["max_depth"]):
-        for file in files:
-            f_path = os.path.join(subdir, file)
-            if is_hidden(f_path):
-                continue
-            if not os.path.isfile(f_path):
-                continue
-            one_file_rbk(f_path=f_path)
+        if config.gParamDict["type"] == "file":
+            for file in files:
+                f_path = os.path.join(subdir, file)
+                if is_hidden(f_path):
+                    continue
+                one_file_rbk(f_path=f_path)
+        elif config.gParamDict["type"] == "dir":
+            for d in dirs:
+                f_path = os.path.join(subdir, d)
+                if is_hidden(f_path):
+                    continue
+                one_file_rbk(f_path)
 
 
 @click.group(cls=DefaultGroup, default="ufn", default_if_no_args=True)
@@ -373,12 +391,19 @@ def cli():
               type=int,
               help="Set travel directory tree with max depth.",
               show_default=True)
+@click.option(
+    "--type",
+    default="file",
+    type=click.Choice(["file", "dir"]),
+    help="File types.If file ,only change file names,If dir,only change "
+    "directory names.",
+    show_default=True)
 @click.option("--dry_run",
               default=True,
               type=bool,
               help="If dry_run is True will not change file name.",
               show_default=True)
-def rbk(path, max_depth, dry_run):
+def rbk(path, max_depth, type, dry_run):
     if not path:
         config.gParamDict["path"] = ["."]
     else:
@@ -387,9 +412,10 @@ def rbk(path, max_depth, dry_run):
         config.gParamDict["max_depth"] = int(str(max_depth))
     else:
         config.gParamDict["max_depth"] = 1
+    config.gParamDict["type"] = type
     config.gParamDict["dry_run"] = dry_run
     for pth in config.gParamDict["path"]:
-        if os.path.isfile(pth):
+        if os.path.isfile(pth) and type_matched(pth):
             one_file_rbk(pth)
         elif os.path.isdir(pth):
             one_dir_rbk(pth)
@@ -410,6 +436,13 @@ def rbk(path, max_depth, dry_run):
               help="Set travel directory tree with max depth.",
               show_default=True)
 @click.option(
+    "--type",
+    default="file",
+    type=click.Choice(["file", "dir"]),
+    help="File types.If file ,only change file names,If dir,only change "
+    "directory names.",
+    show_default=True)
+@click.option(
     "--exclude",
     default="",
     help="Exclude all files in exclude path.Not valid in current version.",
@@ -419,7 +452,7 @@ def rbk(path, max_depth, dry_run):
               type=bool,
               help="If dry_run is True will not change file name.",
               show_default=True)
-def ufn(path, max_depth, exclude, dry_run):
+def ufn(path, max_depth, type, exclude, dry_run):
     """Files in PATH will be changed file names unified.
     
     You can direct set path such as UFn.py path ...
@@ -432,11 +465,12 @@ def ufn(path, max_depth, exclude, dry_run):
         config.gParamDict["max_depth"] = int(str(max_depth))
     else:
         config.gParamDict["max_depth"] = 1
+    config.gParamDict["type"] = type
     config.gParamDict["exclude"] = exclude
     config.gParamDict["dry_run"] = dry_run
 
     for pth in config.gParamDict["path"]:
-        if os.path.isfile(pth):
+        if os.path.isfile(pth) and type_matched(pth):
             one_file_ufn(pth)
         elif os.path.isdir(pth):
             one_dir_ufn(pth)
@@ -498,4 +532,5 @@ if __name__ == "__main__":
 # TODO: display progress bar at bottom ...
 
 # TODO: support regular expression input path or directory as path argument
+# TODO: support directory change name
 # TODO: support directory change name only by interactive way
