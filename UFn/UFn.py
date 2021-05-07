@@ -10,10 +10,6 @@ import sys
 import click
 import colorama
 
-try:
-    from click_default_group import DefaultGroup
-except ModuleNotFoundError:
-    from utils import DefaultGroup
 from colorama import Back
 from colorama import Fore
 from colorama import Style
@@ -278,7 +274,7 @@ def out_info(file, new_name):
         click.echo(" " * 3 + Back.WHITE + rich_org + Style.RESET_ALL)
     else:
         click.echo(" " * 3 + Back.LIGHTWHITE_EX + rich_org + Style.RESET_ALL)
-    if config.gParamDict["dry_run"]:
+    if config.gParamDict["dry"]:
         if config.gParamDict["AlternateFlag"]:
             click.echo("-->" + Back.WHITE + rich_proc + Style.RESET_ALL)
         else:
@@ -321,7 +317,7 @@ def one_file_ufn(f_path):
 
     # Create full path
     new_path = os.path.join(subdir, new_name)
-    if not config.gParamDict["dry_run"]:
+    if not config.gParamDict["dry"]:
         # Create Or Update File Name Change Record and Save to File
         # then rename file name
         if new_name != file:
@@ -363,7 +359,7 @@ def one_file_rbk(f_path):
         return None
     # Create full path
     new_path = os.path.join(subdir, new_name)
-    if not config.gParamDict["dry_run"]:
+    if not config.gParamDict["dry"]:
         # Create Or Update File Name Change Record and Save to File
         # then rename file name
         if new_name != file:
@@ -393,79 +389,17 @@ def one_dir_rbk(tgt_path):
                 one_file_rbk(f_path)
 
 
-@click.group(cls=DefaultGroup, default="ufn", default_if_no_args=True)
-def cli():
-    pass
-
-
-@cli.command(context_settings={"ignore_unknown_options": True})
+@click.command(context_settings={"ignore_unknown_options": True})
 @click.argument("path", required=False, type=click.Path(exists=True), nargs=-1)
 @click.option("--max_depth",
+              "-m",
               default=1,
               type=int,
               help="Set travel directory tree with max depth.",
               show_default=True)
 @click.option(
     "--type",
-    default="file",
-    type=click.Choice(["file", "dir"]),
-    help="File types.If file ,only change file names,If dir,only change "
-    "directory names.",
-    show_default=True)
-@click.option("--dry_run",
-              default=True,
-              type=bool,
-              help="If dry_run is True will not change file name.",
-              show_default=True)
-@click.option(
-    "--is_link",
-    default=False,
-    type=bool,
-    help=
-    "If is_link is True will follow the real path of link.Default is False.",
-    show_default=True)
-@click.option(
-    "--full_path",
-    default=False,
-    type=bool,
-    help="If full_path is True will show full path.Default is False.",
-    show_default=True)
-def rbk(path, max_depth, type, dry_run, is_link, full_path):
-    if not path:
-        config.gParamDict["path"] = ["."]
-    else:
-        config.gParamDict["path"] = path
-    if str(max_depth).isnumeric():
-        config.gParamDict["max_depth"] = int(str(max_depth))
-    else:
-        config.gParamDict["max_depth"] = 1
-    config.gParamDict["type"] = type
-    config.gParamDict["dry_run"] = dry_run
-    config.gParamDict["is_link"] = is_link
-    config.gParamDict["full_path"] = full_path
-    for pth in config.gParamDict["path"]:
-        if os.path.isfile(pth) and type_matched(pth):
-            one_file_rbk(pth)
-        elif os.path.isdir(pth):
-            one_dir_rbk(pth)
-        else:
-            click.echo(f"{Fore.RED}Not valid:{pth}{Fore.RESET}")
-
-    if config.gParamDict["dry_run"]:
-        click.echo("*" * 79)
-        click.echo(
-            "In order to take effect,run the CLI add option '--dry_run False'")
-
-
-@cli.command(context_settings={"ignore_unknown_options": True})
-@click.argument("path", required=False, type=click.Path(exists=True), nargs=-1)
-@click.option("--max_depth",
-              default=1,
-              type=int,
-              help="Set travel directory tree with max depth.",
-              show_default=True)
-@click.option(
-    "--type",
+    "-t",
     default="file",
     type=click.Choice(["file", "dir"]),
     help="File types.If file ,only change file names,If dir,only change "
@@ -473,28 +407,39 @@ def rbk(path, max_depth, type, dry_run, is_link, full_path):
     show_default=True)
 @click.option(
     "--exclude",
+    "-e",
     default="",
     help="Exclude all files in exclude path.Not valid in current version.",
     show_default=True)
-@click.option("--dry_run",
+@click.option("--dry/--in-place",
+              "-d/-i",
               default=True,
               type=bool,
-              help="If dry_run is True will not change file name.",
+              help="If dry is True will not change file name.",
               show_default=True)
 @click.option(
-    "--is_link",
+    "--link/--no-link",
+    "-l/-f",
     default=False,
     type=bool,
     help=
-    "If is_link is True will follow the real path of link.Default is False.",
+    "If link is True will follow the real path of link.",
     show_default=True)
 @click.option(
-    "--full_path",
+    "--full",
     default=False,
     type=bool,
-    help="If full_path is True will show full path.Default is False.",
+    help="If full is True will show full path.",
     show_default=True)
-def ufn(path, max_depth, type, exclude, dry_run, is_link, full_path):
+@click.option(
+    "--rollback/--normal",
+    "-r/-m",
+    default=False,
+    type=bool,
+    help=
+    "If rollback is True will roll back changed file names.",
+    show_default=True)
+def ufn(path, max_depth, type, exclude, dry, link, full, rollback):
     """Files in PATH will be changed file names unified.
     
     You can direct set path such as UFn.py path ...
@@ -509,21 +454,40 @@ def ufn(path, max_depth, type, exclude, dry_run, is_link, full_path):
         config.gParamDict["max_depth"] = 1
     config.gParamDict["type"] = type
     config.gParamDict["exclude"] = exclude
-    config.gParamDict["dry_run"] = dry_run
-    config.gParamDict["is_link"] = is_link
-    config.gParamDict["full_path"] = full_path
+    if dry:
+        config.gParamDict["dry"] = True
+    else:
+        config.gParamDict["dry"] = False
+    if link:
+        config.gParamDict["is_link"] = True
+    else:
+        config.gParamDict["is_link"] = False
+    if full:
+        config.gParamDict["full_path"] = True
+    else:
+        config.gParamDict["full_path"] = False
+    if rollback:
+        rb = True
+    else:
+        rb = False
     for pth in config.gParamDict["path"]:
         if os.path.isfile(pth) and type_matched(pth):
-            one_file_ufn(pth)
+            if not rb:
+                one_file_ufn(pth)
+            else:
+                one_file_rbk(pth)
         elif os.path.isdir(pth):
-            one_dir_ufn(pth)
+            if not rb:
+                one_dir_ufn(pth)
+            else:
+                one_dir_rbk(pth)
         else:
             click.echo(f"{Fore.RED}Not valid:{pth}{Fore.RESET}")
 
-    if config.gParamDict["dry_run"]:
+    if config.gParamDict["dry"]:
         click.echo("*" * 79)
         click.echo(
-            "In order to take effect,run the CLI add option '--dry_run False'")
+            "In order to take effect,run the CLI add option '-i'")
 
     return 0
 
@@ -562,7 +526,7 @@ if __name__ == "__main__":
         Path(config.gParamDict["record_path"]).mkdir(parents=True,
                                                      exist_ok=True)
         #######################################################################
-        cli()
+        ufn()
     finally:
         colorama.deinit()
 
@@ -575,4 +539,3 @@ if __name__ == "__main__":
 # TODO: display progress bar at bottom ...
 
 # TODO: support regular expression input path or directory as path argument
-# TODO: support directory change name only by interactive way
