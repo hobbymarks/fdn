@@ -82,14 +82,16 @@ gParamDict["BeReplacedCharDictionary"] = {
     "what’s": "what_is"
 }
 gParamDict["TerminologyDictionary"] = {
-    #     "apple": "Apple",
+    # "apple": "Apple",# Already in nltk words and also match capwords so
+    # delete
     "asciinema": "asciinema",
     "api": "API",
     "atm": "ATM",
     "cmsis": "CMSIS",
     "cypress": "CYPRESS",
     "dji": "DJI",
-    #     "google": "Google",
+    # "google": "Google",# Already in nltk words and also match capwords so
+    # delete
     "i2c": "I2C",
     "kicad": "KiCAD",
     "mbed": "Mbed",
@@ -107,6 +109,7 @@ gParamDict["TerminologyDictionary"] = {
     "ti": "TI",
     "usb": "USB",
     "vishay": "VISHAY",
+    "vim": "Vim",
 }
 
 gParamDict["RemainUnchangedWordList"] = [
