@@ -461,12 +461,6 @@ def one_dir_rbk(tgt_path):
     help="File types.If file ,only change file names,If dir,only change "
     "directory names.",
     show_default=True)
-@click.option(
-    "--exclude",
-    "-e",
-    default="",
-    help="Exclude all files in exclude path.Not valid in current version.",
-    show_default=True)
 @click.option("--dry/--in-place",
               "-d/-i",
               default=True,
@@ -496,7 +490,7 @@ def one_dir_rbk(tgt_path):
               type=bool,
               help="If rollback is True will roll back changed file names.",
               show_default=True)
-def ufn(path, max_depth, type, exclude, dry, confirm, link, full, rollback):
+def ufn(path, max_depth, type, dry, confirm, link, full, rollback):
     """Files in PATH will be changed file names unified.
     
     You can direct set path such as UFn.py path ...
@@ -510,7 +504,6 @@ def ufn(path, max_depth, type, exclude, dry, confirm, link, full, rollback):
     else:
         config.gParamDict["max_depth"] = 1
     config.gParamDict["type"] = type
-    config.gParamDict["exclude"] = exclude
     if dry:
         config.gParamDict["dry"] = True
     else:
@@ -590,10 +583,11 @@ if __name__ == "__main__":
     finally:
         colorama.deinit()
 
-
 # TODO: display config data
 # TODO: support edit config data
 # TODO: display total summary
 # TODO: display progress bar at bottom ...
 
 # TODO: support regular expression input path or directory as path argument
+
+# TODO: exclude spec directory or file type
