@@ -268,23 +268,66 @@ def rich_style(original, processed):
     return rich_org, rich_proc
 
 
-def out_info(file, new_name):
+def _confirm(p_i=""):
+    v = click.prompt(f"{p_i}\nPlease confirm(y/n/A/q)",
+                     type=click.Choice(
+                         ["y", "yes", "n", "no", "A", "all", "q", "quit"]),
+                     show_choices=False,
+                     default="y")
+
+    def s(x):
+        return {
+            "y": "yes",
+            "yes": "yes",
+            "n": "no",
+            "no": "no",
+            "A": "all",
+            "all": "all",
+            "q": "quit",
+            "quit": "quit"
+        }.get(x, "no")
+
+    return s(v)
+
+
+def _in_place(p_i=""):
+    if config.gParamDict["AllInPlace"]:
+        return True
+    if config.gParamDict["confirm"]:
+        c = _confirm(p_i)
+        if c == "yes":
+            return True
+        elif c == "no":
+            return False
+        elif c == "all":
+            config.gParamDict["AllInPlace"] = True
+            return True
+        elif c == "quit":
+            sys.exit()  # TODO: roughly process ...
+    else:
+        if config.gParamDict["dry"]:
+            return False
+        else:
+            return True
+
+
+def out_info(file, new_name, take_effect=False):
     rich_org, rich_proc = rich_style(file, new_name)
     if config.gParamDict["AlternateFlag"]:
         click.echo(" " * 3 + Back.WHITE + rich_org + Style.RESET_ALL)
     else:
         click.echo(" " * 3 + Back.LIGHTWHITE_EX + rich_org + Style.RESET_ALL)
-    if config.gParamDict["dry"]:
-        if config.gParamDict["AlternateFlag"]:
-            click.echo("-->" + Back.WHITE + rich_proc + Style.RESET_ALL)
-        else:
-            click.echo("-->" + Back.LIGHTWHITE_EX + rich_proc +
-                       Style.RESET_ALL)
-    else:
+    if take_effect:
         if config.gParamDict["AlternateFlag"]:
             click.echo("==>" + Back.WHITE + rich_proc + Style.RESET_ALL)
         else:
             click.echo("==>" + Back.LIGHTWHITE_EX + rich_proc +
+                       Style.RESET_ALL)
+    else:
+        if config.gParamDict["AlternateFlag"]:
+            click.echo("-->" + Back.WHITE + rich_proc + Style.RESET_ALL)
+        else:
+            click.echo("-->" + Back.LIGHTWHITE_EX + rich_proc +
                        Style.RESET_ALL)
     config.gParamDict["AlternateFlag"] = not config.gParamDict["AlternateFlag"]
 
@@ -300,6 +343,7 @@ def type_matched(f_path):
 def one_file_ufn(f_path):
     if os.path.islink(f_path) != config.gParamDict["is_link"]:
         return None
+
     subdir, file = os.path.split(f_path)
     root, ext = os.path.splitext(file)
     # all whitespace replace by sep_char
@@ -317,18 +361,23 @@ def one_file_ufn(f_path):
 
     # Create full path
     new_path = os.path.join(subdir, new_name)
-    if not config.gParamDict["dry"]:
-        # Create Or Update File Name Change Record and Save to File
-        # then rename file name
-        if new_name != file:
-            utils.log_to_db(cur_name=file, new_name=new_name)
-            os.rename(f_path, new_path)
-    if new_name != file:
-        if config.gParamDict["full_path"]:
-            out_info(os.path.join(subdir, file),
-                     os.path.join(subdir, new_name))
-        else:
-            out_info(file, new_name)
+
+    if new_name == file:
+        return None
+
+    if config.gParamDict["full_path"]:
+        ip = _in_place(os.path.join(subdir, file))
+    else:
+        ip = _in_place(file)
+    if ip:
+        utils.log_to_db(cur_name=file, new_name=new_name)
+        os.rename(f_path, new_path)
+    if config.gParamDict["full_path"]:
+        out_info(os.path.join(subdir, file),
+                 os.path.join(subdir, new_name),
+                 take_effect=ip)
+    else:
+        out_info(file, new_name, take_effect=ip)
 
 
 def one_dir_ufn(tgt_path):
@@ -353,23 +402,30 @@ def one_dir_ufn(tgt_path):
 def one_file_rbk(f_path):
     if os.path.islink(f_path) != config.gParamDict["is_link"]:
         return None
+
     subdir, file = os.path.split(f_path)
     new_name = utils.used_name_lookup(file)
     if new_name is None:
         return None
+
     # Create full path
     new_path = os.path.join(subdir, new_name)
-    if not config.gParamDict["dry"]:
-        # Create Or Update File Name Change Record and Save to File
-        # then rename file name
-        if new_name != file:
-            os.rename(f_path, new_path)
-    if new_name != file:
-        if config.gParamDict["full_path"]:
-            out_info(os.path.join(subdir, file),
-                     os.path.join(subdir, new_name))
-        else:
-            out_info(file, new_name)
+
+    if new_name == file:
+        return None
+
+    if config.gParamDict["full_path"]:
+        ip = _in_place(os.path.join(subdir, file))
+    else:
+        ip = _in_place(file)
+    if ip:
+        os.rename(f_path, new_path)
+    if config.gParamDict["full_path"]:
+        out_info(os.path.join(subdir, file),
+                 os.path.join(subdir, new_name),
+                 take_effect=ip)
+    else:
+        out_info(file, new_name, take_effect=ip)
 
 
 def one_dir_rbk(tgt_path):
@@ -417,29 +473,30 @@ def one_dir_rbk(tgt_path):
               type=bool,
               help="If dry is True will not change file name.",
               show_default=True)
-@click.option(
-    "--link/--no-link",
-    "-l/-f",
-    default=False,
-    type=bool,
-    help=
-    "If link is True will follow the real path of link.",
-    show_default=True)
-@click.option(
-    "--full",
-    default=False,
-    type=bool,
-    help="If full is True will show full path.",
-    show_default=True)
-@click.option(
-    "--rollback/--normal",
-    "-r/-m",
-    default=False,
-    type=bool,
-    help=
-    "If rollback is True will roll back changed file names.",
-    show_default=True)
-def ufn(path, max_depth, type, exclude, dry, link, full, rollback):
+@click.option("--confirm/--no-confirm",
+              "-c/-n",
+              default=False,
+              type=bool,
+              help="If confirm is True will need confirmation.",
+              show_default=True)
+@click.option("--link/--no-link",
+              "-l/-f",
+              default=False,
+              type=bool,
+              help="If link is True will follow the real path of link.",
+              show_default=True)
+@click.option("--full",
+              default=False,
+              type=bool,
+              help="If full is True will show full path.",
+              show_default=True)
+@click.option("--rollback/--normal",
+              "-r/-m",
+              default=False,
+              type=bool,
+              help="If rollback is True will roll back changed file names.",
+              show_default=True)
+def ufn(path, max_depth, type, exclude, dry, confirm, link, full, rollback):
     """Files in PATH will be changed file names unified.
     
     You can direct set path such as UFn.py path ...
@@ -458,6 +515,10 @@ def ufn(path, max_depth, type, exclude, dry, link, full, rollback):
         config.gParamDict["dry"] = True
     else:
         config.gParamDict["dry"] = False
+    if confirm:
+        config.gParamDict["confirm"] = True
+    else:
+        config.gParamDict["confirm"] = False
     if link:
         config.gParamDict["is_link"] = True
     else:
@@ -466,6 +527,7 @@ def ufn(path, max_depth, type, exclude, dry, link, full, rollback):
         config.gParamDict["full_path"] = True
     else:
         config.gParamDict["full_path"] = False
+    config.gParamDict["AllInPlace"] = False
     if rollback:
         rb = True
     else:
@@ -484,12 +546,10 @@ def ufn(path, max_depth, type, exclude, dry, link, full, rollback):
         else:
             click.echo(f"{Fore.RED}Not valid:{pth}{Fore.RESET}")
 
-    if config.gParamDict["dry"]:
+    if (config.gParamDict["dry"]) and (not config.gParamDict["confirm"]):
         click.echo("*" * 79)
         click.echo(
-            "In order to take effect,run the CLI add option '-i'")
-
-    return 0
+            "In order to take effect,run the CLI add option '-i' or '-c'")
 
 
 if __name__ == "__main__":
@@ -530,9 +590,7 @@ if __name__ == "__main__":
     finally:
         colorama.deinit()
 
-# TODO: add verify before change take effect
-# TODO: undo default not include extension or manually set include extension
-# TODO: support interactive operation
+
 # TODO: display config data
 # TODO: support edit config data
 # TODO: display total summary
