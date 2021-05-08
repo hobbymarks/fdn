@@ -29,7 +29,7 @@ import utils
     default="file",
     type=click.Choice(["file", "dir"]),
     help="File types.If file ,only change file names,If dir,only change "
-         "directory names.",
+    "directory names.",
     show_default=True)
 @click.option("--dry/--in-place",
               "-d/-i",
@@ -165,8 +165,8 @@ if __name__ == "__main__":
     finally:
         colorama.deinit()
 
+# TODO: **support edit config data
 # TODO: display config data
-# TODO: support edit config data
 # TODO: display total summary
 # TODO: display progress bar at bottom ...
 # TODO: support regular expression input path or directory as path argument

@@ -371,7 +371,8 @@ def one_file_ufn(f_path):
     if ip:
         if (os.path.exists(new_path)) and (not config.gParamDict["overwrite"]):
             click.echo(f"{new_path if fp_flag else new_name} exist.\n"
-                       f"{f_path if fp_flag else file} Skipped. ")
+                       f"{f_path if fp_flag else file} Skipped."
+                       f"You can with option '-o' to enable overwrite.")
             return None
 
         else:
@@ -423,7 +424,8 @@ def one_file_rbk(f_path):
     if ip:
         if (os.path.exists(new_path)) and (not config.gParamDict["overwrite"]):
             click.echo(f"{new_path if fp_flag else new_name} exist.\n"
-                       f"{f_path if fp_flag else file} Skipped. ")
+                       f"{f_path if fp_flag else file} Skipped."
+                       f"You can with option '-o' to enable overwrite.")
             return None
 
         else:
