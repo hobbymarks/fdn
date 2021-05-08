@@ -105,6 +105,8 @@ def ufn(path, max_depth, type, dry, confirm, link, full, rollback, overwrite):
         rb = True
     else:
         rb = False
+    config.gParamDict["latest_confirm"] = utils.unify_confirm()  # Parameter is
+    # Null to get default return
     for pth in config.gParamDict["path"]:
         if os.path.isfile(pth) and utils.type_matched(pth):
             if not rb:

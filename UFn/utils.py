@@ -263,40 +263,45 @@ def rich_style(original, processed):
     return rich_org, rich_proc
 
 
+def unify_confirm(x=""):
+    return {
+        "y": "yes",
+        "yes": "yes",
+        "n": "no",
+        "no": "no",
+        "A": "all",
+        "all": "all",
+        "q": "quit",
+        "quit": "quit"
+    }.get(x, "no")
+
+
 def _confirm(p_i=""):
     v = click.prompt(f"{p_i}\nPlease confirm(y/n/A/q)",
                      type=click.Choice(
                          ["y", "yes", "n", "no", "A", "all", "q", "quit"]),
                      show_choices=False,
-                     default="y")
+                     default=config.gParamDict["latest_confirm"])
 
-    def s(x):
-        return {
-            "y": "yes",
-            "yes": "yes",
-            "n": "no",
-            "no": "no",
-            "A": "all",
-            "all": "all",
-            "q": "quit",
-            "quit": "quit"
-        }.get(x, "no")
-
-    return s(v)
+    return unify_confirm(v)
 
 
 def _in_place(p_i=""):
     if config.gParamDict["AllInPlace"]:
         return True
     if config.gParamDict["confirm"]:
-        if (c := _confirm(p_i)) == "yes":
+        if (c := _confirm(p_i)) == unify_confirm("yes"):
+            config.gParamDict["latest_confirm"] = c
             return True
-        elif c == "no":
+        elif c == unify_confirm("no"):
+            config.gParamDict["latest_confirm"] = c
             return False
-        elif c == "all":
+        elif c == unify_confirm("all"):
+            config.gParamDict["latest_confirm"] = c
             config.gParamDict["AllInPlace"] = True
             return True
-        elif c == "quit":
+        elif c == unify_confirm("quit"):
+            config.gParamDict["latest_confirm"] = c
             sys.exit()  # TODO: roughly process ...
     else:
         if config.gParamDict["dry"]:
