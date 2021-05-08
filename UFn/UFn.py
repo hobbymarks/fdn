@@ -29,7 +29,7 @@ import utils
     default="file",
     type=click.Choice(["file", "dir"]),
     help="File types.If file ,only change file names,If dir,only change "
-    "directory names.",
+         "directory names.",
     show_default=True)
 @click.option("--dry/--in-place",
               "-d/-i",
@@ -169,7 +169,6 @@ if __name__ == "__main__":
 # TODO: support edit config data
 # TODO: display total summary
 # TODO: display progress bar at bottom ...
-
 # TODO: support regular expression input path or directory as path argument
-
 # TODO: exclude spec directory or file type
+# TODO: %,'s,How to ...

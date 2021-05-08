@@ -30,6 +30,7 @@ gParamDict["BeReplacedCharDictionary"] = {
     "'": _gSC,
     "+": _gSC,
     "-": _gSC,
+    "±": _gSC,
     "=": _gSC,
     "|": _gSC,
     "[": _gSC,
