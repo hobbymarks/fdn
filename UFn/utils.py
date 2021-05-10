@@ -172,7 +172,7 @@ def asc_head(s):
             new_word += c
         else:
             break
-    return "".join([elm[0] for elm in unidecode(new_word).split()])
+    return "".join([elm[0].upper() for elm in unidecode(new_word).split()])
 
 
 def process_word(s):
