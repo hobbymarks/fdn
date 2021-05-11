@@ -11,6 +11,7 @@ from colorama import Back
 from colorama import Fore
 from colorama import Style
 from unidecode import unidecode
+from wcwidth import wcswidth
 
 # From This Project
 import config
@@ -242,40 +243,49 @@ def rich_style(original, processed):
     """
     if (type(original) is not str) or (type(processed) is not str):
         return None, None
-    rich_org = rich_proc = ""
-    rich_org_dif_pos = rich_proc_dif_pos = 0
-    org_fill = proc_fill = 0
-    for match in difflib.SequenceMatcher(a=original,
-                                         b=processed).get_matching_blocks():
-        if config.gParamDict["pretty"]:
-            if match.a > match.b:
-                rich_proc += " " * (match.a - match.b - proc_fill)
-                proc_fill = match.a - match.b
-            elif match.a < match.b:
-                rich_org += " " * (match.b - match.a - org_fill)
-                org_fill = match.b - match.a
-        if rich_org_dif_pos < match.a:
-            rich_org += Fore.RED + original[rich_org_dif_pos:match.a].replace(
-                " ", "▯"
-            ) + Fore.RESET + Fore.BLACK + original[match.a:match.a +
-                                                   match.size] + Fore.RESET
-            rich_org_dif_pos = match.a + match.size
-        else:
-            rich_org += Fore.BLACK + original[match.a:match.a +
-                                              match.size] + Fore.RESET
-            rich_org_dif_pos = match.a + match.size
 
-        if rich_proc_dif_pos < match.b:
-            rich_proc += Fore.GREEN + processed[
-                rich_proc_dif_pos:match.b].replace(
-                    " ", "▯") + Fore.RESET + Fore.BLACK + processed[
-                        match.b:match.b + match.size] + Fore.RESET
-            rich_proc_dif_pos = match.b + match.size
+    def _f_d(s="", f_d=None):
+        return f_d + s + Fore.RESET
+
+    def _c_f(s=""):
+        if config.gParamDict["pretty"]:
+            return s
         else:
-            rich_proc += Fore.BLACK + processed[match.b:match.b +
-                                                match.size] + Fore.RESET
-            rich_proc_dif_pos = match.b + match.size
-    return rich_org, rich_proc
+            return ""
+
+    a = original
+    b = processed
+    a_list = []
+    b_list = []
+    c_f = ' '
+    for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(None, a,
+                                                       b).get_opcodes():
+        if tag == "delete":
+            a_list.append(_f_d(a[i1:i2].replace(" ", "▯"), Fore.RED))
+            b_list.append(_c_f(c_f * wcswidth(a[i1:i2])))
+        elif tag == "equal":
+            a_list.append(_f_d(a[i1:i2], Fore.BLACK))
+            b_list.append(_f_d(b[j1:j2], Fore.BLACK))
+        elif tag == "replace":
+            a_w = wcswidth(a[i1:i2])
+            b_w = wcswidth(b[j1:j2])
+            if a_w > b_w:
+                a_list.append(_f_d(a[i1:i2].replace(" ", "▯"), Fore.RED))
+                b_list.append(
+                    _f_d(b[j1:j2].replace(" ", "▯"), Fore.GREEN) +
+                    _c_f(c_f * (a_w - b_w)))
+            elif a_w < b_w:
+                a_list.append(
+                    _f_d(a[i1:i2].replace(" ", "▯"), Fore.RED) +
+                    _c_f(c_f * (b_w - a_w)))
+                b_list.append(_f_d(b[j1:j2].replace(" ", "▯"), Fore.GREEN))
+            else:
+                a_list.append(_f_d(a[i1:i2].replace(" ", "▯"), Fore.RED))
+                b_list.append(_f_d(b[j1:j2].replace(" ", "▯"), Fore.GREEN))
+        elif tag == "insert":
+            a_list.append(_c_f(c_f * wcswidth(b[j1:j2])))
+            b_list.append(_f_d(b[j1:j2].replace(" ", "▯"), Fore.GREEN))
+    return "".join(a_list), "".join(b_list)
 
 
 def unify_confirm(x=""):

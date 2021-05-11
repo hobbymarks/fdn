@@ -9,3 +9,4 @@ cryptography>=3.4.7
 nltk>=3.6.2
 colorama>=0.4.4
 pandas>=1.2.4
+wcwidth>=0.2.5
