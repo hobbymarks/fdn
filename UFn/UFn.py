@@ -76,8 +76,15 @@ import utils
               is_flag=True,
               help="Overwrite exist files.",
               show_default=True)
+@click.option("--pretty",
+              "-p",
+              default=False,
+              type=bool,
+              is_flag=True,
+              help="Try to pretty output.",
+              show_default=True)
 def ufn(path, max_depth, type, in_place, confirm, is_link, full, rollback,
-        overwrite):
+        overwrite,pretty):
     """Files in PATH will be changed file names unified.
     
     You can direct set path such as UFn.py path ...
@@ -111,6 +118,10 @@ def ufn(path, max_depth, type, in_place, confirm, is_link, full, rollback,
         config.gParamDict["overwrite"] = True
     else:
         config.gParamDict["overwrite"] = False
+    if pretty:
+        config.gParamDict["pretty"] = True
+    else:
+        config.gParamDict["pretty"] = False
     config.gParamDict["AllInPlace"] = False
     if rollback:
         rb = True

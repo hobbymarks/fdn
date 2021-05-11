@@ -244,8 +244,16 @@ def rich_style(original, processed):
         return None, None
     rich_org = rich_proc = ""
     rich_org_dif_pos = rich_proc_dif_pos = 0
+    org_fill = proc_fill = 0
     for match in difflib.SequenceMatcher(a=original,
                                          b=processed).get_matching_blocks():
+        if config.gParamDict["pretty"]:
+            if match.a > match.b:
+                rich_proc += " " * (match.a - match.b - proc_fill)
+                proc_fill = match.a - match.b
+            elif match.a < match.b:
+                rich_org += " " * (match.b - match.a - org_fill)
+                org_fill = match.b - match.a
         if rich_org_dif_pos < match.a:
             rich_org += Fore.RED + original[rich_org_dif_pos:match.a].replace(
                 " ", "▯"
