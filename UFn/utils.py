@@ -272,12 +272,14 @@ def rich_style(original, processed):
             if a_w > b_w:
                 a_list.append(_f_d(a[i1:i2].replace(" ", "▯"), Fore.RED))
                 b_list.append(
-                    _f_d(b[j1:j2].replace(" ", "▯"), Fore.GREEN) +
-                    _c_f(c_f * (a_w - b_w)))
+                    _c_f(c_f * (a_w - b_w)) +
+                    _f_d(b[j1:j2].replace(" ", "▯"), Fore.GREEN))
+
             elif a_w < b_w:
                 a_list.append(
-                    _f_d(a[i1:i2].replace(" ", "▯"), Fore.RED) +
-                    _c_f(c_f * (b_w - a_w)))
+                    _c_f(c_f * (b_w - a_w)) +
+                    _f_d(a[i1:i2].replace(" ", "▯"), Fore.RED))
+
                 b_list.append(_f_d(b[j1:j2].replace(" ", "▯"), Fore.GREEN))
             else:
                 a_list.append(_f_d(a[i1:i2].replace(" ", "▯"), Fore.RED))
@@ -389,21 +391,22 @@ def one_file_ufn(f_path):
     if new_name == file:
         return None
 
-    if fp_flag := config.gParamDict["full_path"]:
+    if _fp := config.gParamDict["full_path"]:
         ip = _in_place(f_path)
     else:
         ip = _in_place(file)
     if ip:
         if (os.path.exists(new_path)) and (not config.gParamDict["overwrite"]):
-            click.echo(f"{new_path if fp_flag else new_name} exist.\n"
-                       f"{f_path if fp_flag else file} Skipped."
-                       f"You can with option '-o' to enable overwrite.")
+            click.echo(f"{Back.RED}Exist:{Back.RESET}"
+                       f"{new_path if _fp else new_name}\n"
+                       f"Skipped:{f_path if _fp else file}\n"
+                       f"With option '-o' to enable overwrite.")
             return None
 
         else:
             log_to_db(cur_name=file, new_name=new_name)
             os.rename(f_path, new_path)
-    if fp_flag:
+    if _fp:
         out_info(f_path, new_path, take_effect=ip)
     else:
         out_info(file, new_name, take_effect=ip)
@@ -442,21 +445,21 @@ def one_file_rbk(f_path):
     if new_name == file:
         return None
 
-    if fp_flag := config.gParamDict["full_path"]:
+    if _fp := config.gParamDict["full_path"]:
         ip = _in_place(f_path)
     else:
         ip = _in_place(file)
     if ip:
         if (os.path.exists(new_path)) and (not config.gParamDict["overwrite"]):
-            click.echo(f"{new_path if fp_flag else new_name} exist.\n"
-                       f"{f_path if fp_flag else file} Skipped."
+            click.echo(f"{new_path if _fp else new_name} exist.\n"
+                       f"{f_path if _fp else file} Skipped."
                        f"You can with option '-o' to enable overwrite.")
             return None
 
         else:
             os.replace(f_path, new_path)  # os.place is atomic and match
             # cross platform :https://docs.python.org/dev/library/os.html
-    if fp_flag:
+    if _fp:
         out_info(f_path, new_path, take_effect=ip)
     else:
         out_info(file, new_name, take_effect=ip)
