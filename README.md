@@ -1,5 +1,5 @@
 # UFn
-A Tool For Unify File Name Format
+A tool for uniformly changing file or directory names
 
 ## Introduction
 #### Bash Version
@@ -13,9 +13,9 @@ File name format:
 5. underscore at the end of file name will be deleted;
 
 #### Python Version
-A pure python tool to unify file name.
+A pure python tool to unify file or directory name.
 
-File name format:
+File or directory name format:
 1. no space in file name（firstly every space will be replaced by an underscore,then multiple consecutive underscores will be reduced to one);
 2. only underscore allowed in file name，all other control characters will be replaced by underscore;
 3. multiple consecutive underscores will be reduced to one;
