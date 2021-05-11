@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 from pathlib import Path
+import shutil
 import sys
 
 # From Third party
@@ -15,76 +16,79 @@ import config
 import utils
 
 
-@click.command(context_settings={
-    "ignore_unknown_options": True,
-    "help_option_names": ["-h", "--help"]
-})
+@click.command(
+    context_settings={
+        "ignore_unknown_options": True,
+        "help_option_names": ["-h", "--help"],
+        "max_content_width": shutil.get_terminal_size()[0]
+    })
 @click.argument("path", required=False, type=click.Path(exists=True), nargs=-1)
 @click.option("--max-depth",
               "-d",
               default=1,
               type=int,
-              help="Set travel directory tree with max depth.",
+              help=f"Set travel directory tree with max depth.",
               show_default=True)
 @click.option(
     "--type",
     "-t",
     default="file",
     type=click.Choice(["file", "dir"]),
-    help="File types.If file ,only change file names,If dir,only change "
-    "directory names.",
+    help=
+    f"Set types.If the value is 'file' ,only change file names,If the value "
+    f"is 'dir',only change directory names.",
     show_default=True)
 @click.option("--in-place",
               "-i",
               default=False,
               type=bool,
               is_flag=True,
-              help="Make changes to file name in place.",
+              help=f"Changes file name in place.",
               show_default=True)
 @click.option("--confirm",
               "-c",
               default=False,
               type=bool,
               is_flag=True,
-              help="If confirm is True will need confirmation.",
+              help=f"Need confirmation before change to take effect.",
               show_default=True)
 @click.option("--is-link",
               "-l",
               default=False,
               type=bool,
               is_flag=True,
-              help="Follow the real path of a link.",
+              help=f"Follow the real path of a link.",
               show_default=True)
-@click.option("--full",
+@click.option("--full-path",
               "-f",
               default=False,
               type=bool,
               is_flag=True,
-              help="Show full path.",
+              help="Show full path of file.",
               show_default=True)
-@click.option("--rollback",
+@click.option("--roll-back",
               "-r",
               default=False,
               type=bool,
               is_flag=True,
-              help="To roll back changed file names.",
+              help=f"To roll back changed file names.",
               show_default=True)
 @click.option("--overwrite",
               "-o",
               default=False,
               type=bool,
               is_flag=True,
-              help="Overwrite exist files.",
+              help=f"Overwrite exist files.",
               show_default=True)
 @click.option("--pretty",
               "-p",
               default=False,
               type=bool,
               is_flag=True,
-              help="Try to pretty output.",
+              help=f"Try to pretty output.",
               show_default=True)
-def ufn(path, max_depth, type, in_place, confirm, is_link, full, rollback,
-        overwrite,pretty):
+def ufn(path, max_depth, type, in_place, confirm, is_link, full_path,
+        roll_back, overwrite, pretty):
     """Files in PATH will be changed file names unified.
     
     You can direct set path such as UFn.py path ...
@@ -93,50 +97,25 @@ def ufn(path, max_depth, type, in_place, confirm, is_link, full, rollback,
         config.gParamDict["path"] = ["."]
     else:
         config.gParamDict["path"] = path
-    if str(max_depth).isnumeric():
-        config.gParamDict["max_depth"] = int(str(max_depth))
-    else:
-        config.gParamDict["max_depth"] = 1
+    config.gParamDict["max_depth"] = max_depth
     config.gParamDict["type"] = type
-    if in_place:
-        config.gParamDict["in_place"] = True
-    else:
-        config.gParamDict["in_place"] = False
-    if confirm:
-        config.gParamDict["confirm"] = True
-    else:
-        config.gParamDict["confirm"] = False
-    if is_link:
-        config.gParamDict["is_link"] = True
-    else:
-        config.gParamDict["is_link"] = False
-    if full:
-        config.gParamDict["full_path"] = True
-    else:
-        config.gParamDict["full_path"] = False
-    if overwrite:
-        config.gParamDict["overwrite"] = True
-    else:
-        config.gParamDict["overwrite"] = False
-    if pretty:
-        config.gParamDict["pretty"] = True
-    else:
-        config.gParamDict["pretty"] = False
+    config.gParamDict["in_place"] = in_place
+    config.gParamDict["confirm"] = confirm
+    config.gParamDict["is_link"] = is_link
+    config.gParamDict["full_path"] = full_path
+    config.gParamDict["overwrite"] = overwrite
+    config.gParamDict["pretty"] = pretty
     config.gParamDict["AllInPlace"] = False
-    if rollback:
-        rb = True
-    else:
-        rb = False
     config.gParamDict["latest_confirm"] = utils.unify_confirm()  # Parameter is
     # Null to get default return
     for pth in config.gParamDict["path"]:
         if os.path.isfile(pth) and utils.type_matched(pth):
-            if not rb:
+            if not roll_back:
                 utils.one_file_ufn(pth)
             else:
                 utils.one_file_rbk(pth)
         elif os.path.isdir(pth):
-            if not rb:
+            if not roll_back:
                 utils.one_dir_ufn(pth)
             else:
                 utils.one_dir_rbk(pth)
@@ -145,10 +124,9 @@ def ufn(path, max_depth, type, in_place, confirm, is_link, full, rollback,
 
     if (not config.gParamDict["in_place"]) and (
             not config.gParamDict["confirm"]):
-        cols, _ = os.get_terminal_size()
+        cols, _ = shutil.get_terminal_size(fallback=(79, 23))
         click.echo("*" * cols)
-        click.echo(
-            "In order to take effect,add option '-i' or '-c'")
+        click.echo("In order to take effect,add option '-i' or '-c'")
 
 
 if __name__ == "__main__":
