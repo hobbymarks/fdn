@@ -206,7 +206,14 @@ def depth_walk(top_path, top_down=False, follow_links=False, max_depth=1):
         max_depth = int(max_depth)
     else:
         max_depth = 1
-    names = os.listdir(top_path)
+    try:
+        names = os.listdir(top_path)
+    except FileNotFoundError:
+        click.echo(f"Warning:{top_path} not found.")
+        return None
+    except PermissionError:
+        click.echo(f"Warning:{top_path} no permissions.")
+        return None
     dirs, non_dirs = [], []
     for name in names:
         if os.path.isdir(os.path.join(top_path, name)):
@@ -304,10 +311,10 @@ def _in_place(p_i=""):
             config.gParamDict["latest_confirm"] = c
             sys.exit()  # TODO: roughly process ...
     else:
-        if config.gParamDict["dry"]:
-            return False
-        else:
+        if config.gParamDict["in_place"]:
             return True
+        else:
+            return False
 
 
 def out_info(file, new_name, take_effect=False):
@@ -429,7 +436,8 @@ def one_file_rbk(f_path):
             return None
 
         else:
-            os.rename(f_path, new_path)
+            os.replace(f_path, new_path)  # os.place is atomic and match
+            # cross platform :https://docs.python.org/dev/library/os.html
     if fp_flag:
         out_info(f_path, new_path, take_effect=ip)
     else:

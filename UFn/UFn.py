@@ -15,10 +15,13 @@ import config
 import utils
 
 
-@click.command(context_settings={"ignore_unknown_options": True})
+@click.command(context_settings={
+    "ignore_unknown_options": True,
+    "help_option_names": ["-h", "--help"]
+})
 @click.argument("path", required=False, type=click.Path(exists=True), nargs=-1)
-@click.option("--max_depth",
-              "-m",
+@click.option("--max-depth",
+              "-d",
               default=1,
               type=int,
               help="Set travel directory tree with max depth.",
@@ -31,42 +34,50 @@ import utils
     help="File types.If file ,only change file names,If dir,only change "
     "directory names.",
     show_default=True)
-@click.option("--dry/--in-place",
-              "-d/-i",
-              default=True,
-              type=bool,
-              help="If dry is True will not change file name.",
-              show_default=True)
-@click.option("--confirm/--no-confirm",
-              "-c/-n",
+@click.option("--in-place",
+              "-i",
               default=False,
               type=bool,
+              is_flag=True,
+              help="Make changes to file name in place.",
+              show_default=True)
+@click.option("--confirm",
+              "-c",
+              default=False,
+              type=bool,
+              is_flag=True,
               help="If confirm is True will need confirmation.",
               show_default=True)
-@click.option("--link/--no-link",
-              "-l/-f",
+@click.option("--is-link",
+              "-l",
               default=False,
               type=bool,
-              help="If link is True will follow the real path of link.",
+              is_flag=True,
+              help="Follow the real path of a link.",
               show_default=True)
 @click.option("--full",
+              "-f",
               default=False,
               type=bool,
-              help="If full is True will show full path.",
+              is_flag=True,
+              help="Show full path.",
               show_default=True)
-@click.option("--rollback/--normal",
-              "-r/-m",
+@click.option("--rollback",
+              "-r",
               default=False,
               type=bool,
-              help="If rollback is True will roll back changed file names.",
+              is_flag=True,
+              help="To roll back changed file names.",
               show_default=True)
-@click.option("--overwrite/--skip",
-              "-o/-s",
+@click.option("--overwrite",
+              "-o",
               default=False,
               type=bool,
-              help="If overwrite is True will overwrite exist files.",
+              is_flag=True,
+              help="Overwrite exist files.",
               show_default=True)
-def ufn(path, max_depth, type, dry, confirm, link, full, rollback, overwrite):
+def ufn(path, max_depth, type, in_place, confirm, is_link, full, rollback,
+        overwrite):
     """Files in PATH will be changed file names unified.
     
     You can direct set path such as UFn.py path ...
@@ -80,15 +91,15 @@ def ufn(path, max_depth, type, dry, confirm, link, full, rollback, overwrite):
     else:
         config.gParamDict["max_depth"] = 1
     config.gParamDict["type"] = type
-    if dry:
-        config.gParamDict["dry"] = True
+    if in_place:
+        config.gParamDict["in_place"] = True
     else:
-        config.gParamDict["dry"] = False
+        config.gParamDict["in_place"] = False
     if confirm:
         config.gParamDict["confirm"] = True
     else:
         config.gParamDict["confirm"] = False
-    if link:
+    if is_link:
         config.gParamDict["is_link"] = True
     else:
         config.gParamDict["is_link"] = False
@@ -121,10 +132,12 @@ def ufn(path, max_depth, type, dry, confirm, link, full, rollback, overwrite):
         else:
             click.echo(f"{Fore.RED}Not valid:{pth}{Fore.RESET}")
 
-    if (config.gParamDict["dry"]) and (not config.gParamDict["confirm"]):
-        click.echo("*" * 79)
+    if (not config.gParamDict["in_place"]) and (
+            not config.gParamDict["confirm"]):
+        cols, _ = os.get_terminal_size()
+        click.echo("*" * cols)
         click.echo(
-            "In order to take effect,run the CLI add option '-i' or '-c'")
+            "In order to take effect,add option '-i' or '-c'")
 
 
 if __name__ == "__main__":
@@ -172,3 +185,5 @@ if __name__ == "__main__":
 # TODO: support regular expression input path or directory as path argument
 # TODO: exclude spec directory or file type
 # TODO: %,'s,How to ...
+
+# TODO: unify full_path request to a function ...
