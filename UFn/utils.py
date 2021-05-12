@@ -100,11 +100,10 @@ def process_head_tail(s):
     :param s:
     :return:
     """
-    root = process_head_tail_sep(s)
     # Capitalize The First Letter
-    if root[0].islower():
-        root = root[0].upper() + root[1:]
-    return root
+    if s[0].islower():
+        root = s[0].upper() + s[1:]
+    return s
 
 
 def process_white_space(s):
@@ -258,14 +257,15 @@ def rich_style(original, processed):
     a_list = []
     b_list = []
     c_f = ' '
+    e = config.gParamDict["enhanced_display"]
     for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(None, a,
                                                        b).get_opcodes():
         if tag == "delete":
             a_list.append(_f_d(a[i1:i2].replace(" ", "▯"), Fore.RED))
             b_list.append(_c_f(c_f * wcswidth(a[i1:i2])))
         elif tag == "equal":
-            a_list.append(_f_d(a[i1:i2], Fore.BLACK))
-            b_list.append(_f_d(b[j1:j2], Fore.BLACK))
+            a_list.append(_f_d(a[i1:i2], Fore.BLACK) if e else a[i1:i2])
+            b_list.append(_f_d(b[j1:j2], Fore.BLACK) if e else b[j1:j2])
         elif tag == "replace":
             a_w = wcswidth(a[i1:i2])
             b_w = wcswidth(b[j1:j2])
@@ -338,23 +338,27 @@ def _in_place(p_i=""):
 
 
 def out_info(file, new_name, take_effect=False):
+    def _b_d(s="", b_d=""):
+        if config.gParamDict["enhanced_display"]:
+            return b_d + s + Back.RESET
+        else:
+            return s
+
     rich_org, rich_proc = rich_style(file, new_name)
     if config.gParamDict["AlternateFlag"]:
-        click.echo(" " * 3 + Back.WHITE + rich_org + Style.RESET_ALL)
+        click.echo(" " * 3 + (_b_d(rich_org, Back.WHITE)))
     else:
-        click.echo(" " * 3 + Back.LIGHTWHITE_EX + rich_org + Style.RESET_ALL)
+        click.echo(" " * 3 + (_b_d(rich_org, Back.LIGHTWHITE_EX)))
     if take_effect:
         if config.gParamDict["AlternateFlag"]:
-            click.echo("==>" + Back.WHITE + rich_proc + Style.RESET_ALL)
+            click.echo("==>" + (_b_d(rich_proc, Back.WHITE)))
         else:
-            click.echo("==>" + Back.LIGHTWHITE_EX + rich_proc +
-                       Style.RESET_ALL)
+            click.echo("==>" + (_b_d(rich_proc, Back.LIGHTWHITE_EX)))
     else:
         if config.gParamDict["AlternateFlag"]:
-            click.echo("-->" + Back.WHITE + rich_proc + Style.RESET_ALL)
+            click.echo("-->" + (_b_d(rich_proc, Back.WHITE)))
         else:
-            click.echo("-->" + Back.LIGHTWHITE_EX + rich_proc +
-                       Style.RESET_ALL)
+            click.echo("-->" + (_b_d(rich_proc, Back.LIGHTWHITE_EX)))
     config.gParamDict["AlternateFlag"] = not config.gParamDict["AlternateFlag"]
 
 
@@ -378,10 +382,11 @@ def one_file_ufn(f_path):
     root = replace_char(root)
     # Capwords only when word in wordsSet
     root = process_word(root)
-    # Pretty Terminology
-    root = process_terminology(root)
     # process Head and Tail
     root = process_head_tail(root)
+    root = process_head_tail_sep(root)  # special terminology may conflict
+    # Pretty Terminology
+    root = process_terminology(root)
     # Add ascii head at the beginning
     new_name = asc_head(root) + root + ext
 

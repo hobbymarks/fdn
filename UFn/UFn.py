@@ -87,8 +87,15 @@ import utils
               is_flag=True,
               help=f"Try to pretty output.",
               show_default=True)
+@click.option("--enhanced-display",
+              "-e",
+              default=False,
+              type=bool,
+              is_flag=True,
+              help=f"Enhanced display output.",
+              show_default=True)
 def ufn(path, max_depth, type, in_place, confirm, is_link, full_path,
-        roll_back, overwrite, pretty):
+        roll_back, overwrite, pretty, enhanced_display):
     """Files in PATH will be changed file names unified.
     
     You can direct set path such as UFn.py path ...
@@ -105,6 +112,7 @@ def ufn(path, max_depth, type, in_place, confirm, is_link, full_path,
     config.gParamDict["full_path"] = full_path
     config.gParamDict["overwrite"] = overwrite
     config.gParamDict["pretty"] = pretty
+    config.gParamDict["enhanced_display"] = enhanced_display
     config.gParamDict["AllInPlace"] = False
     config.gParamDict["latest_confirm"] = utils.unify_confirm()  # Parameter is
     # Null to get default return
