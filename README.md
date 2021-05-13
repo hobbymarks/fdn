@@ -30,7 +30,7 @@ File or directory name format:
 * If you wan to run the script in some directory , you can create [soft link](https://en.wikipedia.org/wiki/Ln_(Unix))(ln -s UFn.sh TargetName)
 
 #### Python Version
-
+conda install -c hobbymarks ufdn
 ---
 
 # UFn
@@ -65,3 +65,4 @@ File or directory name format:
 * 如果需要其它目录执行可以考虑创建[软连接](https://en.wikipedia.org/wiki/Ln_(Unix))(ln -s UFn.sh TargetName)
 
 #### Python 版
+conda install -c hobbymarks ufdn
