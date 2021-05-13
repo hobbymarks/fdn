@@ -136,7 +136,6 @@ def ufn(path, max_depth, type, in_place, confirm, is_link, full_path,
         click.echo("*" * cols)
         click.echo("In order to take effect,add option '-i' or '-c'")
 
-
 if __name__ == "__main__":
     try:
         colorama.init()

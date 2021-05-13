@@ -6,7 +6,7 @@ build:
     number: 1
     skip: True # [py<38]
     entry_points:
-        - ufn = ufn.ufn:ufn
+        - ufn = ufn:main
 
 source:
     git_url: https://github.com/hobbymarks/ufn.git
