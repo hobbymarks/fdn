@@ -13,6 +13,7 @@ from colorama import Style
 import ufn.config
 import ufn.ucrypt
 import ufn.udb
+import ufn.ufn
 import ufn.utils
 
 from ufn.ufn import ufn
