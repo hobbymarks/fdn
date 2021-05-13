@@ -31,6 +31,36 @@ File or directory name format:
 
 #### Python Version
 conda install -c hobbymarks ufdn
+
+
+### Use
+run 'ufdn -h' in terminal,you will get the help detail:
+ufdn -h
+Usage: ufdn [OPTIONS] [PATH]...
+
+  Files in PATH will be changed file names unified.
+
+  You can direct set path such as ufncli.py path ...
+
+Options:
+  -d, --max-depth INTEGER  Set travel directory tree with max depth.
+                           [default: 1]
+  -t, --type [file|dir]    Set types.If the value is 'file' ,only change
+                           file names,If the value is 'dir',only change
+                           directory names.  [default: file]
+  -i, --in-place           Changes file name in place.  [default: False]
+  -c, --confirm            Need confirmation before change to take effect.
+                           [default: False]
+  -l, --is-link            Follow the real path of a link.  [default:
+                           False]
+  -f, --full-path          Show full path of file.  [default: False]
+  -r, --roll-back          To roll back changed file names.  [default:
+                           False]
+  -o, --overwrite          Overwrite exist files.  [default: False]
+  -p, --pretty             Try to pretty output.  [default: False]
+  -e, --enhanced-display   Enhanced display output.  [default: False]
+  -h, --help               Show this message and exit.
+
 ---
 
 # UFn
