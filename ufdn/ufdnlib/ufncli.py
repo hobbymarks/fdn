@@ -113,7 +113,8 @@ def ufn(path, max_depth, type, in_place, confirm, is_link, full_path,
     uconfig.gParamDict["pretty"] = pretty
     uconfig.gParamDict["enhanced_display"] = enhanced_display
     uconfig.gParamDict["AllInPlace"] = False
-    uconfig.gParamDict["latest_confirm"] = utils.unify_confirm()  # Parameter is
+    uconfig.gParamDict["latest_confirm"] = utils.unify_confirm(
+    )  # Parameter is
     # Null to get default return
     for pth in uconfig.gParamDict["path"]:
         if os.path.isfile(pth) and utils.type_matched(pth):
@@ -134,6 +135,7 @@ def ufn(path, max_depth, type, in_place, confirm, is_link, full_path,
         cols, _ = shutil.get_terminal_size(fallback=(79, 23))
         click.echo("*" * cols)
         click.echo("In order to take effect,add option '-i' or '-c'")
+
 
 if __name__ == "__main__":
     try:
@@ -165,7 +167,8 @@ if __name__ == "__main__":
 
         uconfig.gParamDict["LowerCaseWordSet"] = set(
             list(map(lambda x: x.lower(), words.words())))
-        uconfig.gParamDict["record_path"] = os.path.join(app_path, "../rd_data")
+        uconfig.gParamDict["record_path"] = os.path.join(
+            app_path, "../rd_data")
         Path(uconfig.gParamDict["record_path"]).mkdir(parents=True,
                                                       exist_ok=True)
         #######################################################################

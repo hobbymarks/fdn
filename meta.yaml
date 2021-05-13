@@ -9,7 +9,7 @@ build:
         - ufdn = ufdn:main
 
 source:
-    git_url: https://github.com/hobbymarks/ufdn.git
+    git_url: https://github.com/hobbymarks/UFn.git
 
 requirements:
     build:
@@ -21,17 +21,17 @@ requirements:
     
     run:
         - 'python>=3.8'
-        - 'click~=7.1.2'
+        - 'click>=8.0.0'
         - 'setuptools>=49.6.0'
         - 'unidecode>=1.2.0'
         - 'cryptography>=3.4.7'
         - 'nltk>=3.6.2'
         - 'colorama>=0.4.4'
         - 'pandas>=1.2.4'
-        - 'wcwidth>=0.2.0'
+        - 'wcwidth>=0.2.5'
 
 about:
-    home: https://github.com/hobbymarks/ufdn.git
+    home: https://github.com/hobbymarks/UFn.git
     description:
     license: MIT
     license_file: LICENSE
