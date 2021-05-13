@@ -1,8 +1,6 @@
 from setuptools import find_packages
 from setuptools import setup
 
-import ufdn
-
 setup(
     name='ufdn@hobbymarks',
     version='2021.05',

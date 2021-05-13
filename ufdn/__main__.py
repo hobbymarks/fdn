@@ -1,3 +1,0 @@
-import ufdn
-
-ufdn.main()
