@@ -1,4 +1,4 @@
-# UFn
+# ufdn
 A tool for uniformly changing file or directory names
 
 ## Introduction
