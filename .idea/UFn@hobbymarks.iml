@@ -6,8 +6,8 @@
       <excludeFolder url="file://$MODULE_DIR$/.virtual_documents" />
       <excludeFolder url="file://$MODULE_DIR$/draft" />
       <excludeFolder url="file://$MODULE_DIR$/.pytest_cache" />
-      <excludeFolder url="file://$MODULE_DIR$/ufn/.ipynb_checkpoints" />
-      <excludeFolder url="file://$MODULE_DIR$/ufn/data/hRdDir" />
+      <excludeFolder url="file://$MODULE_DIR$/ufdn/data/hRdDir" />
+      <excludeFolder url="file://$MODULE_DIR$/ufdn/.ipynb_checkpoints" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.8 (base)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

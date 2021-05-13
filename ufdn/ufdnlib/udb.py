@@ -6,13 +6,13 @@ import sqlite3
 import pandas as pd
 
 # From This Project
-import config
+from ufdn.ufdnlib import uconfig
 
 
 class UDB:
     def __init__(self, db_path=""):
         if not db_path:
-            self._db_path = os.path.join(config.gParamDict["record_path"],
+            self._db_path = os.path.join(uconfig.gParamDict["record_path"],
                                          "rd.db")
         else:
             self._db_path = db_path

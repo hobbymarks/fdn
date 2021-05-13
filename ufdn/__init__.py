@@ -1,3 +1,7 @@
+"""
+UFN use to uniformly change file names
+"""
+from __future__ import absolute_import
 from __future__ import print_function
 
 from pathlib import Path
@@ -10,11 +14,12 @@ from colorama import Back
 from colorama import Fore
 from colorama import Style
 
-import ufn.config
-import ufn.ucrypt
-import ufn.udb
-import ufn.ufn
-import ufn.utils
+from ufdn.ufdnlib import uconfig
+from ufdn.ufdnlib import ucrypt
+from ufdn.ufdnlib import udb
+from ufdn.ufdnlib import ufncli
+from ufdn.ufdnlib import utils
+
 
 def main():
     try:
@@ -38,24 +43,24 @@ def main():
             try:
                 from nltk.corpus import words
 
-                config.gParamDict["LowerCaseWordSet"] = set(
+                uconfig.gParamDict["LowerCaseWordSet"] = set(
                     list(map(lambda x: x.lower(), words.words())))
             except LookupError:
                 nltk.download("words")
         from nltk.corpus import words
 
-        config.gParamDict["LowerCaseWordSet"] = set(
+        uconfig.gParamDict["LowerCaseWordSet"] = set(
             list(map(lambda x: x.lower(), words.words())))
-        config.gParamDict["record_path"] = os.path.join(app_path, "rd_data")
-        Path(config.gParamDict["record_path"]).mkdir(parents=True,
-                                                     exist_ok=True)
+        uconfig.gParamDict["record_path"] = os.path.join(app_path, "rd_data")
+        Path(uconfig.gParamDict["record_path"]).mkdir(parents=True,
+                                                      exist_ok=True)
         #######################################################################
-        ufn.ufn()
+        ufncli.ufn()
     finally:
         colorama.deinit()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     try:
         sys.exit(main())
     except Exception as e:

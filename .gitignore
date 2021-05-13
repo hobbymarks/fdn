@@ -1,6 +1,6 @@
 draft/
 .ipynb_checkpoints/
 .virtual_documents/
-ufn/.ipynb_checkpoints/
-ufn/__pycache__/
+ufdn/.ipynb_checkpoints/
+ufdn/__pycache__/
 tests/__pycache__/

@@ -1,3 +1,0 @@
-import ufn
-
-ufn.main()

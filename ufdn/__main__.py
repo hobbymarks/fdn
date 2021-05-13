@@ -1,0 +1,3 @@
+import ufdn
+
+ufdn.main()

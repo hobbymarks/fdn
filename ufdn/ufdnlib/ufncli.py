@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import os
 from pathlib import Path
 import shutil
@@ -12,8 +11,8 @@ from colorama import Fore
 from colorama import Style
 
 # From This Project
-import config
-import utils
+from ufdn.ufdnlib import uconfig
+from ufdn.ufdnlib import utils
 
 
 @click.command(
@@ -98,25 +97,25 @@ def ufn(path, max_depth, type, in_place, confirm, is_link, full_path,
         roll_back, overwrite, pretty, enhanced_display):
     """Files in PATH will be changed file names unified.
     
-    You can direct set path such as ufn.py path ...
+    You can direct set path such as ufncli.py path ...
     """
     if not path:
-        config.gParamDict["path"] = ["."]
+        uconfig.gParamDict["path"] = ["."]
     else:
-        config.gParamDict["path"] = path
-    config.gParamDict["max_depth"] = max_depth
-    config.gParamDict["type"] = type
-    config.gParamDict["in_place"] = in_place
-    config.gParamDict["confirm"] = confirm
-    config.gParamDict["is_link"] = is_link
-    config.gParamDict["full_path"] = full_path
-    config.gParamDict["overwrite"] = overwrite
-    config.gParamDict["pretty"] = pretty
-    config.gParamDict["enhanced_display"] = enhanced_display
-    config.gParamDict["AllInPlace"] = False
-    config.gParamDict["latest_confirm"] = utils.unify_confirm()  # Parameter is
+        uconfig.gParamDict["path"] = path
+    uconfig.gParamDict["max_depth"] = max_depth
+    uconfig.gParamDict["type"] = type
+    uconfig.gParamDict["in_place"] = in_place
+    uconfig.gParamDict["confirm"] = confirm
+    uconfig.gParamDict["is_link"] = is_link
+    uconfig.gParamDict["full_path"] = full_path
+    uconfig.gParamDict["overwrite"] = overwrite
+    uconfig.gParamDict["pretty"] = pretty
+    uconfig.gParamDict["enhanced_display"] = enhanced_display
+    uconfig.gParamDict["AllInPlace"] = False
+    uconfig.gParamDict["latest_confirm"] = utils.unify_confirm()  # Parameter is
     # Null to get default return
-    for pth in config.gParamDict["path"]:
+    for pth in uconfig.gParamDict["path"]:
         if os.path.isfile(pth) and utils.type_matched(pth):
             if not roll_back:
                 utils.one_file_ufn(pth)
@@ -130,8 +129,8 @@ def ufn(path, max_depth, type, in_place, confirm, is_link, full_path,
         else:
             click.echo(f"{Fore.RED}Not valid:{pth}{Fore.RESET}")
 
-    if (not config.gParamDict["in_place"]) and (
-            not config.gParamDict["confirm"]):
+    if (not uconfig.gParamDict["in_place"]) and (
+            not uconfig.gParamDict["confirm"]):
         cols, _ = shutil.get_terminal_size(fallback=(79, 23))
         click.echo("*" * cols)
         click.echo("In order to take effect,add option '-i' or '-c'")
@@ -146,7 +145,7 @@ if __name__ == "__main__":
             sys.exit()
         #######################################################################
         app_path = os.path.dirname(os.path.realpath(__file__))
-        nltk_path = os.path.join(app_path, "nltk_data")
+        nltk_path = os.path.join(app_path, "../nltk_data")
         import nltk
 
         if os.path.isdir(nltk_path):
@@ -158,17 +157,17 @@ if __name__ == "__main__":
             try:
                 from nltk.corpus import words
 
-                config.gParamDict["LowerCaseWordSet"] = set(
+                uconfig.gParamDict["LowerCaseWordSet"] = set(
                     list(map(lambda x: x.lower(), words.words())))
             except LookupError:
                 nltk.download("words")
         from nltk.corpus import words
 
-        config.gParamDict["LowerCaseWordSet"] = set(
+        uconfig.gParamDict["LowerCaseWordSet"] = set(
             list(map(lambda x: x.lower(), words.words())))
-        config.gParamDict["record_path"] = os.path.join(app_path, "rd_data")
-        Path(config.gParamDict["record_path"]).mkdir(parents=True,
-                                                     exist_ok=True)
+        uconfig.gParamDict["record_path"] = os.path.join(app_path, "../rd_data")
+        Path(uconfig.gParamDict["record_path"]).mkdir(parents=True,
+                                                      exist_ok=True)
         #######################################################################
         ufn()
     finally:

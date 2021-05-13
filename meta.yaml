@@ -1,15 +1,15 @@
 package:
-    name: ufn
+    name: ufdn
     version: "2021.05"
 
 build:
     number: 1
     skip: True # [py<38]
     entry_points:
-        - ufn = ufn:main
+        - ufdn = ufdn:main
 
 source:
-    git_url: https://github.com/hobbymarks/ufn.git
+    git_url: https://github.com/hobbymarks/ufdn.git
 
 requirements:
     build:
@@ -31,7 +31,7 @@ requirements:
         - 'wcwidth>=0.2.0'
 
 about:
-    home: https://github.com/hobbymarks/ufn.git
+    home: https://github.com/hobbymarks/ufdn.git
     description:
     license: MIT
     license_file: LICENSE
