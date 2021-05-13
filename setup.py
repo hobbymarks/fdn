@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='ufn@hobbymarks',
-    version='0.5.3',
+    version='2021.05',
     packages=[''],
     url='https://github.com/hobbymarks/UFn',
     license='MIT',
