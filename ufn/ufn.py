@@ -98,7 +98,7 @@ def ufn(path, max_depth, type, in_place, confirm, is_link, full_path,
         roll_back, overwrite, pretty, enhanced_display):
     """Files in PATH will be changed file names unified.
     
-    You can direct set path such as UFn.py path ...
+    You can direct set path such as ufn.py path ...
     """
     if not path:
         config.gParamDict["path"] = ["."]

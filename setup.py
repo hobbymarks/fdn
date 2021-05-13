@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name='UFn@hobbymarks',
+    name='ufn@hobbymarks',
     version='0.5.3',
     packages=[''],
     url='https://github.com/hobbymarks/UFn',

@@ -2,12 +2,12 @@
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
-      <excludeFolder url="file://$MODULE_DIR$/UFn/data/hRdDir" />
-      <excludeFolder url="file://$MODULE_DIR$/UFn/.ipynb_checkpoints" />
       <excludeFolder url="file://$MODULE_DIR$/.ipynb_checkpoints" />
       <excludeFolder url="file://$MODULE_DIR$/.virtual_documents" />
       <excludeFolder url="file://$MODULE_DIR$/draft" />
       <excludeFolder url="file://$MODULE_DIR$/.pytest_cache" />
+      <excludeFolder url="file://$MODULE_DIR$/ufn/.ipynb_checkpoints" />
+      <excludeFolder url="file://$MODULE_DIR$/ufn/data/hRdDir" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.8 (Py38)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

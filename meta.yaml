@@ -5,10 +5,13 @@ package:
     version: { { version } }
 
 build:
+    number: 0
     skip: True # [py<38]
+    entry_points:
+        - ufn = ufn.ufn:ufn
 
 source:
-    git_url: https://github.com/hobbymarks/UFn.git
+    git_url: https://github.com/hobbymarks/ufn.git
 
 requirements:
     build:
@@ -30,7 +33,7 @@ requirements:
         - 'wcwidth>=0.2.'
 
 about:
-    home: https://github.com/hobbymarks/UFn.git
+    home: https://github.com/hobbymarks/ufn.git
     description: 
     license: MIT
     license_file: LICENSE
