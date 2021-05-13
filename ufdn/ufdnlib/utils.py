@@ -358,7 +358,8 @@ def out_info(file, new_name, take_effect=False):
             click.echo("-->" + (_b_d(rich_proc, Back.WHITE)))
         else:
             click.echo("-->" + (_b_d(rich_proc, Back.LIGHTWHITE_EX)))
-    uconfig.gParamDict["AlternateFlag"] = not uconfig.gParamDict["AlternateFlag"]
+    uconfig.gParamDict[
+        "AlternateFlag"] = not uconfig.gParamDict["AlternateFlag"]
 
 
 def type_matched(f_path):
@@ -400,7 +401,8 @@ def one_file_ufn(f_path):
     else:
         ip = _in_place(file)
     if ip:
-        if (os.path.exists(new_path)) and (not uconfig.gParamDict["overwrite"]):
+        if (os.path.exists(new_path)) and (
+                not uconfig.gParamDict["overwrite"]):
             click.echo(f"{Back.RED}Exist:{Back.RESET}"
                        f"{new_path if _fp else new_name}\n"
                        f"Skipped:{f_path if _fp else file}\n"
@@ -454,7 +456,8 @@ def one_file_rbk(f_path):
     else:
         ip = _in_place(file)
     if ip:
-        if (os.path.exists(new_path)) and (not uconfig.gParamDict["overwrite"]):
+        if (os.path.exists(new_path)) and (
+                not uconfig.gParamDict["overwrite"]):
             click.echo(f"{new_path if _fp else new_name} exist.\n"
                        f"{f_path if _fp else file} Skipped."
                        f"You can with option '-o' to enable overwrite.")

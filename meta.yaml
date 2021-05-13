@@ -3,7 +3,7 @@ package:
     version: "2021.05"
 
 build:
-    number: 1
+    number: auto
     skip: True # [py<38]
     entry_points:
         - ufdn = ufdn:main
@@ -15,14 +15,7 @@ requirements:
     build:
         - python
         - setuptools
-        - 'click>=8.0.0'
-        - 'setuptools>=49.6.0'
-        - 'unidecode>=1.2.0'
-        - 'cryptography>=3.4.7'
-        - 'nltk>=3.6.2'
-        - 'colorama>=0.4.4'
-        - 'pandas>=1.2.4'
-        - 'wcwidth>=0.2.5'
+    
     host:
         - python
         - setuptools

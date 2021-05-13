@@ -51,7 +51,7 @@ def main():
 
         uconfig.gParamDict["LowerCaseWordSet"] = set(
             list(map(lambda x: x.lower(), words.words())))
-        uconfig.gParamDict["record_path"] = os.path.join(app_path, "rd_data")
+        uconfig.gParamDict["record_path"] = os.path.join(Path.home(), ".ufdn")
         Path(uconfig.gParamDict["record_path"]).mkdir(parents=True,
                                                       exist_ok=True)
         #######################################################################
