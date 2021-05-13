@@ -1,0 +1,3 @@
+import ufn
+
+ufn.main()

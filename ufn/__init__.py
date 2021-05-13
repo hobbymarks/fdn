@@ -16,9 +16,6 @@ import ufn.udb
 import ufn.ufn
 import ufn.utils
 
-from ufn.ufn import ufn
-
-
 def main():
     try:
         colorama.init()
@@ -53,13 +50,14 @@ def main():
         Path(config.gParamDict["record_path"]).mkdir(parents=True,
                                                      exist_ok=True)
         #######################################################################
-        ufn()
+        ufn.ufn()
     finally:
         colorama.deinit()
 
-    if __name__ == "__main__":
-        try:
-            sys.exit(main())
-        except Exception as e:
-            sys.stderr.write(f"Error:{str(e)}\n")
-            sys.exit(1)
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except Exception as e:
+        sys.stderr.write(f"Error:{str(e)}\n")
+        sys.exit(1)
