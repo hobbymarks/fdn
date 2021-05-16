@@ -1,9 +1,9 @@
 package:
     name: ufdn
-    version: "2021.05.13"
+    version: "2021.05.16"
 
 build:
-    number: 1946
+    number: 1142
     skip: True # [py<38]
     entry_points:
         - ufdn = ufdn:main
