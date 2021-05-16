@@ -1,15 +1,15 @@
 import string
 
-_gSC = "_"
+_gSC: str = "_"
 
-gParamDict = {
+gParamDict: dict = {
     "SeparatorChar": _gSC,
     "ASCLen": 3,
     "AlternateFlag": True,
     "HeadChars": string.ascii_letters + string.digits + string.punctuation
 }
 
-rd_prefix_str = "CNSH_ONCrypt_dict"
+rd_prefix_str: str = "CNSH_ONCrypt_dict"
 
 gParamDict["BeReplacedCharDictionary"] = {
     "\r": _gSC,

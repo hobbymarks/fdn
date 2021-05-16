@@ -2,21 +2,23 @@ import base64
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from typing import Union, Optional
 
 
 class Crypt:
-    def __init__(self, salt='HobbyMarks'):
+    def __init__(self, salt: str = 'HobbyMarks'):
         self.salt = salt.encode('UTF-8')
         self.kdf = PBKDF2HMAC(algorithm=hashes.SHA256(),
                               length=32,
                               salt=self.salt,
                               iterations=100000)
 
-    def get_key(self, passwd):
+    def get_key(self, passwd: str) -> bytes:
         return base64.urlsafe_b64encode(self.kdf.derive(
             passwd.encode("UTF-8")))
 
-    def encrypt(self, plaintext, passwd):
+    def encrypt(self, plaintext: Union[str, bytes],
+                passwd: str) -> Optional[bytes]:
         key = self.get_key(passwd)
         if type(plaintext) is str:
             return Fernet(key).encrypt(plaintext.encode("UTF-8"))
@@ -25,7 +27,8 @@ class Crypt:
         else:
             return None
 
-    def decrypt(self, ciphertext, passwd):
+    def decrypt(self, ciphertext: Union[bytes, str],
+                passwd: str) -> Optional[bytes]:
         key = self.get_key(passwd)
         if type(ciphertext) is bytes:
             return Fernet(key).decrypt(ciphertext)
@@ -35,7 +38,7 @@ class Crypt:
             return None
 
 
-def encrypt_b64_str(plaintext="", passwd="", salt=""):
+def encrypt_b64_str(plaintext: str, passwd: str, salt: str = "") -> str:
     if salt == "":
         crypt_ins = Crypt()
     else:
@@ -44,7 +47,7 @@ def encrypt_b64_str(plaintext="", passwd="", salt=""):
     return base64.b64encode(enc_bytes).decode("UTF-8")
 
 
-def b64_str_decrypt(ciphertext="", passwd="", salt=""):
+def b64_str_decrypt(ciphertext: str, passwd: str, salt: str = "") -> str:
     if salt == "":
         crypt_ins = Crypt()
     else:

@@ -1,26 +1,22 @@
 from datetime import datetime
-import os
+from pathlib import Path
 import sqlite3
 
 # From Third Party
 import pandas as pd
 
+
 # From This Project
-from ufdn.ufdnlib import uconfig
 
 
 class UDB:
-    def __init__(self, db_path=""):
-        if not db_path:
-            self._db_path = os.path.join(uconfig.gParamDict["record_path"],
-                                         "rd.db")
-        else:
-            self._db_path = db_path
+    def __init__(self, db_path: Path):
+        self._db_path = db_path
         self._db_con = sqlite3.connect(self._db_path)
         self._db_cur = self._db_con.cursor()
         self._tb_name = "UFnRecord"
 
-    def create_tb(self, tb_name):
+    def create_tb(self, tb_name: str):
         if tb_name and (type(tb_name) is str):
             self._tb_name = tb_name
         tb_create_sql = """
@@ -34,7 +30,7 @@ class UDB:
         if not self.is_tb_exist(self._tb_name):
             self._db_cur.execute(tb_create_sql)
 
-    def insert_rd(self, new_id, cur_id, cur_crypt):
+    def insert_rd(self, new_id: str, cur_id: str, cur_crypt: str):
         if not self.is_tb_exist(self._tb_name):
             self.create_tb(self._tb_name)
         insert_rd_sql = """
@@ -44,7 +40,7 @@ class UDB:
         self._db_cur.execute(insert_rd_sql,
                              (new_id, cur_id, cur_crypt, datetime.now()))
 
-    def checkout_rd(self, new_id):
+    def checkout_rd(self, new_id: str):
         checkout_rd_sql = """
         SELECT curCrypt, opStamp FROM {} 
         WHERE newID=? ORDER BY opStamp DESC;
@@ -53,7 +49,7 @@ class UDB:
         rows = self._db_cur.fetchall()
         return pd.DataFrame(rows, columns=["curCrypt", "opStamp"])
 
-    def is_tb_exist(self, tb_name):
+    def is_tb_exist(self, tb_name: str):
         tb_slt_sql = """
         SELECT count(name) FROM sqlite_master
         WHERE type='table' 

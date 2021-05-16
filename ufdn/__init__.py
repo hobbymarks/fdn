@@ -21,7 +21,7 @@ from ufdn.ufdnlib import ufncli
 from ufdn.ufdnlib import utils
 
 
-def main():
+def main() -> None:
     try:
         colorama.init()
         if (sys.version_info.major, sys.version_info.minor) < (3, 8):

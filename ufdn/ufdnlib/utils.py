@@ -1,9 +1,11 @@
 import difflib
 import hashlib
 import os
+from pathlib import Path
 import re
 import string
 import sys
+from typing import Tuple, List, Optional, Generator, Union
 
 # From Third Party
 import click
@@ -18,7 +20,7 @@ from ufdn.ufdnlib import ucrypt
 from ufdn.ufdnlib.udb import UDB
 
 
-def is_hidden(f_path):
+def is_hidden(f_path: Path) -> bool:
     """
     Check file is hidden or not
     :param f_path: string,file path
@@ -35,13 +37,13 @@ def is_hidden(f_path):
         return os.path.basename(f_path).startswith(".")  # linux, osx
 
 
-def replace_char(s):
+def replace_char(s: str) -> str:
     """
     Replace char in s ,when the char in "BeReplacedCharDictionary"
     :param s:string,if "BeReplacedChar" in s ,then will be replaced
     :return:string,be replaced
     """
-    def _mask_ruw(_s):
+    def _mask_ruw(_s: str) -> Tuple[List[str], List[bool]]:
         """
         Mask a input string by RemainUnchangedWordList value
         :param _s: string,input string to be masked
@@ -79,7 +81,7 @@ def replace_char(s):
     return "".join(new_word_list)
 
 
-def process_head_tail_sep(s):
+def process_head_tail_sep(s: str) -> str:
     """
     Delete the beginning and the end separator in string.
     :param s: string
@@ -93,7 +95,7 @@ def process_head_tail_sep(s):
     return s
 
 
-def process_head_tail(s):
+def process_head_tail(s: str) -> str:
     """
 
     :param s:
@@ -105,7 +107,7 @@ def process_head_tail(s):
     return s
 
 
-def process_white_space(s):
+def process_white_space(s: str) -> str:
     """
     All white space will be replaced by Separator Char.
     :param s:string,input string
@@ -116,13 +118,13 @@ def process_white_space(s):
     return sep_char.join(s.split())
 
 
-def process_terminology(s):
+def process_terminology(s: str) -> str:
     """
 
     :param s:
     :return:
     """
-    def _swt(_s):
+    def _swt(_s: str) -> Optional[str]:
         """
         Check if the s startswith a terminology word.If the s startswith a
         terminology word then return the word lower case ,else return None.
@@ -150,7 +152,7 @@ def process_terminology(s):
     return sep_char.join(new_word_list)
 
 
-def asc_head(s):
+def asc_head(s: str) -> str:
     """
     If s not starts with ascii letters ,will create at most "ASCLen" length
     asc letters then return ,else return null string.
@@ -174,7 +176,7 @@ def asc_head(s):
     return "".join([elm[0].upper() for elm in unidecode(new_word).split()])
 
 
-def process_word(s):
+def process_word(s: str) -> str:
     """
 
     :param s:
@@ -192,7 +194,11 @@ def process_word(s):
     return sep_char.join(new_word_list)
 
 
-def depth_walk(top_path, top_down=False, follow_links=False, max_depth=1):
+def depth_walk(
+        top_path: Path,
+        top_down: bool = False,
+        follow_links: bool = False,
+        max_depth: int = 1) -> Generator[Tuple[str], List[str], List[str]]:
     """
 
     :param top_path:
@@ -232,7 +238,8 @@ def depth_walk(top_path, top_down=False, follow_links=False, max_depth=1):
         yield top_path, dirs, non_dirs
 
 
-def rich_style(original, processed):
+def rich_style(original: str,
+               processed: str) -> Union[Tuple[None, None], Tuple[str, str]]:
     """
 
     :param original:
@@ -242,10 +249,10 @@ def rich_style(original, processed):
     if (type(original) is not str) or (type(processed) is not str):
         return None, None
 
-    def _f_d(s="", f_d=None):
+    def _f_d(s: str = "", f_d=None):
         return f_d + s + Fore.RESET
 
-    def _c_f(s=""):
+    def _c_f(s: str = "") -> str:
         if uconfig.gParamDict["pretty"]:
             return s
         else:
@@ -289,7 +296,7 @@ def rich_style(original, processed):
     return "".join(a_list), "".join(b_list)
 
 
-def unify_confirm(x=""):
+def unify_confirm(x: str = "") -> str:
     return {
         "y": "yes",
         "yes": "yes",
@@ -302,7 +309,7 @@ def unify_confirm(x=""):
     }.get(x, "no")
 
 
-def _confirm(p_i=""):
+def _confirm(p_i: str = "") -> str:
     v = click.prompt(f"{p_i}\nPlease confirm(y/n/A/q)",
                      type=click.Choice(
                          ["y", "yes", "n", "no", "A", "all", "q", "quit"]),
@@ -312,7 +319,7 @@ def _confirm(p_i=""):
     return unify_confirm(v)
 
 
-def _in_place(p_i=""):
+def _in_place(p_i: str = "") -> bool:
     if uconfig.gParamDict["AllInPlace"]:
         return True
     if uconfig.gParamDict["confirm"]:
@@ -336,7 +343,7 @@ def _in_place(p_i=""):
             return False
 
 
-def out_info(file, new_name, take_effect=False):
+def out_info(file: str, new_name: str, take_effect: bool = False) -> None:
     def _b_d(s="", b_d=""):
         if uconfig.gParamDict["enhanced_display"]:
             return b_d + s + Back.RESET
@@ -362,7 +369,7 @@ def out_info(file, new_name, take_effect=False):
         "AlternateFlag"] = not uconfig.gParamDict["AlternateFlag"]
 
 
-def type_matched(f_path):
+def type_matched(f_path: str) -> bool:
     if (uconfig.gParamDict["type"] == "file") and (os.path.isfile(f_path)):
         return True
     if (uconfig.gParamDict["type"] == "dir") and (os.path.isdir(f_path)):
@@ -370,7 +377,7 @@ def type_matched(f_path):
     return False
 
 
-def one_file_ufn(f_path):
+def one_file_ufn(f_path: Path) -> None:
     if os.path.islink(f_path) != uconfig.gParamDict["is_link"]:
         return None
 
@@ -418,7 +425,7 @@ def one_file_ufn(f_path):
         out_info(file, new_name, take_effect=ip)
 
 
-def one_dir_ufn(tgt_path):
+def one_dir_ufn(tgt_path: Path) -> None:
     for subdir, dirs, files in depth_walk(
             top_path=tgt_path, max_depth=uconfig.gParamDict["max_depth"]):
         if uconfig.gParamDict["type"] == "file":
@@ -437,7 +444,7 @@ def one_dir_ufn(tgt_path):
                     one_file_ufn(f_path)
 
 
-def one_file_rbk(f_path):
+def one_file_rbk(f_path: Path) -> None:
     if os.path.islink(f_path) != uconfig.gParamDict["is_link"]:
         return None
 
@@ -472,7 +479,7 @@ def one_file_rbk(f_path):
         out_info(file, new_name, take_effect=ip)
 
 
-def one_dir_rbk(tgt_path):
+def one_dir_rbk(tgt_path: Path) -> None:
     for subdir, dirs, files in depth_walk(
             top_path=tgt_path, max_depth=uconfig.gParamDict["max_depth"]):
         if uconfig.gParamDict["type"] == "file":
@@ -492,13 +499,15 @@ def one_dir_rbk(tgt_path):
 ###############################################################################
 
 
-def sha2_id(s):
+def sha2_id(s: str) -> Optional[str]:
     if (not s) or (not type(s) is str):
         return None
     return hashlib.sha256(s.encode("UTF-8")).hexdigest()
 
 
-def used_name_lookup(cur_name, db_path="", latest=True):
+def used_name_lookup(cur_name: str,
+                     db_path: Optional[Path],
+                     latest: bool = True) -> Union[None, str, List[str]]:
     if not db_path:
         db_path = os.path.join(uconfig.gParamDict["record_path"], "rd.db")
     _cur_id = sha2_id(cur_name)
@@ -519,7 +528,7 @@ def used_name_lookup(cur_name, db_path="", latest=True):
         ]
 
 
-def log_to_db(cur_name, new_name, db_path=""):
+def log_to_db(cur_name: str, new_name: str, db_path: Optional[Path]) -> None:
     if not db_path:
         db_path = os.path.join(uconfig.gParamDict["record_path"], "rd.db")
     _cur_id = sha2_id(cur_name)
