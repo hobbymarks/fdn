@@ -17,7 +17,7 @@ class UDB:
         self._tb_name = "UFnRecord"
 
     def create_tb(self, tb_name: str):
-        if tb_name and (type(tb_name) is str):
+        if tb_name:
             self._tb_name = tb_name
         tb_create_sql = """
         CREATE TABLE {} (

@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import os
 from pathlib import Path
 import shutil
@@ -96,8 +94,7 @@ from ufdn.ufdnlib import utils
               is_flag=True,
               help=f"Enhanced display output.",
               show_default=True)
-def ufn(path: Union[None,
-                    List[Path]], max_depth: int, type: str, in_place: bool,
+def ufn(path: Optional[List[Path]], max_depth: int, type: str, in_place: bool,
         confirm: bool, is_link: bool, full_path: bool, roll_back: bool,
         overwrite: bool, pretty: bool, enhanced_display: bool):
     """Files in PATH will be changed file names unified.

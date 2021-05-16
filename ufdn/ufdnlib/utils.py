@@ -195,10 +195,11 @@ def process_word(s: str) -> str:
 
 
 def depth_walk(
-        top_path: Path,
-        top_down: bool = False,
-        follow_links: bool = False,
-        max_depth: int = 1) -> Generator[Tuple[str], List[str], List[str]]:
+    top_path: Path,
+    top_down: bool = False,
+    follow_links: bool = False,
+    max_depth: int = 1
+) -> Optional[Generator[Tuple[str], List[str], List[str]]]:
     """
 
     :param top_path:
@@ -229,7 +230,7 @@ def depth_walk(
         yield top_path, dirs, non_dirs
     if max_depth > 1:
         for name in dirs:
-            new_path = os.path.join(top_path, name)
+            new_path = Path(os.path.join(top_path, name))
             if follow_links or not os.path.islink(new_path):
                 for x in depth_walk(new_path, top_down, follow_links,
                                     1 if max_depth == 1 else max_depth - 1):
@@ -404,7 +405,7 @@ def one_file_ufn(f_path: Path) -> None:
         return None
 
     if _fp := uconfig.gParamDict["full_path"]:
-        ip = _in_place(f_path)
+        ip = _in_place(str(f_path))
     else:
         ip = _in_place(file)
     if ip:
@@ -420,7 +421,7 @@ def one_file_ufn(f_path: Path) -> None:
             log_to_db(cur_name=file, new_name=new_name)
             os.rename(f_path, new_path)
     if _fp:
-        out_info(f_path, new_path, take_effect=ip)
+        out_info(str(f_path), new_path, take_effect=ip)
     else:
         out_info(file, new_name, take_effect=ip)
 
@@ -430,14 +431,14 @@ def one_dir_ufn(tgt_path: Path) -> None:
             top_path=tgt_path, max_depth=uconfig.gParamDict["max_depth"]):
         if uconfig.gParamDict["type"] == "file":
             for file in files:
-                f_path = os.path.join(subdir, file)
+                f_path = Path(os.path.join(subdir, file))
                 if is_hidden(f_path):
                     continue
                 if os.path.isfile(f_path):
-                    one_file_ufn(f_path=f_path)
+                    one_file_ufn(f_path)
         elif uconfig.gParamDict["type"] == "dir":
             for d in dirs:
-                f_path = os.path.join(subdir, d)
+                f_path = Path(os.path.join(subdir, d))
                 if is_hidden(f_path):
                     continue
                 if os.path.isdir(f_path):
@@ -449,7 +450,7 @@ def one_file_rbk(f_path: Path) -> None:
         return None
 
     subdir, file = os.path.split(f_path)
-    if (new_name := used_name_lookup(file)) is None:
+    if not (new_name := used_name_lookup(file)):
         return None
 
     # Create full path
@@ -459,7 +460,7 @@ def one_file_rbk(f_path: Path) -> None:
         return None
 
     if _fp := uconfig.gParamDict["full_path"]:
-        ip = _in_place(f_path)
+        ip = _in_place(str(f_path))
     else:
         ip = _in_place(file)
     if ip:
@@ -474,7 +475,7 @@ def one_file_rbk(f_path: Path) -> None:
             os.replace(f_path, new_path)  # os.place is atomic and match
             # cross platform :https://docs.python.org/dev/library/os.html
     if _fp:
-        out_info(f_path, new_path, take_effect=ip)
+        out_info(str(f_path), new_path, take_effect=ip)
     else:
         out_info(file, new_name, take_effect=ip)
 
@@ -484,13 +485,13 @@ def one_dir_rbk(tgt_path: Path) -> None:
             top_path=tgt_path, max_depth=uconfig.gParamDict["max_depth"]):
         if uconfig.gParamDict["type"] == "file":
             for file in files:
-                f_path = os.path.join(subdir, file)
+                f_path = Path(os.path.join(subdir, file))
                 if is_hidden(f_path):
                     continue
-                one_file_rbk(f_path=f_path)
+                one_file_rbk(f_path)
         elif uconfig.gParamDict["type"] == "dir":
             for d in dirs:
-                f_path = os.path.join(subdir, d)
+                f_path = Path(os.path.join(subdir, d))
                 if is_hidden(f_path):
                     continue
                 one_file_rbk(f_path)
@@ -500,7 +501,7 @@ def one_dir_rbk(tgt_path: Path) -> None:
 
 
 def sha2_id(s: str) -> Optional[str]:
-    if (not s) or (not type(s) is str):
+    if not s:
         return None
     return hashlib.sha256(s.encode("UTF-8")).hexdigest()
 
