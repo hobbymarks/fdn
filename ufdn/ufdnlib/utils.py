@@ -425,6 +425,8 @@ def one_file_ufn(f_path: Path) -> None:
     else:
         out_info(file, new_name, take_effect=ip)
 
+    uconfig.gParamDict["TargetAppears"] = True
+
 
 def one_dir_ufn(tgt_path: Path) -> None:
     for subdir, dirs, files in depth_walk(
@@ -478,6 +480,8 @@ def one_file_rbk(f_path: Path) -> None:
         out_info(str(f_path), new_path, take_effect=ip)
     else:
         out_info(file, new_name, take_effect=ip)
+
+    uconfig.gParamDict["TargetAppears"] = True
 
 
 def one_dir_rbk(tgt_path: Path) -> None:

@@ -116,8 +116,8 @@ def ufn(path: Optional[List[Path]], max_depth: int, type: str, in_place: bool,
     uconfig.gParamDict["enhanced_display"] = enhanced_display
     uconfig.gParamDict["AllInPlace"] = False
     uconfig.gParamDict["latest_confirm"] = utils.unify_confirm(
-    )  # Parameter is
-    # Null to get default return
+    )  # Parameter is Null to get default return
+    uconfig.gParamDict["TargetAppears"] = False
     for pth in uconfig.gParamDict["path"]:
         if os.path.isfile(pth) and utils.type_matched(pth):
             if not roll_back:
@@ -133,10 +133,12 @@ def ufn(path: Optional[List[Path]], max_depth: int, type: str, in_place: bool,
             click.echo(f"{Fore.RED}Not valid:{pth}{Fore.RESET}")
 
     if (not uconfig.gParamDict["in_place"]) and (
-            not uconfig.gParamDict["confirm"]):
+            not uconfig.gParamDict["confirm"]) and (
+                uconfig.gParamDict["TargetAppears"]):
         cols, _ = shutil.get_terminal_size(fallback=(79, 23))
         click.echo("*" * cols)
         click.echo("In order to take effect,add option '-i' or '-c'")
+        uconfig.gParamDict["TargetAppears"] = False
 
 
 if __name__ == "__main__":
