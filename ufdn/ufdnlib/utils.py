@@ -528,7 +528,9 @@ def used_name_lookup(cur_name: str,
         ]
 
 
-def log_to_db(cur_name: str, new_name: str, db_path: Optional[Path]) -> None:
+def log_to_db(cur_name: str,
+              new_name: str,
+              db_path: Optional[Path] = None) -> None:
     if not db_path:
         db_path = os.path.join(uconfig.gParamDict["record_path"], "rd.db")
     _cur_id = sha2_id(cur_name)
