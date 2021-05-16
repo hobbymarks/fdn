@@ -506,7 +506,7 @@ def sha2_id(s: str) -> Optional[str]:
 
 
 def used_name_lookup(cur_name: str,
-                     db_path: Optional[Path],
+                     db_path: Optional[Path] = None,
                      latest: bool = True) -> Union[None, str, List[str]]:
     if not db_path:
         db_path = os.path.join(uconfig.gParamDict["record_path"], "rd.db")
