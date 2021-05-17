@@ -418,7 +418,7 @@ def one_file_ufn(f_path: Path) -> None:
             return None
 
         else:
-            log_to_db(cur_name=file, new_name=new_name)
+            log_to_db(cur_name=file, new_path=Path(new_path))
             os.rename(f_path, new_path)
     if _fp:
         out_info(str(f_path), new_path, take_effect=ip)
@@ -504,9 +504,7 @@ def one_dir_rbk(tgt_path: Path) -> None:
 ###############################################################################
 
 
-def sha2_id(s: str) -> Optional[str]:
-    if not s:
-        return None
+def sha2_id(s: str) -> str:
     return hashlib.sha256(s.encode("UTF-8")).hexdigest()
 
 
@@ -514,7 +512,7 @@ def used_name_lookup(cur_name: str,
                      db_path: Optional[Path] = None,
                      latest: bool = True) -> Union[None, str, List[str]]:
     if not db_path:
-        db_path = os.path.join(uconfig.gParamDict["record_path"], "rd.db")
+        db_path = uconfig.gParamDict["db_path"]
     _cur_id = sha2_id(cur_name)
     db = UDB(db_path)
     df = db.checkout_rd(_cur_id)
@@ -534,13 +532,20 @@ def used_name_lookup(cur_name: str,
 
 
 def log_to_db(cur_name: str,
-              new_name: str,
+              new_path: Path,
               db_path: Optional[Path] = None) -> None:
     if not db_path:
-        db_path = os.path.join(uconfig.gParamDict["record_path"], "rd.db")
+        db_path = uconfig.gParamDict["db_path"]
+    _f_p = os.path.abspath(new_path)
+    _new = os.path.basename(_f_p)
+    abs_dp = os.path.dirname(_f_p)
     _cur_id = sha2_id(cur_name)
-    _new_id = sha2_id(new_name)
-    _cur_crypt = ucrypt.encrypt_b64_str(cur_name, new_name)
+    _new_id = sha2_id(_new)
+    _cur_crypt = ucrypt.encrypt_b64_str(cur_name, _new)
+    _sep_dp_id = "_|_".join([sha2_id(d) for d in abs_dp.split(os.sep)])
+    _abs_dp_id = sha2_id(abs_dp)
     db = UDB(db_path)
-    db.insert_rd(_new_id, _cur_id, _cur_crypt)
-    db.close()
+    try:
+        db.insert_rd(_new_id, _cur_id, _cur_crypt, _sep_dp_id, _abs_dp_id)
+    finally:
+        db.close()

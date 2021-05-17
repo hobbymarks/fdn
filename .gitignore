@@ -3,4 +3,5 @@ draft/
 .virtual_documents/
 ufdn/.ipynb_checkpoints/
 ufdn/__pycache__/
+ufdn/ufdnlib/__pycache__/
 tests/__pycache__/

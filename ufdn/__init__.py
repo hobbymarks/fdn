@@ -54,6 +54,8 @@ def main() -> None:
         uconfig.gParamDict["record_path"] = os.path.join(Path.home(), ".ufdn")
         Path(uconfig.gParamDict["record_path"]).mkdir(parents=True,
                                                       exist_ok=True)
+        uconfig.gParamDict["db_path"] = os.path.join(
+            uconfig.gParamDict["record_path"], "rdsa.db")
         #######################################################################
         ufncli.ufn()
     finally:

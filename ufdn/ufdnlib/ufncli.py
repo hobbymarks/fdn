@@ -147,7 +147,7 @@ def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
 # TODO: %,'s,How to ...
 
 # TODO: unify full_path request to a function ...
-
 # TODO: Joint with other CLI tool ,such as fd
-
 # TODO: Embed nltk ,but need download first time ,why?
+# TODO: multi dir may accure same name conflict so record path ID?
+# TODO: support user select roll back
