@@ -1,15 +1,18 @@
+{% set ver = "2021.05.17" %}
+{% set num = "0940" %}
+
 package:
     name: ufdn
-    version: "2021.05.16"
+    version: {{ ver }}
 
 build:
-    number: 1142
+    number: {{ num }}
     skip: True # [py<38]
     entry_points:
         - ufdn = ufdn:main
 
 source:
-    git_url: https://github.com/hobbymarks/UFn.git
+    git_url: https://github.com/hobbymarks/ufdn.git
 
 requirements:
     build:
@@ -32,7 +35,7 @@ requirements:
         - 'wcwidth>=0.2.5'
 
 about:
-    home: https://github.com/hobbymarks/UFn.git
-    description:
+    home: https://github.com/hobbymarks/ufdn.git
+    description: A tool for uniformly changing file or directory names.
     license: MIT
     license_file: LICENSE
