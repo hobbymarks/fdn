@@ -150,4 +150,8 @@ def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
 # TODO: Joint with other CLI tool ,such as fd
 # TODO: Embed nltk ,but need download first time ,why?
 # TODO: multi dir may accure same name conflict so record path ID?
-# TODO: support user select roll back
+# TODO: support user select roll back when multi target
+
+# TODO: bug:mac osx begin with ._ hidden check wrong
+# TODO: bug:dir self is not dir ?
+# TODO: bug:fd -x can not get terminal size .so fall back and no color display
