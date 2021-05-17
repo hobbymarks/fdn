@@ -1,15 +1,11 @@
 import os
 from pathlib import Path
 import shutil
-import sys
-from typing import Optional, Union, List
+from typing import Optional, List
 
 # From Third party
 import click
-import colorama
-from colorama import Back
 from colorama import Fore
-from colorama import Style
 
 # From This Project
 from ufdn.ufdnlib import uconfig
@@ -30,7 +26,7 @@ from ufdn.ufdnlib import utils
               help=f"Set travel directory tree with max depth.",
               show_default=True)
 @click.option(
-    "--type",
+    "--file-type",
     "-t",
     default="file",
     type=click.Choice(["file", "dir"]),
@@ -94,9 +90,10 @@ from ufdn.ufdnlib import utils
               is_flag=True,
               help=f"Enhanced display output.",
               show_default=True)
-def ufn(path: Optional[List[Path]], max_depth: int, type: str, in_place: bool,
-        confirm: bool, is_link: bool, full_path: bool, roll_back: bool,
-        overwrite: bool, pretty: bool, enhanced_display: bool):
+def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
+        in_place: bool, confirm: bool, is_link: bool, full_path: bool,
+        roll_back: bool, overwrite: bool, pretty: bool,
+        enhanced_display: bool):
     """Files in PATH will be changed file names unified.
     
     You can direct set path such as ufncli.py path ...
@@ -106,7 +103,7 @@ def ufn(path: Optional[List[Path]], max_depth: int, type: str, in_place: bool,
     else:
         uconfig.gParamDict["path"] = path
     uconfig.gParamDict["max_depth"] = max_depth
-    uconfig.gParamDict["type"] = type
+    uconfig.gParamDict["type"] = file_type
     uconfig.gParamDict["in_place"] = in_place
     uconfig.gParamDict["confirm"] = confirm
     uconfig.gParamDict["is_link"] = is_link
@@ -141,44 +138,6 @@ def ufn(path: Optional[List[Path]], max_depth: int, type: str, in_place: bool,
         uconfig.gParamDict["TargetAppears"] = False
 
 
-if __name__ == "__main__":
-    try:
-        colorama.init()
-        if (sys.version_info.major, sys.version_info.minor) < (3, 8):
-            click.echo(
-                f"{Fore.RED}current is {sys.version},\n"
-                f"{Back.WHITE}Please upgrade to >=3.8.{Style.RESET_ALL}")
-            sys.exit()
-        #######################################################################
-        app_path = os.path.dirname(os.path.realpath(__file__))
-        nltk_path = os.path.join(app_path, "../nltk_data")
-        import nltk
-
-        if os.path.isdir(nltk_path):
-            nltk.data.path.append(nltk_path)
-            if not os.path.isfile(
-                    os.path.join(nltk_path, "corpora", "words.zip")):
-                nltk.download("words", download_dir=nltk_path)
-        else:
-            try:
-                from nltk.corpus import words
-
-                uconfig.gParamDict["LowerCaseWordSet"] = set(
-                    list(map(lambda x: x.lower(), words.words())))
-            except LookupError:
-                nltk.download("words")
-        from nltk.corpus import words
-
-        uconfig.gParamDict["LowerCaseWordSet"] = set(
-            list(map(lambda x: x.lower(), words.words())))
-        uconfig.gParamDict["record_path"] = os.path.join(Path.home(), ".ufdn")
-        Path(uconfig.gParamDict["record_path"]).mkdir(parents=True,
-                                                      exist_ok=True)
-        #######################################################################
-        ufn()
-    finally:
-        colorama.deinit()
-
 # TODO: **support edit config data
 # TODO: display config data
 # TODO: display total summary
@@ -188,3 +147,7 @@ if __name__ == "__main__":
 # TODO: %,'s,How to ...
 
 # TODO: unify full_path request to a function ...
+
+# TODO: Joint with other CLI tool ,such as fd
+
+# TODO: Embed nltk ,but need download first time ,why?
