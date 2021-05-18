@@ -11,6 +11,8 @@ from colorama import Fore
 from ufdn.ufdnlib import uconfig
 from ufdn.ufdnlib import utils
 
+_ver = "2021.05.18.1024"
+
 
 @click.command(
     context_settings={
@@ -90,6 +92,7 @@ from ufdn.ufdnlib import utils
               is_flag=True,
               help=f"Enhanced display output.",
               show_default=True)
+@click.version_option(version=_ver)
 def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
         in_place: bool, confirm: bool, is_link: bool, full_path: bool,
         roll_back: bool, overwrite: bool, pretty: bool,

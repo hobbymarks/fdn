@@ -1,5 +1,5 @@
-{% set ver = "XXXX.XX.XX" %}
-{% set num = "XXXX" %}
+{% set ver = "2021.05.18" %}
+{% set num = "1024" %}
 
 package:
     name: ufdn
