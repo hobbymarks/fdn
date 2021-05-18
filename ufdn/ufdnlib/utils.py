@@ -81,7 +81,7 @@ def replace_char(s: str) -> str:
     return "".join(new_word_list)
 
 
-def process_head_tail_sep(s: str) -> str:
+def del_head_tail_sep(s: str) -> str:
     """
     Delete the beginning and the end separator in string.
     :param s: string
@@ -103,11 +103,11 @@ def process_head_tail(s: str) -> str:
     """
     # Capitalize The First Letter
     if s[0].islower():
-        root = s[0].upper() + s[1:]
+        return (s[0].upper() + s[1:])
     return s
 
 
-def process_white_space(s: str) -> str:
+def del_white_space(s: str) -> str:
     """
     All white space will be replaced by Separator Char.
     :param s:string,input string
@@ -385,14 +385,14 @@ def one_file_ufn(f_path: Path) -> None:
     subdir, file = os.path.split(f_path)
     root, ext = os.path.splitext(file)
     # all whitespace replace by sep_char
-    root = process_white_space(root)
+    root = del_white_space(root)
     # replace characters by defined Dictionary
     root = replace_char(root)
     # Capwords only when word in wordsSet
     root = process_word(root)
     # process Head and Tail
     root = process_head_tail(root)
-    root = process_head_tail_sep(root)  # special terminology may conflict
+    root = del_head_tail_sep(root)  # special terminology may conflict
     # Pretty Terminology
     root = process_terminology(root)
     # Add ascii head at the beginning
