@@ -15,7 +15,7 @@ from unidecode import unidecode
 from wcwidth import wcswidth
 
 # From This Project
-from ufdn.ufdnlib import uconfig
+from ufdn.ufdnlib.uconfig import gParamDict as ugPD
 from ufdn.ufdnlib import ucrypt
 from ufdn.ufdnlib.udb import UDB
 
@@ -49,7 +49,7 @@ def replace_char(s: str) -> str:
         :param _s: string,input string to be masked
         :return: word list and mask list
         """
-        ruw_list = uconfig.gParamDict["RemainUnchangedWordList"]
+        ruw_list = ugPD["RemainUnchangedWordList"]
         re_str = "|".join([re.escape(ruw) for ruw in ruw_list])
         w_list = re.split(f"({re_str})", _s)
         m_list = []
@@ -60,8 +60,8 @@ def replace_char(s: str) -> str:
                 m_list.append(False)
         return w_list, m_list
 
-    c_dict = uconfig.gParamDict["BeReplacedCharDictionary"]
-    sep_c = uconfig.gParamDict["SeparatorChar"]
+    c_dict = ugPD["BeReplacedCharDictionary"]
+    sep_c = ugPD["SeparatorChar"]
     re_cns = re.compile(
         f"[{sep_c}]+")  # To recognize continuous separator char
     word_list, mask_list = _mask_ruw(s)
@@ -87,7 +87,7 @@ def del_head_tail_sep(s: str) -> str:
     :param s: string
     :return: string
     """
-    sep_char = uconfig.gParamDict["SeparatorChar"]
+    sep_char = ugPD["SeparatorChar"]
     if s.startswith(sep_char):
         s = sep_char.join(s.split(sep_char)[1:])
     if s.endswith(sep_char):
@@ -114,7 +114,7 @@ def del_white_space(s: str) -> str:
     :return:string,all whitespace in input string will be replaced by
     Separator Char then return the processed input string
     """
-    sep_char = uconfig.gParamDict["SeparatorChar"]
+    sep_char = ugPD["SeparatorChar"]
     return sep_char.join(s.split())
 
 
@@ -131,15 +131,15 @@ def process_terminology(s: str) -> str:
         :param _s:string,input
         :return:None or string
         """
-        t_d = uconfig.gParamDict["TerminologyDictionary"]
+        t_d = ugPD["TerminologyDictionary"]
         for k in t_d.keys():
             if _s.lower().startswith(k):
                 return k
         return None
 
-    sep_char = uconfig.gParamDict["SeparatorChar"]
+    sep_char = ugPD["SeparatorChar"]
     word_list = s.split(sep_char)
-    term_dict = uconfig.gParamDict["TerminologyDictionary"]
+    term_dict = ugPD["TerminologyDictionary"]
     new_word_list = []
     for word in word_list:
         if word.lower() in term_dict.keys():
@@ -159,9 +159,9 @@ def asc_head(s: str) -> str:
     :param s:string
     :return:string ,null string or at most "ASCLen" length ascii letters
     """
-    lmt_len = uconfig.gParamDict["ASCLen"]
-    sep_char = uconfig.gParamDict["SeparatorChar"]
-    head_chars = uconfig.gParamDict["HeadChars"]
+    lmt_len = ugPD["ASCLen"]
+    sep_char = ugPD["SeparatorChar"]
+    head_chars = ugPD["HeadChars"]
     if s[0] in head_chars:
         return ""
     word = s.split(sep_char)[0]
@@ -182,10 +182,10 @@ def process_word(s: str) -> str:
     :param s:
     :return:
     """
-    sep_char = uconfig.gParamDict["SeparatorChar"]
+    sep_char = ugPD["SeparatorChar"]
     word_list = s.split(sep_char)
     new_word_list = []
-    word_set = uconfig.gParamDict["LowerCaseWordSet"]
+    word_set = ugPD["LowerCaseWordSet"]
     for word in word_list:
         if word.lower() in word_set:
             new_word_list.append(string.capwords(word))
@@ -254,7 +254,7 @@ def rich_style(original: str,
         return f_d + s + Fore.RESET
 
     def _c_f(s: str = "") -> str:
-        if uconfig.gParamDict["pretty"]:
+        if ugPD["pretty_flag"]:
             return s
         else:
             return ""
@@ -264,7 +264,7 @@ def rich_style(original: str,
     a_list = []
     b_list = []
     c_f = ' '
-    e = uconfig.gParamDict["enhanced_display"]
+    e = ugPD["enhanced_display_flag"]
     for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(None, a,
                                                        b).get_opcodes():
         if tag == "delete":
@@ -315,30 +315,30 @@ def _confirm(p_i: str = "") -> str:
                      type=click.Choice(
                          ["y", "yes", "n", "no", "A", "all", "q", "quit"]),
                      show_choices=False,
-                     default=uconfig.gParamDict["latest_confirm"])
+                     default=ugPD["latest_confirm"])
 
     return unify_confirm(v)
 
 
 def _in_place(p_i: str = "") -> bool:
-    if uconfig.gParamDict["AllInPlace"]:
+    if ugPD["all_in_place_flag"]:
         return True
-    if uconfig.gParamDict["confirm"]:
+    if ugPD["need_confirmation_flag"]:
         if (c := _confirm(p_i)) == unify_confirm("yes"):
-            uconfig.gParamDict["latest_confirm"] = c
+            ugPD["latest_confirm"] = c
             return True
         elif c == unify_confirm("no"):
-            uconfig.gParamDict["latest_confirm"] = c
+            ugPD["latest_confirm"] = c
             return False
         elif c == unify_confirm("all"):
-            uconfig.gParamDict["latest_confirm"] = c
-            uconfig.gParamDict["AllInPlace"] = True
+            ugPD["latest_confirm"] = c
+            ugPD["all_in_place_flag"] = True
             return True
         elif c == unify_confirm("quit"):
-            uconfig.gParamDict["latest_confirm"] = c
+            ugPD["latest_confirm"] = c
             sys.exit()  # TODO: roughly process ...
     else:
-        if uconfig.gParamDict["in_place"]:
+        if ugPD["in_place_flag"]:
             return True
         else:
             return False
@@ -346,40 +346,39 @@ def _in_place(p_i: str = "") -> bool:
 
 def out_info(file: str, new_name: str, take_effect: bool = False) -> None:
     def _b_d(s="", b_d=""):
-        if uconfig.gParamDict["enhanced_display"]:
+        if ugPD["enhanced_display_flag"]:
             return b_d + s + Back.RESET
         else:
             return s
 
     rich_org, rich_proc = rich_style(file, new_name)
-    if uconfig.gParamDict["AlternateFlag"]:
+    if ugPD["AlternateFlag"]:
         click.echo(" " * 3 + (_b_d(rich_org, Back.WHITE)))
     else:
         click.echo(" " * 3 + (_b_d(rich_org, Back.LIGHTWHITE_EX)))
     if take_effect:
-        if uconfig.gParamDict["AlternateFlag"]:
+        if ugPD["AlternateFlag"]:
             click.echo("==>" + (_b_d(rich_proc, Back.WHITE)))
         else:
             click.echo("==>" + (_b_d(rich_proc, Back.LIGHTWHITE_EX)))
     else:
-        if uconfig.gParamDict["AlternateFlag"]:
+        if ugPD["AlternateFlag"]:
             click.echo("-->" + (_b_d(rich_proc, Back.WHITE)))
         else:
             click.echo("-->" + (_b_d(rich_proc, Back.LIGHTWHITE_EX)))
-    uconfig.gParamDict[
-        "AlternateFlag"] = not uconfig.gParamDict["AlternateFlag"]
+    ugPD["AlternateFlag"] = not ugPD["AlternateFlag"]
 
 
 def type_matched(f_path: str) -> bool:
-    if (uconfig.gParamDict["type"] == "file") and (os.path.isfile(f_path)):
+    if (ugPD["type"] == "file") and (os.path.isfile(f_path)):
         return True
-    if (uconfig.gParamDict["type"] == "dir") and (os.path.isdir(f_path)):
+    if (ugPD["type"] == "dir") and (os.path.isdir(f_path)):
         return True
     return False
 
 
 def one_file_ufn(f_path: Path) -> None:
-    if os.path.islink(f_path) != uconfig.gParamDict["is_link"]:
+    if os.path.islink(f_path) != ugPD["is_link"]:
         return None
 
     subdir, file = os.path.split(f_path)
@@ -404,13 +403,17 @@ def one_file_ufn(f_path: Path) -> None:
     if new_name == file:
         return None
 
-    if _fp := uconfig.gParamDict["full_path"]:
+    _ap = ugPD["absolute_path_flag"]
+    _fp = ugPD["full_path_flag"]
+
+    if _ap:
+        ip = _in_place(os.path.abspath(f_path))
+    elif _fp:
         ip = _in_place(str(f_path))
     else:
         ip = _in_place(file)
     if ip:
-        if (os.path.exists(new_path)) and (
-                not uconfig.gParamDict["overwrite"]):
+        if (os.path.exists(new_path)) and (not ugPD["overwrite_flag"]):
             click.echo(f"{Back.RED}Exist:{Back.RESET}"
                        f"{new_path if _fp else new_name}\n"
                        f"Skipped:{f_path if _fp else file}\n"
@@ -420,35 +423,41 @@ def one_file_ufn(f_path: Path) -> None:
         else:
             log_to_db(cur_name=file, new_path=Path(new_path))
             os.rename(f_path, new_path)
-    if _fp:
+    if _ap:
+        out_info(str(os.path.abspath(f_path)),
+                 os.path.abspath(new_path),
+                 take_effect=ip)
+    elif _fp:
         out_info(str(f_path), new_path, take_effect=ip)
     else:
         out_info(file, new_name, take_effect=ip)
 
-    uconfig.gParamDict["TargetAppears"] = True
+    ugPD["target_appeared"] = True
 
 
 def one_dir_ufn(tgt_path: Path) -> None:
-    for subdir, dirs, files in depth_walk(
-            top_path=tgt_path, max_depth=uconfig.gParamDict["max_depth"]):
-        if uconfig.gParamDict["type"] == "file":
+    for subdir, dirs, files in depth_walk(top_path=tgt_path,
+                                          max_depth=ugPD["max_depth"]):
+        if ugPD["type"] == "file":
             for file in files:
                 f_path = Path(os.path.join(subdir, file))
                 if is_hidden(f_path):
                     continue
                 if os.path.isfile(f_path):
                     one_file_ufn(f_path)
-        elif uconfig.gParamDict["type"] == "dir":
+        elif ugPD["type"] == "dir":
             for d in dirs:
                 f_path = Path(os.path.join(subdir, d))
                 if is_hidden(f_path):
                     continue
                 if os.path.isdir(f_path):
                     one_file_ufn(f_path)
+    if ugPD["type"] == "dir":
+        one_file_ufn(tgt_path)
 
 
 def one_file_rbk(f_path: Path) -> None:
-    if os.path.islink(f_path) != uconfig.gParamDict["is_link"]:
+    if os.path.islink(f_path) != ugPD["is_link"]:
         return None
 
     subdir, file = os.path.split(f_path)
@@ -461,13 +470,17 @@ def one_file_rbk(f_path: Path) -> None:
     if new_name == file:
         return None
 
-    if _fp := uconfig.gParamDict["full_path"]:
+    _ap = ugPD["absolute_path_flag"]
+    _fp = ugPD["full_path_flag"]
+
+    if _ap:
+        ip = _in_place(os.path.abspath(f_path))
+    elif _fp := ugPD["full_path_flag"]:
         ip = _in_place(str(f_path))
     else:
         ip = _in_place(file)
     if ip:
-        if (os.path.exists(new_path)) and (
-                not uconfig.gParamDict["overwrite"]):
+        if (os.path.exists(new_path)) and (not ugPD["overwrite_flag"]):
             click.echo(f"{new_path if _fp else new_name} exist.\n"
                        f"{f_path if _fp else file} Skipped."
                        f"You can with option '-o' to enable overwrite.")
@@ -476,29 +489,35 @@ def one_file_rbk(f_path: Path) -> None:
         else:
             os.replace(f_path, new_path)  # os.place is atomic and match
             # cross platform :https://docs.python.org/dev/library/os.html
-    if _fp:
+    if _ap:
+        out_info(str(os.path.abspath(f_path)),
+                 os.path.abspath(new_path),
+                 take_effect=ip)
+    elif _fp:
         out_info(str(f_path), new_path, take_effect=ip)
     else:
         out_info(file, new_name, take_effect=ip)
 
-    uconfig.gParamDict["TargetAppears"] = True
+    ugPD["target_appeared"] = True
 
 
 def one_dir_rbk(tgt_path: Path) -> None:
-    for subdir, dirs, files in depth_walk(
-            top_path=tgt_path, max_depth=uconfig.gParamDict["max_depth"]):
-        if uconfig.gParamDict["type"] == "file":
+    for subdir, dirs, files in depth_walk(top_path=tgt_path,
+                                          max_depth=ugPD["max_depth"]):
+        if ugPD["type"] == "file":
             for file in files:
                 f_path = Path(os.path.join(subdir, file))
                 if is_hidden(f_path):
                     continue
                 one_file_rbk(f_path)
-        elif uconfig.gParamDict["type"] == "dir":
+        elif ugPD["type"] == "dir":
             for d in dirs:
                 f_path = Path(os.path.join(subdir, d))
                 if is_hidden(f_path):
                     continue
                 one_file_rbk(f_path)
+    if ugPD["type"] == "dir":
+        one_file_rbk(tgt_path)
 
 
 ###############################################################################
@@ -512,7 +531,7 @@ def used_name_lookup(cur_name: str,
                      db_path: Optional[Path] = None,
                      latest: bool = True) -> Union[None, str, List[str]]:
     if not db_path:
-        db_path = uconfig.gParamDict["db_path"]
+        db_path = ugPD["db_path"]
     _cur_id = sha2_id(cur_name)
     db = UDB(db_path)
     df = db.checkout_rd(_cur_id)
@@ -535,7 +554,7 @@ def log_to_db(cur_name: str,
               new_path: Path,
               db_path: Optional[Path] = None) -> None:
     if not db_path:
-        db_path = uconfig.gParamDict["db_path"]
+        db_path = ugPD["db_path"]
     _f_p = os.path.abspath(new_path)
     _new = os.path.basename(_f_p)
     abs_dp = os.path.dirname(_f_p)

@@ -8,10 +8,10 @@ import click
 from colorama import Fore
 
 # From This Project
-from ufdn.ufdnlib import uconfig
+from ufdn.ufdnlib.uconfig import gParamDict as ugPD
 from ufdn.ufdnlib import utils
 
-_ver = "2021.05.18.1024"
+_ver = "XXXX.XX.XX"
 
 
 @click.command(
@@ -32,9 +32,8 @@ _ver = "2021.05.18.1024"
     "-t",
     default="file",
     type=click.Choice(["file", "dir"]),
-    help=
-    f"Set types.If the value is 'file' ,only change file names,If the value "
-    f"is 'dir',only change directory names.",
+    help=f"Set type.If 'file',operations are only valid for file,If 'dir',"
+    f"operations are only valid for directory.",
     show_default=True)
 @click.option("--in-place",
               "-i",
@@ -62,7 +61,14 @@ _ver = "2021.05.18.1024"
               default=False,
               type=bool,
               is_flag=True,
-              help="Show full path of file.",
+              help=f"Show full path of file.Relative to the input path.",
+              show_default=True)
+@click.option("--absolute-path",
+              "-a",
+              default=False,
+              type=bool,
+              is_flag=True,
+              help=f"Show absolute path of file.",
               show_default=True)
 @click.option("--roll-back",
               "-r",
@@ -95,30 +101,30 @@ _ver = "2021.05.18.1024"
 @click.version_option(version=_ver)
 def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
         in_place: bool, confirm: bool, is_link: bool, full_path: bool,
-        roll_back: bool, overwrite: bool, pretty: bool,
+        absolute_path: bool, roll_back: bool, overwrite: bool, pretty: bool,
         enhanced_display: bool):
     """Files in PATH will be changed file names unified.
-    
-    You can direct set path such as ufncli.py path ...
     """
     if not path:
-        uconfig.gParamDict["path"] = ["."]
+        ugPD["path"] = ["."]
     else:
-        uconfig.gParamDict["path"] = path
-    uconfig.gParamDict["max_depth"] = max_depth
-    uconfig.gParamDict["type"] = file_type
-    uconfig.gParamDict["in_place"] = in_place
-    uconfig.gParamDict["confirm"] = confirm
-    uconfig.gParamDict["is_link"] = is_link
-    uconfig.gParamDict["full_path"] = full_path
-    uconfig.gParamDict["overwrite"] = overwrite
-    uconfig.gParamDict["pretty"] = pretty
-    uconfig.gParamDict["enhanced_display"] = enhanced_display
-    uconfig.gParamDict["AllInPlace"] = False
-    uconfig.gParamDict["latest_confirm"] = utils.unify_confirm(
+        ugPD["path"] = path
+    ugPD["max_depth"] = max_depth
+    ugPD["type"] = file_type
+    ugPD["in_place_flag"] = in_place
+    ugPD["need_confirmation_flag"] = confirm
+    ugPD["is_link"] = is_link
+    ugPD["full_path_flag"] = full_path
+    ugPD["absolute_path_flag"] = absolute_path
+    ugPD["overwrite_flag"] = overwrite
+    ugPD["pretty_flag"] = pretty
+    ugPD["enhanced_display_flag"] = enhanced_display
+    ugPD["all_in_place_flag"] = False
+    ugPD["latest_confirm"] = utils.unify_confirm(
     )  # Parameter is Null to get default return
-    uconfig.gParamDict["TargetAppears"] = False
-    for pth in uconfig.gParamDict["path"]:
+    ugPD["target_appeared"] = False
+    for pth in ugPD["path"]:
+        pth = (pth[:-1] if pth.endswith(os.sep) else pth)
         if os.path.isfile(pth) and utils.type_matched(pth):
             if not roll_back:
                 utils.one_file_ufn(pth)
@@ -132,13 +138,12 @@ def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
         else:
             click.echo(f"{Fore.RED}Not valid:{pth}{Fore.RESET}")
 
-    if (not uconfig.gParamDict["in_place"]) and (
-            not uconfig.gParamDict["confirm"]) and (
-                uconfig.gParamDict["TargetAppears"]):
+    if (not ugPD["in_place_flag"]) and (
+            not ugPD["need_confirmation_flag"]) and (ugPD["target_appeared"]):
         cols, _ = shutil.get_terminal_size(fallback=(79, 23))
         click.echo("*" * cols)
         click.echo("In order to take effect,add option '-i' or '-c'")
-        uconfig.gParamDict["TargetAppears"] = False
+        ugPD["target_appeared"] = False
 
 
 # TODO: **support edit config data
@@ -156,5 +161,6 @@ def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
 # TODO: support user select roll back when multi target
 
 # TODO: bug:mac osx begin with ._ hidden check wrong
-# TODO: bug:dir self is not dir ?
 # TODO: bug:fd -x can not get terminal size .so fall back and no color display
+
+# TODO: autocomplete

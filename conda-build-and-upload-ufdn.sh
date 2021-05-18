@@ -24,7 +24,7 @@ sed -i "s/.*{% set ver = \".*\" %}.*/{% set ver = \"XXXX.XX.XX\" %}/" meta.yaml
 sed -i "s/.*{% set num = \".*\" %}.*/{% set num = \"XXXX\" %}/" meta.yaml
 sed -i "s/.*_ver.*=.*\".*\".*/_ver = \"XXXX.XX.XX\"/" ufdn/ufdnlib/ufncli.py
 
-printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+printf '%*s\n\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 
 read -p "Convert to others platform? [y]/n" -n 1 -r
 printf '\n' # (optional) move to a new line
@@ -45,9 +45,9 @@ find $bld_dir/linux-64/ -name $pkg*$ver*$num*.tar.bz2 | while read file; do
   done
 
 done
-printf "Convert finished.\n\n\n"
+printf "Convert finished.\n"
 
-printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+printf '%*s\n\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 read -p "Upload to anaconda? [y]/n" -n 1 -r
 printf # (optional) move to a new line
 if [[ $REPLY =~ ^[Nn]$ ]]; then

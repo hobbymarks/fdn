@@ -1,7 +1,6 @@
 """
 UFN use to uniformly change file names
 """
-from __future__ import absolute_import
 from __future__ import print_function
 
 from pathlib import Path
@@ -14,7 +13,7 @@ from colorama import Back
 from colorama import Fore
 from colorama import Style
 
-from ufdn.ufdnlib import uconfig
+from ufdn.ufdnlib.uconfig import gParamDict as ugPD
 from ufdn.ufdnlib import ucrypt
 from ufdn.ufdnlib import udb
 from ufdn.ufdnlib import ufncli
@@ -43,19 +42,17 @@ def main() -> None:
             try:
                 from nltk.corpus import words
 
-                uconfig.gParamDict["LowerCaseWordSet"] = set(
+                ugPD["LowerCaseWordSet"] = set(
                     list(map(lambda x: x.lower(), words.words())))
             except LookupError:
                 nltk.download("words")
         from nltk.corpus import words
 
-        uconfig.gParamDict["LowerCaseWordSet"] = set(
+        ugPD["LowerCaseWordSet"] = set(
             list(map(lambda x: x.lower(), words.words())))
-        uconfig.gParamDict["record_path"] = os.path.join(Path.home(), ".ufdn")
-        Path(uconfig.gParamDict["record_path"]).mkdir(parents=True,
-                                                      exist_ok=True)
-        uconfig.gParamDict["db_path"] = os.path.join(
-            uconfig.gParamDict["record_path"], "rdsa.db")
+        ugPD["record_path"] = os.path.join(Path.home(), ".ufdn")
+        Path(ugPD["record_path"]).mkdir(parents=True, exist_ok=True)
+        ugPD["db_path"] = os.path.join(ugPD["record_path"], "rdsa.db")
         #######################################################################
         ufncli.ufn()
     finally:
