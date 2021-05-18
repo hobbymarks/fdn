@@ -11,7 +11,7 @@ from colorama import Fore
 from ufdn.ufdnlib.uconfig import gParamDict as ugPD
 from ufdn.ufdnlib import utils
 
-_ver = "XXXX.XX.XX"
+_ver = "2021.05.18.1505"
 
 
 @click.command(
