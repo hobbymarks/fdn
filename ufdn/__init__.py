@@ -1,6 +1,5 @@
-"""
-UFN use to uniformly change file names
-"""
+"""ufdn use to uniformly change file or directory names and also support
+rollback these operations. """
 from __future__ import print_function
 
 from pathlib import Path

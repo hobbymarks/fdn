@@ -1,21 +1,32 @@
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
 =  UFDN
 :toc:
 
 
 ==  Introduction
 
-A tool for uniformly changing file or directory names
+A tool for uniformly change file sor directorys names and also support
+rollback these operations.
 
 
 
 ===  Bash Version
 
-A tool base on link:++http://plasmasturm.org/code/rename/++[rename] to unify file name.
+WARNING: May be not to continue update ,because Bash is too difficult.
+
+A tool base on link:++http://plasmasturm.org/code/rename/++[rename] to uniformly change file name.
 
 File name format:
 
 [arabic]
-. no space in file name（firstly every space will be replaced by an underscore,then multiple consecutive underscores will be reduced to one);
+. no space remained in file name（firstly every space will be replaced by an underscore,then multiple consecutive underscores will be reduced to only one);
 
 . only underscore allowed in file name，all other control characters will be replaced by underscore;
 
@@ -51,10 +62,10 @@ File or directory name format:
 
 * The content is link:++https://www.gnu.org/software/bash/++[bash] script，so you can download and run directly;
 
-* If you wan to run UFn.sh any where,please make sure place UFn.sh in /usr/local/bin or /usr/bin or other directory include in
+* If you want to run UFn.sh any where,please make sure place UFn.sh in /usr/local/bin or /usr/bin or other directory include in
 link:++https://en.wikipedia.org/wiki/Environment_variable++[Environment_variable]；
 
-* If you wan to run the script in some directory , you can create link:++https://en.wikipedia.org/wiki/Ln_(Unix)++[soft link](ln -s UFn.sh TargetName)
+* If you want to run the script in some directory , you can create link:++https://en.wikipedia.org/wiki/Ln_(Unix)++[soft link](ln -s UFn.sh TargetName)
 
 [id="python-version-1"]
 ===  Python Version
