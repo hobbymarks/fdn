@@ -6,6 +6,8 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
+:source-highlighter: coderay
+
 =  UFDN
 :toc:
 
@@ -70,13 +72,15 @@ link:++https://en.wikipedia.org/wiki/Environment_variable++[Environment_variable
 [id="python-version-1"]
 ===  Python Version
 
-To install UFDN from conda:
+To install ufdn via link:++https://www.anaconda.com/products/individual++[conda]:
 
 [sub="attributes"]
+[source,shell script]
 ----
 $ conda install -c hobbymarks ufdn
 ----
 
+[#_usage_options]
 ==  Usage
 
 Options:
@@ -113,6 +117,7 @@ Options:
 -d option ::
 
 [sub="attributes"]
+[source,shell script]
 ----
 $  ufdn tgt_root -f -t dir -d 2
    tgt_root/test directory/$0_T\▯Only
@@ -132,6 +137,7 @@ In order to take effect,add option '-i' or '-c'
 -t option ::
 
 [sub="attributes"]
+[source,shell script]
 ----
 $  ufdn tgt_root -f -t dir
    tgt_root/!临时文件夹
@@ -149,6 +155,7 @@ In order to take effect,add option '-i' or '-c'
 -i option ::
 
 [sub="attributes"]
+[source,shell script]
 ----
 $ ufdn tgt_root/\$0\ 测试用文件.html -i
    $0▯测试用文件.html
@@ -158,6 +165,7 @@ $ ufdn tgt_root/\$0\ 测试用文件.html -i
 -c option ::
 
 [sub="attributes"]
+[source,shell script]
 ----
 $ ufdn tgt_root/\$0_测试用文件.html -rc
 $0_测试用文件.html
@@ -172,6 +180,7 @@ This Option
 -f option ::
 
 [sub="attributes"]
+[source,shell script]
 ----
 $ ufdn tgt_root/\$0\ 测试用文件.html
    $0▯测试用文件.html
@@ -189,6 +198,7 @@ In order to take effect,add option '-i' or '-c'
 -r option ::
 
 [sub="attributes"]
+[source,shell script]
 ----
 $ ufdn tgt_root/\$0_测试用文件.html -r
    $0_测试用文件.html
@@ -203,6 +213,7 @@ This Option
 -p option ::
 
 [sub="attributes"]
+[source,shell script]
 ----
 $ ufdn tgt_root
    $0▯测试用文件.html
@@ -232,11 +243,13 @@ In order to take effect,add option '-i' or '-c'
 -e option ::
 This Option
 
+[#_every_emp]
 ==  Example
 
 ===  change one file name
 
 [sub="attributes"]
+[source,shell script]
 ----
 $ ufdn tgt_root/\$0\ 测试用文件.html
    $0▯测试用文件.html
@@ -248,6 +261,7 @@ In order to take effect,add option '-i' or '-c'
 ===  change files in dir
 
 [sub="attributes"]
+[source,shell script]
 ----
 $ ufdn tgt_root
    $0▯测试用文件.html
@@ -265,6 +279,7 @@ In order to take effect,add option '-i' or '-c'
 ===  rollback one file changed
 
 [sub="attributes"]
+[source,shell script]
 ----
 $ ufdn tgt_root/\$0_测试用文件.html -r
    $0_测试用文件.html
@@ -276,6 +291,7 @@ In order to take effect,add option '-i' or '-c'
 ===  rollback files changed in dir
 
 [sub="attributes"]
+[source,shell script]
 ----
 $ ufdn tgt_root -r
    This_Is_A_Test_File.pdf
@@ -296,6 +312,8 @@ In order to take effect,add option '-i' or '-c'
 
 
 ===  Bash版
+
+WARNING: 可能不继续更新.
 
 基于link:++http://plasmasturm.org/code/rename/++[rename]的一个小工具，用 link:++https://www.gnu.org/software/bash/++[bash] 编写,用于日常统一更改资料的文件名。
 
@@ -345,12 +363,18 @@ In order to take effect,add option '-i' or '-c'
 [id="python-1"]
 ===  Python 版
 
-建议使用conda进行安装:
+建议使用link:++https://www.anaconda.com/products/individual++[conda]进行安装:
 
 [sub="attributes"]
+[source,shell script]
 ----
 $ conda install -c hobbymarks ufdn
 ----
 
-==  示例
+==  参数
+请前往<<_usage_options>>查看
 
+
+==  示例
+供参考
+<<_every_emp>>
