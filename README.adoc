@@ -130,7 +130,7 @@ $  ufdn tgt_root -f -t dir -d 2
 -->tgt_root/Test_Directory
    tgt_root/_is▯dir▯%
 -->tgt_root/Is_dir_%
-**********************************************************************************
+****************************************************************************
 In order to take effect,add option '-i' or '-c'
 ----
 
