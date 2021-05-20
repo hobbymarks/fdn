@@ -122,29 +122,37 @@ Options:
 ====
 When you run ufdn ,you will see two kinds of output:
 
+- First Kind
+
    sample▯file▯name
 -->sample_file_name
 
-The output means: a file named `sample file name` will be changed to `sample_file_name`
+The output means: a file name `sample file name` will be changed to `sample_file_name`
 
-`-->` means in dry run mode ,operation not take effect.The character `▯` means space ,every space will be replaced by one `▯`.
+``-\->`` means in dry run mode ,operation not take effect.The character `▯` means space ,every space will be replaced by one `▯`.
 
 [underline]#**The character `▯` is only for the convenience of visual contrast and only display in output.**#
 
 or you will see:
+
+- Second Kind:
 
    sample▯file▯name
 ==>sample_file_name
 
 The output means: a file named `sample file name` has been changed to `sample_file_name`
 
-`==>` means operation have taken effect.
+``=\=>`` means operation have taken effect.
 
 ====
 
-**[red]#all deleted character will be display as red color#** ,such as `sample [red]#▯# file [red]#▯# name`
+[red]#all deleted character will be display as red color# ,such as the original file name:
 
-**[green]#all added character will be diplay as green color#** ,such as `sample [green]#\_# file [green]#_# name`
+**sample [red]#▯# file [red]#▯# name**
+
+[green]#all added character will be diplay as green color# ,such as the changed file name:
+
+**sample [green]#\_# file [green]#_# name**
 
 
 === Options
