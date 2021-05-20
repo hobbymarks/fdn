@@ -215,9 +215,6 @@ change one file name
     -->$0_测试用文件.html
     ********************************************************************************
     In order to take effect,add option '-i' or '-c'
-.. image:: ./docs/images/UFDN_one_file_NoOp.png
-  :width: 680px
-  :align: center
 
 change files in dir
 ~~~~~~~~~~~~~~~~~~~~
@@ -237,9 +234,6 @@ change files in dir
     In order to take effect,add option '-i' or '-c'
 
 
-.. image:: ./docs/images/UFDN_one_dir_NoOp.png
-  :width: 680px
-  :align: center
 
 rollback one file changed
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -251,9 +245,6 @@ rollback one file changed
     -->$0▯测试用文件.html
     *******************************************************************************
     In order to take effect,add option '-i' or '-c'
-.. image:: ./docs/images/UFDN_one_file_rOp.png
-  :width: 680px
-  :align: center
 
 rollback files changed in dir
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -271,9 +262,7 @@ rollback files changed in dir
     -->$0▯测试用文件.html
     *******************************************************************************
     In order to take effect,add option '-i' or '-c'
-.. image:: ./docs/images/UFDN_one_dir_rOp.png
-  :width: 680px
-  :align: center
+
 
 简介
 ====
