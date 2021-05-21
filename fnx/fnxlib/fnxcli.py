@@ -149,13 +149,11 @@ def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
 # TODO: **support edit config data
 # TODO: display config data
 # TODO: display total summary
-# TODO: display progress bar at bottom ...
 # TODO: support regular expression input path or directory as path argument
 # TODO: exclude spec directory or file type
 # TODO: %,'s,How to ...
 
 # TODO: unify full_path request to a function ...
-# TODO: Joint with other CLI tool ,such as fd
 # TODO: Embed nltk ,but need download first time ,why?
 # TODO: multi dir may accure same name conflict so record path ID?
 # TODO: support user select roll back when multi target
