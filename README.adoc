@@ -8,14 +8,14 @@ endif::[]
 
 :source-highlighter: coderay
 
-==  UFDN
+==  FNX
 :toc:
 
 
 ==  Introduction
 
 A tool for uniformly change file sor directorys names and also support
-rollback these operations.
+rollback these operations.File names operation.
 
 
 
