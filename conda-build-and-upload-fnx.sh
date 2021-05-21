@@ -4,6 +4,7 @@
 pkg="fnx"
 array=(3.8 3.9)
 printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+###############################################################################
 printf "Building conda package ..."
 
 # create package version and number
@@ -25,52 +26,56 @@ sed -i "s/.*{% set num = \".*\" %}.*/{% set num = \"XXXX\" %}/" meta.yaml
 #sed -i "s/.*_ver.*=.*\".*\".*/_ver = \"XXXX.XX.XX\"/" fnx/fnxlib/fnxcli.py
 
 printf '%*s\n\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+###############################################################################
+read -p "Convert to others platform? [yes]/no " -r
+if [[ $REPLY =~ ^[Yy][Ee][Ss]$ ]]; then
+  printf "Convert to other platform ...\n"
+  bld_dir=$HOME/anaconda3/conda-bld
 
-read -p "Convert to others platform? [y]/n" -n 1 -r
-printf '\n' # (optional) move to a new line
-if [[ $REPLY =~ ^[Nn]$ ]]; then
+  # convert package to other platforms
+  platforms=(osx-64 osx-arm64 linux-32 linux-64 win-32 win-64)
+
+  find $bld_dir/linux-64/ -name $pkg*$ver*$num*.tar.bz2 | while read file; do
+    printf $file
+    #conda convert --platform all $file  -o $HOME/conda-bld/
+    for platform in "${platforms[@]}"; do
+      conda convert --platform $platform $file -o $bld_dir/
+    done
+
+  done
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' \#
+  printf "Convert finished.\n"
+else
   exit 1
 fi
-printf "Convert to other platform ...\n"
-bld_dir=$HOME/anaconda3/conda-bld
-
-# convert package to other platforms
-platforms=(osx-64 osx-arm64 linux-32 linux-64 win-32 win-64)
-
-find $bld_dir/linux-64/ -name $pkg*$ver*$num*.tar.bz2 | while read file; do
-  printf $file
-  #conda convert --platform all $file  -o $HOME/conda-bld/
-  for platform in "${platforms[@]}"; do
-    conda convert --platform $platform $file -o $bld_dir/
-  done
-
-done
-printf "Convert finished.\n"
 
 printf '%*s\n\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
-read -p "Upload to anaconda? [y]/n" -n 1 -r
-printf # (optional) move to a new line
-if [[ $REPLY =~ ^[Nn]$ ]]; then
+###############################################################################
+read -p "Upload to anaconda? [yes]/no " -r
+if [[ $REPLY =~ ^[Yy][Ee][Ss]$ ]]; then
+  # upload packages to conda
+  find $bld_dir/ -name $pkg*$ver*$num*.tar.bz2 | while read file; do
+    printf $file
+    anaconda upload $file
+  done
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' \#
+  printf "Upload finished.\n"
+else
   exit 1
 fi
 
-# upload packages to conda
-find $bld_dir/ -name $pkg*$ver*$num*.tar.bz2 | while read file; do
-  printf $file
-  anaconda upload $file
-done
-printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' \#
-printf "Upload finished.\n"
-
-read -p "Purge all and Delete all local packages? [y]/n" -n 1 -r
-printf '\n' # (optional) move to a new line
-if [[ $REPLY =~ ^[Nn]$ ]]; then
+printf '%*s\n\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+###############################################################################
+read -p "Purge all and Delete all local packages? [yes]/no " -r
+if [[ $REPLY =~ ^[Yy][Ee][Ss]$ ]]; then
+  conda build purge-all
+  find $bld_dir/ -name $pkg*.tar.bz2* | while read file; do
+    printf $file
+    printf "\n"
+    rm $file
+  done
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' \#
+  printf "All packages deleted.\n"
+else
   exit 1
 fi
-conda build purge-all
-find $bld_dir/ -name $pkg*.tar.bz2* | while read file; do
-  printf $file
-  printf "\n"
-  rm $file
-done
-printf "All packages deleted.\n"

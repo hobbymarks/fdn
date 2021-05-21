@@ -43,6 +43,7 @@ def replace_char(s: str) -> str:
     :param s:string,if "BeReplacedChar" in s ,then will be replaced
     :return:string,be replaced
     """
+
     def _mask_ruw(_s: str) -> Tuple[List[str], List[bool]]:
         """
         Mask a input string by RemainUnchangedWordList value
@@ -96,11 +97,6 @@ def del_head_tail_sep(s: str) -> str:
 
 
 def process_head_tail(s: str) -> str:
-    """
-
-    :param s:
-    :return:
-    """
     # Capitalize The First Letter
     if s[0].islower():
         return s[0].upper() + s[1:]
@@ -124,6 +120,7 @@ def process_terminology(s: str) -> str:
     :param s:
     :return:
     """
+
     def _swt(_s: str) -> Optional[str]:
         """
         Check if the s startswith a terminology word.If the s startswith a
@@ -177,11 +174,6 @@ def asc_head(s: str) -> str:
 
 
 def process_word(s: str) -> str:
-    """
-
-    :param s:
-    :return:
-    """
     sep_char = ugPD["SeparatorChar"]
     word_list = s.split(sep_char)
     new_word_list = []
@@ -195,19 +187,11 @@ def process_word(s: str) -> str:
 
 
 def depth_walk(
-    top_path: Path,
-    top_down: bool = False,
-    follow_links: bool = False,
-    max_depth: int = 1
+        top_path: Path,
+        top_down: bool = False,
+        follow_links: bool = False,
+        max_depth: int = 1
 ) -> Optional[Generator[Tuple[str], List[str], List[str]]]:
-    """
-
-    :param top_path:
-    :param top_down:
-    :param follow_links:
-    :param max_depth:
-    :return:
-    """
     if str(max_depth).isnumeric():
         max_depth = int(max_depth)
     else:
@@ -241,12 +225,6 @@ def depth_walk(
 
 def rich_style(original: str,
                processed: str) -> Union[Tuple[None, None], Tuple[str, str]]:
-    """
-
-    :param original:
-    :param processed:
-    :return:
-    """
     if (type(original) is not str) or (type(processed) is not str):
         return None, None
 
@@ -536,6 +514,8 @@ def used_name_lookup(cur_name: str,
     db = UDB(db_path)
     df = db.checkout_rd(_cur_id)
     db.close()
+    if not df:
+        return None
     if "curCrypt" not in df.columns:
         return None
     rlt = list(df["curCrypt"])
