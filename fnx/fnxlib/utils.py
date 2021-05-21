@@ -514,8 +514,6 @@ def used_name_lookup(cur_name: str,
     db = UDB(db_path)
     df = db.checkout_rd(_cur_id)
     db.close()
-    if not df:
-        return None
     if "curCrypt" not in df.columns:
         return None
     rlt = list(df["curCrypt"])

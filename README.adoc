@@ -169,15 +169,33 @@ $  fnx tgt_root -f -t dir -d 2
 -->tgt_root/test directory/$0_T_Only
    tgt_root/!临时文件夹
 -->tgt_root/LSW临时文件夹
+   tgt_root/_is▯dir▯%
+-->tgt_root/Is_dir_%
    tgt_root/测试@#文件夹
 -->tgt_root/CS测试_文件夹
    tgt_root/test▯directory
 -->tgt_root/Test_Directory
+   tgt_root
+-->Tgt_Root
+**************************************************************************
+In order to take effect,add option '-i' or '-c'
+
+$ fnx tgt_root -f -t dir -d 1
+   tgt_root/!临时文件夹
+-->tgt_root/LSW临时文件夹
    tgt_root/_is▯dir▯%
 -->tgt_root/Is_dir_%
+   tgt_root/测试@#文件夹
+-->tgt_root/CS测试_文件夹
+   tgt_root/test▯directory
+-->tgt_root/Test_Directory
+   tgt_root
+-->Tgt_Root
 **************************************************************************
 In order to take effect,add option '-i' or '-c'
 ----
+image::docs/images/fnx_f_tdir_d2.png[]
+image::docs/images/fnx_f_tdir_d1.png[]
 
 -t option ::
 
@@ -195,17 +213,28 @@ $  fnx tgt_root -f -t dir
 -->tgt_root/Is_dir_%
 **************************************************************************
 In order to take effect,add option '-i' or '-c'
+
+$ fnx tgt_root -f
+   tgt_root/thi_Is_File_%.mp4
+-->tgt_root/Thi_Is_File_%.mp4
+   tgt_root/$0▯▯测试用文件.html
+-->tgt_root/$0_测试用文件.html
+**************************************************************************
+In order to take effect,add option '-i' or '-c'
 ----
+image::docs/images/fnx_f_dir.png[]
+image::docs/images/fnx_f.png[]
 
 -i option ::
 
 [sub="attributes"]
 [source,shell script]
 ----
-$ fnx tgt_root/\$0\ 测试用文件.html -i
-   $0▯测试用文件.html
+$ fnx tgt_root/\$0\ \ 测试用文件.html -io
+   $0▯▯测试用文件.html
 ==>$0_测试用文件.html
 ----
+image::docs/images/fnx_io_Exist.png[]
 
 -c option ::
 
@@ -253,7 +282,21 @@ In order to take effect,add option '-i' or '-c'
 ----
 
 -o option ::
-This Option
+
+[sub="attributes"]
+[source,shell script]
+----
+$ fnx tgt_root/\$0\ \ 测试用文件.html -i
+Exist:$0_测试用文件.html
+Skipped:$0  测试用文件.html
+With option '-o' to enable overwrite.
+
+$ fnx tgt_root/\$0\ \ 测试用文件.html -io
+   $0▯▯测试用文件.html
+==>$0_测试用文件.html
+----
+image::docs/images/fnx_i_Exist.png[]
+image::docs/images/fnx_io_Exist.png[]
 
 -p option ::
 

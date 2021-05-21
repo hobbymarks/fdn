@@ -11,7 +11,7 @@ from colorama import Fore
 from fnx.fnxlib.fnxcfg import gParamDict as ugPD
 from fnx.fnxlib import utils
 
-_ver = "2021.05.21.2419"
+_ver = "2021.05.21.2714"
 
 
 @click.command(

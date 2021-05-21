@@ -15,7 +15,7 @@ class UDB:
         self._db_path = db_path
         self._db_con = sqlite3.connect(self._db_path)
         self._db_cur = self._db_con.cursor()
-        self._tb_name = "UFDNrecord"
+        self._tb_name = "fnxrd"
 
     def create_tb(self, tb_name: str):
         if tb_name:
@@ -56,7 +56,7 @@ class UDB:
             insert_rd_sql,
             (new_id, cur_id, cur_crypt, sep_dp_id, abs_dp_id, datetime.now()))
 
-    def checkout_rd(self, new_id: str) -> Optional[pd.DataFrame]:
+    def checkout_rd(self, new_id: str):
         checkout_rd_sql = """
         SELECT curCrypt, opStamp FROM {} 
         WHERE newID=? ORDER BY opStamp DESC;
@@ -66,7 +66,7 @@ class UDB:
             rows = self._db_cur.fetchall()
             return pd.DataFrame(rows, columns=["curCrypt", "opStamp"])
         except sqlite3.OperationalError as e:  # TODO: hidden error !!!
-            return None
+            return pd.DataFrame([], columns=["curCrypt", "opStamp"])
 
     def is_tb_exist(self, tb_name: str):
         tb_slt_sql = """
