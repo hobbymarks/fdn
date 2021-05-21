@@ -162,5 +162,5 @@ def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
 
 # TODO: bug:mac osx begin with ._ hidden check wrong
 # TODO: bug:fd -x can not get terminal size .so fall back and no color display
-
 # TODO: autocomplete
+# TODO: different language can use separator for terminology

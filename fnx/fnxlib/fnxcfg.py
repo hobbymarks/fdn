@@ -102,6 +102,10 @@ gParamDict: dict = {
         "pcie": "PCIe",
         "pep8": "PEP8",
         "psoc": "PSoC",
+        "pyqt": "PyQt",
+        "pyqt4": "PyQt4",
+        "pyqt5": "PyQt5",
+        "pyqt6": "PyQt6",
         "restructuredtext": "reStructuredText",
         "rohs": "ROHS",
         "spi": "SPI",
@@ -116,6 +120,6 @@ gParamDict: dict = {
         "vim": "Vim",
     },
     "RemainUnchangedWordList":
-    ["$*", "$@", "$#", "$?", "$-", "$$", "$!", "$0"],
+        ["$*", "$@", "$#", "$?", "$-", "$$", "$!", "$0"],
     "IgnoredDirectoryKeyList": [".git", ".xcodeproj", ".cydsn", ".cywrk"]
 }

@@ -431,6 +431,27 @@ $ fnx tgt_root -r
 In order to take effect,add option '-i' or '-c'
 ----
 
+===  joint work with `fd`/与 `fd` 工具联合工作
+
+__link:++https://github.com/sharkdp/fd++[fd] is a program to find entries in your filesytem. It is a simple, fast and user-friendly alternative to find.__
+
+[sub="attributes"]
+[source,shell script]
+----
+$ fdfind -HIi html -X fnx
+   $0▯▯测试用文件.html
+-->$0_测试用文件.html
+**************************************************************************
+In order to take effect,add option '-i' or '-c'
+
+$ fdfind -HIi html -X fnx {} -pf
+   tgt_root/$0▯▯测试用文件.html
+-->tgt_root/$0 _测试用文件.html
+**************************************************************************
+In order to take effect,add option '-i' or '-c'
+----
+
+
 ==  简介
 
 一个小工具，用于日常统一更改文件（或者文件夹）名称
