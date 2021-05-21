@@ -3,10 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="b3f02cd7-eadd-4c57-8da5-af782de82446" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/conda-build-and-upload-fnx.sh" beforeDir="false" afterPath="$PROJECT_DIR$/conda-build-and-upload-fnx.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fnx/fnxlib/fnxcli.py" beforeDir="false" afterPath="$PROJECT_DIR$/fnx/fnxlib/fnxcli.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fnx/fnxlib/udb.py" beforeDir="false" afterPath="$PROJECT_DIR$/fnx/fnxlib/udb.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fnx/fnxlib/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/fnx/fnxlib/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/conda-build-and-upload-fnx.sh" beforeDir="false" afterPath="$PROJECT_DIR$/conda-bld-upld-fnx.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fnx/fnxlib/fnx_notebook.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/fnx/fnxlib/fnx_nb.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fnx/fnxlib/fnx_sh.sh" beforeDir="false" afterPath="$PROJECT_DIR$/fnx/fnxlib/fnx.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

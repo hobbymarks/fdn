@@ -27,7 +27,8 @@ sed -i "s/.*{% set num = \".*\" %}.*/{% set num = \"XXXX\" %}/" meta.yaml
 
 printf '%*s\n\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 ###############################################################################
-read -p "Convert to others platform? [yes]/no " -r
+read -p "Convert to others platform? yes/[no] " -r
+printf '\n'
 if [[ $REPLY =~ ^[Yy][Ee][Ss]$ ]]; then
   printf "Convert to other platform ...\n"
   bld_dir=$HOME/anaconda3/conda-bld
@@ -51,7 +52,8 @@ fi
 
 printf '%*s\n\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 ###############################################################################
-read -p "Upload to anaconda? [yes]/no " -r
+read -p "Upload to anaconda? yes/[no] " -r
+printf '\n'
 if [[ $REPLY =~ ^[Yy][Ee][Ss]$ ]]; then
   # upload packages to conda
   find $bld_dir/ -name $pkg*$ver*$num*.tar.bz2 | while read file; do
@@ -66,7 +68,8 @@ fi
 
 printf '%*s\n\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 ###############################################################################
-read -p "Purge all and Delete all local packages? [yes]/no " -r
+read -p "Purge all and Delete all local packages? yes/[no] " -r
+printf '\n'
 if [[ $REPLY =~ ^[Yy][Ee][Ss]$ ]]; then
   conda build purge-all
   find $bld_dir/ -name $pkg*.tar.bz2* | while read file; do
