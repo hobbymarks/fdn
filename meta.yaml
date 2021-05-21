@@ -2,17 +2,17 @@
 {% set num = "XXXX" %}
 
 package:
-    name: ufdn
+    name: fnx
     version: {{ ver }}
 
 build:
     number: {{ num }}
     skip: True # [py<38]
     entry_points:
-        - ufdn = ufdn:main
+        - fnx = fnx:main
 
 source:
-    git_url: https://github.com/hobbymarks/ufdn.git
+    git_url: https://github.com/hobbymarks/fnx.git
 
 requirements:
     build:
@@ -35,7 +35,7 @@ requirements:
         - 'wcwidth>=0.2.5'
 
 about:
-    home: https://github.com/hobbymarks/ufdn.git
+    home: https://github.com/hobbymarks/fnx.git
     description: A tool for uniformly changing file or directory names.
     license: MIT
     license_file: LICENSE

@@ -15,9 +15,9 @@ from unidecode import unidecode
 from wcwidth import wcswidth
 
 # From This Project
-from ufdn.ufdnlib.uconfig import gParamDict as ugPD
-from ufdn.ufdnlib import ucrypt
-from ufdn.ufdnlib.udb import UDB
+from fnx.fnxlib.fnxcfg import gParamDict as ugPD
+from fnx.fnxlib import ucrypt
+from fnx.fnxlib.udb import UDB
 
 
 def is_hidden(f_path: Path) -> bool:

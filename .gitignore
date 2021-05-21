@@ -1,6 +1,6 @@
 .ipynb_checkpoints/
 .virtual_documents/
-ufdn/.ipynb_checkpoints/
-ufdn/__pycache__/
-ufdn/ufdnlib/__pycache__/
+fnx/.ipynb_checkpoints/
+fnx/__pycache__/
+fnx/fnxlib/__pycache__/
 tests/__pycache__/

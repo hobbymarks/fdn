@@ -14,8 +14,10 @@ endif::[]
 
 ==  Introduction
 
-A tool for uniformly change file sor directorys names and also support
-rollback these operations.File names operation.
+A tool for uniformly change file sor directory names and also support
+rollback these operations.
+
+__In short,fnx is about file names operation.__
 
 
 
@@ -64,20 +66,20 @@ File or directory name format:
 
 * The content is link:++https://www.gnu.org/software/bash/++[bash] script，so you can download and run directly;
 
-* If you want to run UFn.sh any where,please make sure place UFn.sh in /usr/local/bin or /usr/bin or other directory include in
+* If you want to run fnx.sh any where,please make sure place fnx.sh in /usr/local/bin or /usr/bin or other directory include in
 link:++https://en.wikipedia.org/wiki/Environment_variable++[Environment_variable]；
 
-* If you want to run the script in some directory , you can create link:++https://en.wikipedia.org/wiki/Ln_(Unix)++[soft link](ln -s UFn.sh TargetName)
+* If you want to run the script in some directory , you can create link:++https://en.wikipedia.org/wiki/Ln_(Unix)++[soft link](ln -s fnx.sh TargetName)
 
 [id="python-version-1"]
 ===  Python Version
 
-To install ufdn via link:++https://www.anaconda.com/products/individual++[conda]:
+To install fnx via link:++https://www.anaconda.com/products/individual++[conda]:
 
 [sub="attributes"]
 [source,shell script]
 ----
-$ conda install -c hobbymarks ufdn
+$ conda install -c hobbymarks fnx
 ----
 
 [#_usage_options]
@@ -87,7 +89,7 @@ Options:
 
 [sub="attributes"]
 ----
-Usage: ufdn [OPTIONS] [PATH]...
+Usage: fnx [OPTIONS] [PATH]...
 
   Files in PATH will be changed file names unified.
 
@@ -120,7 +122,7 @@ Options:
 
 [NOTE]
 ====
-When you run ufdn ,you will see two kinds of output:
+When you run fnx ,you will see two kinds of output:
 
 - First Kind
 
@@ -162,7 +164,7 @@ The output means: a file named `sample file name` has been changed to `sample_fi
 [sub="attributes"]
 [source,shell script]
 ----
-$  ufdn tgt_root -f -t dir -d 2
+$  fnx tgt_root -f -t dir -d 2
    tgt_root/test directory/$0_T\▯Only
 -->tgt_root/test directory/$0_T_Only
    tgt_root/!临时文件夹
@@ -182,7 +184,7 @@ In order to take effect,add option '-i' or '-c'
 [sub="attributes"]
 [source,shell script]
 ----
-$  ufdn tgt_root -f -t dir
+$  fnx tgt_root -f -t dir
    tgt_root/!临时文件夹
 -->tgt_root/LSW临时文件夹
    tgt_root/测试@#文件夹
@@ -200,7 +202,7 @@ In order to take effect,add option '-i' or '-c'
 [sub="attributes"]
 [source,shell script]
 ----
-$ ufdn tgt_root/\$0\ 测试用文件.html -i
+$ fnx tgt_root/\$0\ 测试用文件.html -i
    $0▯测试用文件.html
 ==>$0_测试用文件.html
 ----
@@ -210,7 +212,7 @@ $ ufdn tgt_root/\$0\ 测试用文件.html -i
 [sub="attributes"]
 [source,shell script]
 ----
-$ ufdn tgt_root/\$0_测试用文件.html -rc
+$ fnx tgt_root/\$0_测试用文件.html -rc
 $0_测试用文件.html
 Please confirm(y/n/A/q) [no]: y
    $0_测试用文件.html
@@ -225,13 +227,13 @@ This Option
 [sub="attributes"]
 [source,shell script]
 ----
-$ ufdn tgt_root/\$0\ 测试用文件.html
+$ fnx tgt_root/\$0\ 测试用文件.html
    $0▯测试用文件.html
 -->$0_测试用文件.html
 **************************************************************************
 In order to take effect,add option '-i' or '-c'
 
-$ ufdn tgt_root/\$0\ 测试用文件.html -f
+$ fnx tgt_root/\$0\ 测试用文件.html -f
    tgt_root/$0▯测试用文件.html
 -->tgt_root/$0_测试用文件.html
 **************************************************************************
@@ -243,7 +245,7 @@ In order to take effect,add option '-i' or '-c'
 [sub="attributes"]
 [source,shell script]
 ----
-$ ufdn tgt_root/\$0_测试用文件.html -r
+$ fnx tgt_root/\$0_测试用文件.html -r
    $0_测试用文件.html
 -->$0▯测试用文件.html
 **************************************************************************
@@ -258,7 +260,7 @@ This Option
 [sub="attributes"]
 [source,shell script]
 ----
-$ ufdn tgt_root
+$ fnx tgt_root
    $0▯测试用文件.html
 -->$0_测试用文件.html
    This▯is▯a▯Test▯file.pdf
@@ -270,7 +272,7 @@ $ ufdn tgt_root
 **************************************************************************
 In order to take effect,add option '-i' or '-c'
 
-$ ufdn tgt_root -p
+$ fnx tgt_root -p
    $0▯测试用文件.html
 -->$0_测试用文件.html
    This▯is▯a▯Test▯file.pdf
@@ -294,7 +296,7 @@ This Option
 [sub="attributes"]
 [source,shell script]
 ----
-$ ufdn tgt_root/\$0\ 测试用文件.html
+$ fnx tgt_root/\$0\ 测试用文件.html
    $0▯测试用文件.html
 -->$0_测试用文件.html
 **************************************************************************
@@ -306,7 +308,7 @@ In order to take effect,add option '-i' or '-c'
 [sub="attributes"]
 [source,shell script]
 ----
-$ ufdn tgt_root
+$ fnx tgt_root
    $0▯测试用文件.html
 -->$0_测试用文件.html
    This▯is▯a▯Test▯file.pdf
@@ -324,7 +326,7 @@ In order to take effect,add option '-i' or '-c'
 [sub="attributes"]
 [source,shell script]
 ----
-$ ufdn tgt_root/\$0_测试用文件.html -r
+$ fnx tgt_root/\$0_测试用文件.html -r
    $0_测试用文件.html
 -->$0▯测试用文件.html
 **************************************************************************
@@ -336,7 +338,7 @@ In order to take effect,add option '-i' or '-c'
 [sub="attributes"]
 [source,shell script]
 ----
-$ ufdn tgt_root -r
+$ fnx tgt_root -r
    This_Is_A_Test_File.pdf
 -->This▯is▯a▯Test▯file.pdf
    ZSC这是测试文件.jpg
@@ -399,9 +401,9 @@ WARNING: 可能不继续更新.
 
 * 内容为link:++https://www.gnu.org/software/bash/++[bash]脚本，可以直接下载和执行;
 
-* 将UFn.sh放置在/usr/local/bin 或者/usr/bin 或者其它link:++https://en.wikipedia.org/wiki/Environment_variable++[环境变量]包含的目录，这样可以在任意目录执行该脚本；
+* 将fnx.sh放置在/usr/local/bin 或者/usr/bin 或者其它link:++https://en.wikipedia.org/wiki/Environment_variable++[环境变量]包含的目录，这样可以在任意目录执行该脚本；
 
-* 如果需要其它目录执行可以考虑创建link:++https://en.wikipedia.org/wiki/Ln_(Unix)++[软连接](ln -s UFn.sh TargetName)
+* 如果需要其它目录执行可以考虑创建link:++https://en.wikipedia.org/wiki/Ln_(Unix)++[软连接](ln -s fnx.sh TargetName)
 
 [id="python-1"]
 ===  Python 版
@@ -411,7 +413,7 @@ WARNING: 可能不继续更新.
 [sub="attributes"]
 [source,shell script]
 ----
-$ conda install -c hobbymarks ufdn
+$ conda install -c hobbymarks fnx
 ----
 
 ==  参数

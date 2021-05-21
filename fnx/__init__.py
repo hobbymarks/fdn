@@ -1,4 +1,4 @@
-"""ufdn use to uniformly change file or directory names and also support
+"""fnx use to uniformly change file or directory names and also support
 rollback these operations. """
 from __future__ import print_function
 
@@ -12,11 +12,11 @@ from colorama import Back
 from colorama import Fore
 from colorama import Style
 
-from ufdn.ufdnlib.uconfig import gParamDict as ugPD
-from ufdn.ufdnlib import ucrypt
-from ufdn.ufdnlib import udb
-from ufdn.ufdnlib import ufncli
-from ufdn.ufdnlib import utils
+from fnx.fnxlib.fnxcfg import gParamDict as ugPD
+from fnx.fnxlib import ucrypt
+from fnx.fnxlib import udb
+from fnx.fnxlib import fnxcli
+from fnx.fnxlib import utils
 
 
 def main() -> None:
@@ -49,11 +49,11 @@ def main() -> None:
 
         ugPD["LowerCaseWordSet"] = set(
             list(map(lambda x: x.lower(), words.words())))
-        ugPD["record_path"] = os.path.join(Path.home(), ".ufdn")
+        ugPD["record_path"] = os.path.join(Path.home(), ".fnx")
         Path(ugPD["record_path"]).mkdir(parents=True, exist_ok=True)
         ugPD["db_path"] = os.path.join(ugPD["record_path"], "rdsa.db")
         #######################################################################
-        ufncli.ufn()
+        fnxcli.ufn()
     finally:
         colorama.deinit()
 

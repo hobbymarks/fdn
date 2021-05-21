@@ -8,8 +8,8 @@ import click
 from colorama import Fore
 
 # From This Project
-from ufdn.ufdnlib.uconfig import gParamDict as ugPD
-from ufdn.ufdnlib import utils
+from fnx.fnxlib.fnxcfg import gParamDict as ugPD
+from fnx.fnxlib import utils
 
 _ver = "2021.05.18.1505"
 

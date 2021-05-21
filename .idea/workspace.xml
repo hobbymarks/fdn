@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="b3f02cd7-eadd-4c57-8da5-af782de82446" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/fnx@hobbymarks.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/conda-build-and-upload-fnx.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/UFn@hobbymarks.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/copyright/HobbyMarks_Copyright.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.adoc" beforeDir="false" afterPath="$PROJECT_DIR$/README.adoc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/conda-build-and-upload-ufdn.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/meta.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/meta.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/context.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/context.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_UFn.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_fnx.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/ufdn4T_nb.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/tests/fnx4T_nb.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ufdn/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fnx/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ufdn/nltk_data/corpora/words.zip" beforeDir="false" afterPath="$PROJECT_DIR$/fnx/nltk_data/corpora/words.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ufdn/nltk_data/corpora/words/README" beforeDir="false" afterPath="$PROJECT_DIR$/fnx/nltk_data/corpora/words/README" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ufdn/nltk_data/corpora/words/en" beforeDir="false" afterPath="$PROJECT_DIR$/fnx/nltk_data/corpora/words/en" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ufdn/nltk_data/corpora/words/en-basic" beforeDir="false" afterPath="$PROJECT_DIR$/fnx/nltk_data/corpora/words/en-basic" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ufdn/ufdnlib/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fnx/fnxlib/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ufdn/ufdnlib/uconfig.py" beforeDir="false" afterPath="$PROJECT_DIR$/fnx/fnxlib/fnxcfg.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ufdn/ufdnlib/ucrypt.py" beforeDir="false" afterPath="$PROJECT_DIR$/fnx/fnxlib/ucrypt.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ufdn/ufdnlib/udb.py" beforeDir="false" afterPath="$PROJECT_DIR$/fnx/fnxlib/udb.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ufdn/ufdnlib/ufn_notebook.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/fnx/fnxlib/fnx_notebook.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ufdn/ufdnlib/ufn_sh.sh" beforeDir="false" afterPath="$PROJECT_DIR$/fnx/fnxlib/fnx_sh.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ufdn/ufdnlib/ufncli.py" beforeDir="false" afterPath="$PROJECT_DIR$/fnx/fnxlib/fnxcli.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ufdn/ufdnlib/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/fnx/fnxlib/utils.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1sp7jE13jk73N4jDZA3HmYxLTuN" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="b3f02cd7-eadd-4c57-8da5-af782de82446" name="Default Changelist" comment="" />
+      <created>1621557809556</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1621557809556</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

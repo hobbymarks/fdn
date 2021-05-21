@@ -2,7 +2,7 @@ from setuptools import find_packages
 from setuptools import setup
 
 setup(
-    name='ufdn@hobbymarks',
+    name='fnx@hobbymarks',
     version='2021.05',
     packages=find_packages('.'),
     url='https://github.com/hobbymarks/UFn',
@@ -12,7 +12,7 @@ setup(
     description='',
     entry_points={
         'console_scripts': [
-            'ufdn = ufdn:main',
+            'fnx = fnx:main',
         ],
     },
 )
