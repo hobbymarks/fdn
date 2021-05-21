@@ -59,6 +59,8 @@ File or directory name format:
 
 . keep link:++https://www.gnu.org/software/bash/manual/html_node/Special-Parameters.html++[bash special parameters] in file name;
 
+. some terminology will remained(update continuously) ,such as `USB`,`PCIe` ...
+
 ==  Installation
 
 [id="bash-version-1"]
@@ -241,12 +243,20 @@ image::docs/images/fnx_io_Exist.png[]
 [sub="attributes"]
 [source,shell script]
 ----
-$ fnx tgt_root/\$0_测试用文件.html -rc
-$0_测试用文件.html
+$ fnx tgt_root/\$0\ \ 测试用文件.html -c
+$0  测试用文件.html
+Please confirm(y/n/A/q) [no]:
+   $0▯▯测试用文件.html
+-->$0_测试用文件.html
+
+$ fnx tgt_root/\$0\ \ 测试用文件.html -c
+$0  测试用文件.html
 Please confirm(y/n/A/q) [no]: y
-   $0_测试用文件.html
-==>$0▯测试用文件.html
+   $0▯▯测试用文件.html
+==>$0_测试用文件.html
 ----
+image::docs/images/fnx_f_cNo.png[]
+image::docs/images/fnx_f_cYes.png[]
 
 -l option ::
 This Option
@@ -256,18 +266,40 @@ This Option
 [sub="attributes"]
 [source,shell script]
 ----
-$ fnx tgt_root/\$0\ 测试用文件.html
-   $0▯测试用文件.html
+$ fnx tgt_root/\$0\ \ 测试用文件.html
+   $0▯▯测试用文件.html
 -->$0_测试用文件.html
 **************************************************************************
 In order to take effect,add option '-i' or '-c'
 
-$ fnx tgt_root/\$0\ 测试用文件.html -f
-   tgt_root/$0▯测试用文件.html
+$ fnx tgt_root/\$0\ \ 测试用文件.html -f
+   tgt_root/$0▯▯测试用文件.html
 -->tgt_root/$0_测试用文件.html
 **************************************************************************
 In order to take effect,add option '-i' or '-c'
 ----
+image::docs/images/fnx_File.png[]
+image::docs/images/fnx_File_f.png[]
+
+-a option ::
+
+[sub="attributes"]
+[source,shell script]
+----
+$ fnx
+   a▯Test-file.txt
+-->A_Test_File.txt
+**************************************************************************
+In order to take effect,add option '-i' or '-c'
+
+$ fnx -a
+   /home/hma/a▯Test-file.txt
+-->/home/hma/A_Test_File.txt
+**************************************************************************
+In order to take effect,add option '-i' or '-c'
+----
+image::docs/images/fnx.png[]
+image::docs/images/fnx_a.png[]
 
 -r option ::
 
@@ -276,10 +308,11 @@ In order to take effect,add option '-i' or '-c'
 ----
 $ fnx tgt_root/\$0_测试用文件.html -r
    $0_测试用文件.html
--->$0▯测试用文件.html
+-->$0▯▯测试用文件.html
 **************************************************************************
 In order to take effect,add option '-i' or '-c'
 ----
+image::docs/images/fnx_File_r.png[]
 
 -o option ::
 
@@ -304,32 +337,36 @@ image::docs/images/fnx_io_Exist.png[]
 [source,shell script]
 ----
 $ fnx tgt_root
-   $0▯测试用文件.html
+   thi_Is_File_%.mp4
+-->Thi_Is_File_%.mp4
+   $0▯▯测试用文件.html
 -->$0_测试用文件.html
-   This▯is▯a▯Test▯file.pdf
--->This_Is_A_Test_File.pdf
-   这是测试文件▯.jpg
--->ZSC这是测试文件.jpg
-   _thi▯▯is▯▯▯file▯%.mp4
--->thi_Is_File_%.mp4
 **************************************************************************
 In order to take effect,add option '-i' or '-c'
 
 $ fnx tgt_root -p
-   $0▯测试用文件.html
--->$0_测试用文件.html
-   This▯is▯a▯Test▯file.pdf
--->This_Is_A_Test_File.pdf
-      这是测试文件▯.jpg
--->ZSC这是测试文件 .jpg
-   _thi▯▯is▯▯▯file▯%.mp4
---> thi _Is  _File_%.mp4
+   thi_Is_File_%.mp4
+-->Thi_Is_File_%.mp4
+   $0▯▯测试用文件.html
+-->$0 _测试用文件.html
 **************************************************************************
 In order to take effect,add option '-i' or '-c'
 ----
+image::docs/images/fnx_D.png[]
+image::docs/images/fnx_D_p.png[]
 
 -e option ::
-This Option
+
+[sub="attributes"]
+[source,shell script]
+----
+$ fnx tgt_root/\$0_测试用文件.html -re
+   $0_测试用文件.html
+-->$0▯▯测试用文件.html
+**************************************************************************
+In order to take effect,add option '-i' or '-c'
+----
+image::docs/images/fnx_File_r_e.png[]
 
 [#_every_emp]
 ==  Example
@@ -436,6 +473,7 @@ WARNING: 可能不继续更新.
 . 除去扩展名后的文件名如果最后一个字符是下划线也会被删除；
 
 . 在文件名中保留 link:++https://www.gnu.org/software/bash/manual/html_node/Special-Parameters.html++[bash special parameters];
+. 文件名中包含的一些术语会保留术语本身的大小写写法(持续更新中...),例如 `USB`,`PCIe` 等;
 
 ==  安装
 

@@ -2,16 +2,20 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3f02cd7-eadd-4c57-8da5-af782de82446" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/docs/images/fnx_f.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/images/fnx_f_dir.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/images/fnx_f_tdir_d1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/images/fnx_f_tdir_d2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/images/fnx_i_Exist.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/images/fnx_io_Exist.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/images/fnx.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/images/fnx_D.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/images/fnx_D_p.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/images/fnx_File.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/images/fnx_File_f.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/images/fnx_File_r.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/images/fnx_File_r_e.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/images/fnx_a.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/images/fnx_f_cNo.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/images/fnx_f_cYes.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/tgt_root/$0  测试用文件.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.adoc" beforeDir="false" afterPath="$PROJECT_DIR$/README.adoc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fnx/fnxlib/udb.py" beforeDir="false" afterPath="$PROJECT_DIR$/fnx/fnxlib/udb.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/tgt_root/$0  测试用文件.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/tgt_root/$0_测试用文件.html" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
