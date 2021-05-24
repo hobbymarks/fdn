@@ -2,9 +2,9 @@
 rollback these operations. """
 from __future__ import print_function
 
-from pathlib import Path
 import os
 import sys
+from pathlib import Path
 
 import click
 import colorama
@@ -12,11 +12,11 @@ from colorama import Back
 from colorama import Fore
 from colorama import Style
 
-from fnx.fnxlib.fnxcfg import gParamDict as ugPD
+from fnx.fnxlib import fnxcli
 from fnx.fnxlib import ucrypt
 from fnx.fnxlib import udb
-from fnx.fnxlib import fnxcli
 from fnx.fnxlib import utils
+from fnx.fnxlib.fnxcfg import gParamDict as ugPD
 
 
 def main() -> None:

@@ -1,6 +1,6 @@
 import os
-from pathlib import Path
 import shutil
+from pathlib import Path
 from typing import Optional, List
 
 # From Third party
@@ -8,10 +8,11 @@ import click
 from colorama import Fore
 
 # From This Project
-from fnx.fnxlib.fnxcfg import gParamDict as ugPD
+from fnx.fnxlib import fnxutils
 from fnx.fnxlib import utils
+from fnx.fnxlib.fnxcfg import gParamDict as ugPD
 
-_ver = "2021.05.21.2714"
+_ver = "2021.05.24.2404"
 
 
 @click.command(
@@ -125,16 +126,16 @@ def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
     ugPD["target_appeared"] = False
     for pth in ugPD["path"]:
         pth = (pth[:-1] if pth.endswith(os.sep) else pth)
-        if os.path.isfile(pth) and utils.type_matched(pth):
+        if os.path.isfile(pth) and fnxutils.type_matched(pth):
             if not roll_back:
-                utils.one_file_ufn(pth)
+                fnxutils.one_file_ufn(pth)
             else:
-                utils.one_file_rbk(pth)
+                fnxutils.one_file_rbk(pth)
         elif os.path.isdir(pth):
             if not roll_back:
-                utils.one_dir_ufn(pth)
+                fnxutils.one_dir_ufn(pth)
             else:
-                utils.one_dir_rbk(pth)
+                fnxutils.one_dir_rbk(pth)
         else:
             click.echo(f"{Fore.RED}Not valid:{pth}{Fore.RESET}")
 

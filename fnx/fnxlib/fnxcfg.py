@@ -79,16 +79,15 @@ gParamDict: dict = {
         "what’s": "what_is"
     },
     "TerminologyDictionary": {
-        # "apple": "Apple",# Already in nltk words and also match capwords so
-        # delete
+        "apple": "Apple",
+        "acid": "ACID",
         "asciinema": "asciinema",
         "api": "API",
         "atm": "ATM",
         "cmsis": "CMSIS",
         "cypress": "CYPRESS",
         "dji": "DJI",
-        # "google": "Google",# Already in nltk words and also match capwords so
-        # delete
+        "google": "Google",
         "i2c": "I2C",
         "idata": "iData",
         "kicad": "KiCAD",
@@ -100,6 +99,7 @@ gParamDict: dict = {
         "nucleo": "NUCLEO",
         "pcb": "PCB",
         "pcie": "PCIe",
+        "pdfminersix": "pdfminersix",
         "pep8": "PEP8",
         "psoc": "PSoC",
         "pyqt": "PyQt",
@@ -109,6 +109,7 @@ gParamDict: dict = {
         "restructuredtext": "reStructuredText",
         "rohs": "ROHS",
         "spi": "SPI",
+        "ssd": "SSD",
         "stm32": "STM32",
         "stmicroelectronics": "STMicroelectronics",
         "sudo": "sudo",

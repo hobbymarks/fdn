@@ -1,8 +1,9 @@
 import base64
+from typing import Union, Optional
+
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from typing import Union, Optional
 
 
 class Crypt:
