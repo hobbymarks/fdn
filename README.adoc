@@ -8,7 +8,7 @@ endif::[]
 
 :source-highlighter: coderay
 
-==  FNX
+==  fdn
 :toc:
 
 
@@ -17,7 +17,7 @@ endif::[]
 A tool for uniformly change file sor directory names and also support
 rollback these operations.
 
-__In short,fnx is about file names operation.__
+__In short,fdn is about file names operation.__
 
 
 
@@ -68,21 +68,30 @@ File or directory name format:
 
 * The content is link:++https://www.gnu.org/software/bash/++[bash] script，so you can download and run directly;
 
-* If you want to run fnx.sh any where,please make sure place fnx.sh in /usr/local/bin or /usr/bin or other directory include in
+* If you want to run fdn.sh any where,please make sure place fdn.sh in /usr/local/bin or /usr/bin or other directory include in
 link:++https://en.wikipedia.org/wiki/Environment_variable++[Environment_variable]；
 
-* If you want to run the script in some directory , you can create link:++https://en.wikipedia.org/wiki/Ln_(Unix)++[soft link](ln -s fnx.sh TargetName)
+* If you want to run the script in some directory , you can create link:++https://en.wikipedia.org/wiki/Ln_(Unix)++[soft link](ln -s fdn.sh TargetName)
 
 [id="python-version-1"]
 ===  Python Version
 
-To install fnx via link:++https://www.anaconda.com/products/individual++[conda]:
+To install fdn via link:++https://www.anaconda.com/products/individual++[conda]:
 
 [sub="attributes"]
 [source,shell script]
 ----
-$ conda install -c hobbymarks fnx
+$ conda install -c hobbymarks fdn
 ----
+
+To install fdn via link:++https://pypi.org/project/pip/++[pip]:
+
+[sub="attributes"]
+[source,shell script]
+----
+$ pip install fdn
+----
+
 
 [#_usage_options]
 ==  Usage/参数
@@ -91,7 +100,7 @@ Options:
 
 [sub="attributes"]
 ----
-Usage: fnx [OPTIONS] [PATH]...
+Usage: fdn [OPTIONS] [PATH]...
 
   Files in PATH will be changed file names unified.
 
@@ -124,7 +133,7 @@ Options:
 
 [NOTE]
 ====
-When you run fnx ,you will see two kinds of output:
+When you run fdn ,you will see two kinds of output:
 
 - First Kind
 
@@ -166,7 +175,7 @@ The output means: a file named `sample file name` has been changed to `sample_fi
 [sub="attributes"]
 [source,shell script]
 ----
-$  fnx tgt_root -f -t dir -d 2
+$  fdn tgt_root -f -t dir -d 2
    tgt_root/test directory/$0_T\▯Only
 -->tgt_root/test directory/$0_T_Only
    tgt_root/!临时文件夹
@@ -182,7 +191,7 @@ $  fnx tgt_root -f -t dir -d 2
 **************************************************************************
 In order to take effect,add option '-i' or '-c'
 
-$ fnx tgt_root -f -t dir -d 1
+$ fdn tgt_root -f -t dir -d 1
    tgt_root/!临时文件夹
 -->tgt_root/LSW临时文件夹
    tgt_root/_is▯dir▯%
@@ -204,7 +213,7 @@ image::docs/images/fnx_f_tdir_d1.png[]
 [sub="attributes"]
 [source,shell script]
 ----
-$  fnx tgt_root -f -t dir
+$  fdn tgt_root -f -t dir
    tgt_root/!临时文件夹
 -->tgt_root/LSW临时文件夹
    tgt_root/测试@#文件夹
@@ -216,7 +225,7 @@ $  fnx tgt_root -f -t dir
 **************************************************************************
 In order to take effect,add option '-i' or '-c'
 
-$ fnx tgt_root -f
+$ fdn tgt_root -f
    tgt_root/thi_Is_File_%.mp4
 -->tgt_root/Thi_Is_File_%.mp4
    tgt_root/$0▯▯测试用文件.html
@@ -232,7 +241,7 @@ image::docs/images/fnx_f.png[]
 [sub="attributes"]
 [source,shell script]
 ----
-$ fnx tgt_root/\$0\ \ 测试用文件.html -io
+$ fdn tgt_root/\$0\ \ 测试用文件.html -io
    $0▯▯测试用文件.html
 ==>$0_测试用文件.html
 ----
@@ -243,13 +252,13 @@ image::docs/images/fnx_io_Exist.png[]
 [sub="attributes"]
 [source,shell script]
 ----
-$ fnx tgt_root/\$0\ \ 测试用文件.html -c
+$ fdn tgt_root/\$0\ \ 测试用文件.html -c
 $0  测试用文件.html
 Please confirm(y/n/A/q) [no]:
    $0▯▯测试用文件.html
 -->$0_测试用文件.html
 
-$ fnx tgt_root/\$0\ \ 测试用文件.html -c
+$ fdn tgt_root/\$0\ \ 测试用文件.html -c
 $0  测试用文件.html
 Please confirm(y/n/A/q) [no]: y
    $0▯▯测试用文件.html
@@ -266,13 +275,13 @@ This Option
 [sub="attributes"]
 [source,shell script]
 ----
-$ fnx tgt_root/\$0\ \ 测试用文件.html
+$ fdn tgt_root/\$0\ \ 测试用文件.html
    $0▯▯测试用文件.html
 -->$0_测试用文件.html
 **************************************************************************
 In order to take effect,add option '-i' or '-c'
 
-$ fnx tgt_root/\$0\ \ 测试用文件.html -f
+$ fdn tgt_root/\$0\ \ 测试用文件.html -f
    tgt_root/$0▯▯测试用文件.html
 -->tgt_root/$0_测试用文件.html
 **************************************************************************
@@ -286,13 +295,13 @@ image::docs/images/fnx_File_f.png[]
 [sub="attributes"]
 [source,shell script]
 ----
-$ fnx
+$ fdn
    a▯Test-file.txt
 -->A_Test_File.txt
 **************************************************************************
 In order to take effect,add option '-i' or '-c'
 
-$ fnx -a
+$ fdn -a
    /home/hma/a▯Test-file.txt
 -->/home/hma/A_Test_File.txt
 **************************************************************************
@@ -306,7 +315,7 @@ image::docs/images/fnx_a.png[]
 [sub="attributes"]
 [source,shell script]
 ----
-$ fnx tgt_root/\$0_测试用文件.html -r
+$ fdn tgt_root/\$0_测试用文件.html -r
    $0_测试用文件.html
 -->$0▯▯测试用文件.html
 **************************************************************************
@@ -319,12 +328,12 @@ image::docs/images/fnx_File_r.png[]
 [sub="attributes"]
 [source,shell script]
 ----
-$ fnx tgt_root/\$0\ \ 测试用文件.html -i
+$ fdn tgt_root/\$0\ \ 测试用文件.html -i
 Exist:$0_测试用文件.html
 Skipped:$0  测试用文件.html
 With option '-o' to enable overwrite.
 
-$ fnx tgt_root/\$0\ \ 测试用文件.html -io
+$ fdn tgt_root/\$0\ \ 测试用文件.html -io
    $0▯▯测试用文件.html
 ==>$0_测试用文件.html
 ----
@@ -336,7 +345,7 @@ image::docs/images/fnx_io_Exist.png[]
 [sub="attributes"]
 [source,shell script]
 ----
-$ fnx tgt_root
+$ fdn tgt_root
    thi_Is_File_%.mp4
 -->Thi_Is_File_%.mp4
    $0▯▯测试用文件.html
@@ -344,7 +353,7 @@ $ fnx tgt_root
 **************************************************************************
 In order to take effect,add option '-i' or '-c'
 
-$ fnx tgt_root -p
+$ fdn tgt_root -p
    thi_Is_File_%.mp4
 -->Thi_Is_File_%.mp4
    $0▯▯测试用文件.html
@@ -360,7 +369,7 @@ image::docs/images/fnx_D_p.png[]
 [sub="attributes"]
 [source,shell script]
 ----
-$ fnx tgt_root/\$0_测试用文件.html -re
+$ fdn tgt_root/\$0_测试用文件.html -re
    $0_测试用文件.html
 -->$0▯▯测试用文件.html
 **************************************************************************
@@ -376,7 +385,7 @@ image::docs/images/fnx_File_r_e.png[]
 [sub="attributes"]
 [source,shell script]
 ----
-$ fnx tgt_root/\$0\ 测试用文件.html
+$ fdn tgt_root/\$0\ 测试用文件.html
    $0▯测试用文件.html
 -->$0_测试用文件.html
 **************************************************************************
@@ -388,7 +397,7 @@ In order to take effect,add option '-i' or '-c'
 [sub="attributes"]
 [source,shell script]
 ----
-$ fnx tgt_root
+$ fdn tgt_root
    $0▯测试用文件.html
 -->$0_测试用文件.html
    This▯is▯a▯Test▯file.pdf
@@ -406,7 +415,7 @@ In order to take effect,add option '-i' or '-c'
 [sub="attributes"]
 [source,shell script]
 ----
-$ fnx tgt_root/\$0_测试用文件.html -r
+$ fdn tgt_root/\$0_测试用文件.html -r
    $0_测试用文件.html
 -->$0▯测试用文件.html
 **************************************************************************
@@ -418,7 +427,7 @@ In order to take effect,add option '-i' or '-c'
 [sub="attributes"]
 [source,shell script]
 ----
-$ fnx tgt_root -r
+$ fdn tgt_root -r
    This_Is_A_Test_File.pdf
 -->This▯is▯a▯Test▯file.pdf
    ZSC这是测试文件.jpg
@@ -438,13 +447,13 @@ __link:++https://github.com/sharkdp/fd++[fd] is a program to find entries in you
 [sub="attributes"]
 [source,shell script]
 ----
-$ fdfind -HIi html -X fnx
+$ fdfind -HIi html -X fdn
    $0▯▯测试用文件.html
 -->$0_测试用文件.html
 **************************************************************************
 In order to take effect,add option '-i' or '-c'
 
-$ fdfind -HIi html -X fnx {} -pf
+$ fdfind -HIi html -X fdn {} -pf
    tgt_root/$0▯▯测试用文件.html
 -->tgt_root/$0 _测试用文件.html
 **************************************************************************
@@ -503,9 +512,9 @@ WARNING: 可能不继续更新.
 
 * 内容为link:++https://www.gnu.org/software/bash/++[bash]脚本，可以直接下载和执行;
 
-* 将fnx.sh放置在/usr/local/bin 或者/usr/bin 或者其它link:++https://en.wikipedia.org/wiki/Environment_variable++[环境变量]包含的目录，这样可以在任意目录执行该脚本；
+* 将fdn.sh放置在/usr/local/bin 或者/usr/bin 或者其它link:++https://en.wikipedia.org/wiki/Environment_variable++[环境变量]包含的目录，这样可以在任意目录执行该脚本；
 
-* 如果需要其它目录执行可以考虑创建link:++https://en.wikipedia.org/wiki/Ln_(Unix)++[软连接](ln -s fnx.sh TargetName)
+* 如果需要其它目录执行可以考虑创建link:++https://en.wikipedia.org/wiki/Ln_(Unix)++[软连接](ln -s fdn.sh TargetName)
 
 [id="python-1"]
 ===  Python 版
@@ -515,7 +524,15 @@ WARNING: 可能不继续更新.
 [sub="attributes"]
 [source,shell script]
 ----
-$ conda install -c hobbymarks fnx
+$ conda install -c hobbymarks fdn
+----
+
+使用link:++https://pypi.org/project/pip/++[pip]进行安装:
+
+[sub="attributes"]
+[source,shell script]
+----
+$ pip install fdn
 ----
 
 ==  参数

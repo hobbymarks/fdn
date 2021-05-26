@@ -10,11 +10,11 @@ import click
 from colorama import Back
 from unidecode import unidecode
 
-from fnx.fnxlib import ucrypt
-from fnx.fnxlib import utils
+from fdn.fdnlib import ucrypt
+from fdn.fdnlib import utils
 # From This Project
-from fnx.fnxlib.fnxcfg import gParamDict as ugPD
-from fnx.fnxlib.udb import UDB
+from fdn.fdnlib.fdncfg import gParamDict as ugPD
+from fdn.fdnlib.udb import UDB
 
 
 def _replace_char(s: str) -> str:

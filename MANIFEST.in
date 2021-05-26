@@ -1,0 +1,4 @@
+graft fdn/nltk_data
+graft docs
+prune tests
+include README.adoc

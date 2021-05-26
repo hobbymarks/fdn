@@ -1,0 +1,14 @@
+Metadata-Version: 1.1
+Name: fdn
+Version: 2021.5.26.2637
+Summary: uniformly change file or directory names
+Home-page: https://github.com/hobbymarks/fdn
+Author: hobbymarks
+Author-email: ihobbymarks@gmail.com
+License: MIT
+Description: fdn used to uniformly change file or directory names and also support rollback these operations. 
+Platform: UNKNOWN
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
