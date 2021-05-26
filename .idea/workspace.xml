@@ -5,35 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b3f02cd7-eadd-4c57-8da5-af782de82446" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/MANIFEST.in" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/fdn.egg-info/PKG-INFO" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/fdn.egg-info/SOURCES.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/fdn.egg-info/dependency_links.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/fdn.egg-info/entry_points.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/fdn.egg-info/requires.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/fdn.egg-info/top_level.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/fdn/__main__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/fnx@hobbymarks.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/fnx@hobbymarks.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.adoc" beforeDir="false" afterPath="$PROJECT_DIR$/README.adoc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/conda-bld-upld-fnx.sh" beforeDir="false" afterPath="$PROJECT_DIR$/conda-bld-upld-fnx.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fnx/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fnx/fnxlib/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/fdnlib/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fnx/fnxlib/fnx.sh" beforeDir="false" afterPath="$PROJECT_DIR$/fdn.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fnx/fnxlib/fnx_nb.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/fdn_nb.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fnx/fnxlib/fnxcfg.py" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/fdnlib/fdncfg.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fnx/fnxlib/fnxcli.py" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/fdnlib/fdncli.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fnx/fnxlib/fnxutils.py" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/fdnlib/fdnutils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fnx/fnxlib/ucrypt.py" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/fdnlib/ucrypt.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fnx/fnxlib/udb.py" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/fdnlib/udb.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fnx/fnxlib/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/fdnlib/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fnx/nltk_data/corpora/words.zip" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/nltk_data/corpora/words.zip" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fnx/nltk_data/corpora/words/README" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/nltk_data/corpora/words/README" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fnx/nltk_data/corpora/words/en" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/nltk_data/corpora/words/en" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fnx/nltk_data/corpora/words/en-basic" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/nltk_data/corpora/words/en-basic" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/meta.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/meta.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/conda-bld-upld-fnx.sh" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
