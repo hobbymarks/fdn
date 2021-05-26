@@ -1,13 +1,13 @@
 """fdn use to uniformly change file or directory names and also support
 rollback these operations. """
-from __future__ import print_function
+import click
 
 import os
 import sys
 from pathlib import Path
 
 # From Third party
-import click
+
 import colorama
 from colorama import Back
 from colorama import Fore
