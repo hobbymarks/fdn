@@ -1,8 +1,6 @@
 from setuptools import find_packages
 from setuptools import setup
 
-import fdn
-
 setup(
     name='fdn',
     # version=fdn.__version__,
