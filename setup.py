@@ -5,7 +5,8 @@ import fdn
 
 setup(
     name='fdn',
-    version=fdn.__version__,
+    # version=fdn.__version__,
+    version="2021.05.26",
     packages=find_packages('.'),
     url='https://github.com/hobbymarks/fdn',
     license='MIT',
