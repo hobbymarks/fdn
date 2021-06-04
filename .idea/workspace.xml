@@ -5,7 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b3f02cd7-eadd-4c57-8da5-af782de82446" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/fnx@hobbymarks.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/conda-bld-upld-fdn.sh" beforeDir="false" afterPath="$PROJECT_DIR$/conda-bld-upld-fdn.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fdn.sh" beforeDir="false" afterPath="$PROJECT_DIR$/fdn.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fdn/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fdn/fdnlib/fdncli.py" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/fdnlib/fdncli.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/meta.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/meta.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,15 +53,15 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../yapf@google" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="run.code.analysis.last.selected.profile" value="aDefault" />
-    <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
-      <console-settings module-name="fnx@hobbymarks" is-module-sdk="true">
+      <console-settings module-name="fdn@hobbymarks" is-module-sdk="true">
         <option name="myUseModuleSdk" value="true" />
-        <option name="myModuleName" value="fnx@hobbymarks" />
+        <option name="myModuleName" value="fdn@hobbymarks" />
       </console-settings>
     </option>
   </component>

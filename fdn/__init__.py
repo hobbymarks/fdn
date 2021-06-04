@@ -16,7 +16,7 @@ from colorama import Style
 from fdn.fdnlib.fdncfg import gParamDict as ugPD
 from fdn.fdnlib.fdncli import ufn
 
-__version__ = "2021.05.26.2637"
+__version__ = "2021.05.31.2637"
 
 
 def main() -> None:

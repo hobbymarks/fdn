@@ -4,7 +4,7 @@ from setuptools import setup
 setup(
     name='fdn',
     # version=fdn.__version__,
-    version="2021.05.26",
+    version="2021.05.31",
     packages=find_packages('.'),
     url='https://github.com/hobbymarks/fdn',
     license='MIT',
