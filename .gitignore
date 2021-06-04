@@ -3,7 +3,8 @@
 fdn/.ipynb_checkpoints/
 fdn/__pycache__/
 fdn/fdnlib/__pycache__/
+fdn/data/__pycache__/
 tests/__pycache__/
 build/
 dist/
-fnx.egg-info/
+fdn.egg-info/

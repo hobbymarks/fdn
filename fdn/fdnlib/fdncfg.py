@@ -1,126 +1,37 @@
-import string
+import importlib.resources
+import json
+import os
+from pathlib import Path
 
-_gSC: str = "_"
+# From Third party
+import nltk
+from nltk.corpus import words
 
-gParamDict: dict = {
-    "SeparatorChar": _gSC,
-    "ASCLen": 3,
-    "AlternateFlag": True,
-    "HeadChars": string.ascii_letters + string.digits + string.punctuation,
-    "BeReplacedCharDictionary": {
-        "\r": _gSC,
-        "\n": _gSC,
-        "?": _gSC,
-        ",": _gSC,
-        "!": _gSC,
-        ":": _gSC,
-        "&": _gSC,
-        "@": _gSC,
-        "·": _gSC,  # at the middle height of row
-        "\`": _gSC,
-        "`": _gSC,
-        "\\": _gSC,
-        " ": _gSC,  # space
-        "(": _gSC,
-        ")": _gSC,
-        "'": _gSC,
-        "+": _gSC,
-        "-": _gSC,
-        "±": _gSC,
-        "=": _gSC,
-        "|": _gSC,
-        "[": _gSC,
-        "]": _gSC,
-        "{": _gSC,
-        "}": _gSC,
-        "»": _gSC,
-        "«": _gSC,
-        "\"": _gSC,
-        "*": _gSC,
-        "#": _gSC,
-        "®": _gSC,
-        "™": _gSC,
-        "…": _gSC,
-        "“": _gSC,
-        "”": _gSC,
-        #     ".": _gSC,
-        "•": _gSC,
-        "，": _gSC,
-        "。": _gSC,
-        "–": _gSC,
-        "—": _gSC,
-        #     "一": _gSC,# It is a chinese number character, means one
-        "、": _gSC,
-        "（": _gSC,
-        "）": _gSC,
-        "《": _gSC,
-        "》": _gSC,
-        ">": _gSC,
-        "【": _gSC,
-        "】": _gSC,
-        "「": _gSC,
-        "」": _gSC,
-        "｜": _gSC,
-        "：": _gSC,
-        "；": _gSC,
-        "？": _gSC,
-        "！": _gSC,
-        "🚀": _gSC,
-        "🚴": _gSC,
-        "🌏": _gSC,
-        "🐾": _gSC,
-        "❤️": _gSC,
-        "%2F": _gSC,
-        # "____": _gSC,# This is a rougher way to deal with continuous
-        # separator "___": _gSC,# character. "__": _gSC,# Now replaced by a
-        # regex,so delete them
-        "._": _gSC,
-        "What’s": "What_is",
-        "what’s": "what_is"
-    },
-    "TerminologyDictionary": {
-        "apple": "Apple",
-        "acid": "ACID",
-        "asciinema": "asciinema",
-        "api": "API",
-        "atm": "ATM",
-        "cmsis": "CMSIS",
-        "cypress": "CYPRESS",
-        "dji": "DJI",
-        "google": "Google",
-        "i2c": "I2C",
-        "idata": "iData",
-        "kicad": "KiCAD",
-        "kriasoft": "Kriasoft",
-        "mbed": "Mbed",
-        "mosfet": "MOSFET",
-        "mux": "MUX",
-        "nltk": "NLTK",
-        "nucleo": "NUCLEO",
-        "pcb": "PCB",
-        "pcie": "PCIe",
-        "pdfminersix": "pdfminersix",
-        "pep8": "PEP8",
-        "psoc": "PSoC",
-        "pyqt": "PyQt",
-        "pyqt4": "PyQt4",
-        "pyqt5": "PyQt5",
-        "pyqt6": "PyQt6",
-        "restructuredtext": "reStructuredText",
-        "rohs": "ROHS",
-        "spi": "SPI",
-        "ssd": "SSD",
-        "stm32": "STM32",
-        "stmicroelectronics": "STMicroelectronics",
-        "sudo": "sudo",
-        "tkinter": "Tkinter",
-        "ti": "TI",
-        "usb": "USB",
-        "urwid": "Urwid",
-        "vishay": "VISHAY",
-        "vim": "Vim",
-    },
-    "RemainUnchangedWordList":
-        ["$*", "$@", "$#", "$?", "$-", "$$", "$!", "$0"],
-    "IgnoredDirectoryKeyList": [".git", ".xcodeproj", ".cydsn", ".cywrk"]
-}
+# From Project
+import fdn.data
+
+gParamDict: dict = {}
+with importlib.resources.path("fdn.data", "config.json") as cfg_path:
+    with open(cfg_path) as fh:
+        gParamDict.update(json.load(fh))
+
+# TODO: can optimize to not require nltk package
+nltk_path = os.path.dirname(fdn.data.__file__)
+if os.path.isdir(nltk_path):
+    nltk.data.path.append(nltk_path)
+    if not os.path.isfile(os.path.join(nltk_path, "corpora", "words.zip")):
+        nltk.download("words", download_dir=nltk_path)
+else:
+    try:
+        from nltk.corpus import words
+
+        gParamDict["LowerCaseWordSet"] = set(
+            list(map(lambda x: x.lower(), words.words())))
+    except LookupError:
+        nltk.download("words")
+gParamDict["LowerCaseWordSet"] = set(
+    list(map(lambda x: x.lower(), words.words())))
+
+gParamDict["record_path"] = os.path.join(Path.home(), ".fdn")
+Path(gParamDict["record_path"]).mkdir(parents=True, exist_ok=True)
+gParamDict["db_path"] = os.path.join(gParamDict["record_path"], "rdsa.db")
