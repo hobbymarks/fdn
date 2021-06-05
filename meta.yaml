@@ -37,5 +37,6 @@ requirements:
 about:
     home: https://github.com/hobbymarks/fdn.git
     description: A tool for uniformly changing file or directory names.
+    doc_source_url: https://github.com/hobbymarks/fdn/blob/main/README.rst
     license: MIT
     license_file: LICENSE

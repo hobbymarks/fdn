@@ -5,45 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b3f02cd7-eadd-4c57-8da5-af782de82446" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/fdn/data/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/fdn/data/config.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/python-setup-twine-fdn.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/README.rst" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MANIFEST.in" beforeDir="false" afterPath="$PROJECT_DIR$/MANIFEST.in" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.adoc" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/images/fd_fnx.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/images/fd_fnx_p_f.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/images/fnx.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/images/fnx_D.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/images/fnx_D_p.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/images/fnx_File.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/images/fnx_File_f.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/images/fnx_File_r.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/images/fnx_File_r_e.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/images/fnx_a.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/images/fnx_f.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/images/fnx_f_cNo.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/images/fnx_f_cYes.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/images/fnx_f_dir.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/images/fnx_f_tdir_d1.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/images/fnx_f_tdir_d2.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/images/fnx_i_Exist.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/images/fnx_io_Exist.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fdn.egg-info/PKG-INFO" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fdn.egg-info/SOURCES.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fdn.egg-info/dependency_links.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fdn.egg-info/entry_points.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fdn.egg-info/requires.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fdn.egg-info/top_level.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/fdn/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fdn/fdnlib/fdncfg.py" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/fdnlib/fdncfg.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fdn/fdnlib/fdncli.py" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/fdnlib/fdncli.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fdn/nltk_data/corpora/words.zip" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/data/corpora/words.zip" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fdn/nltk_data/corpora/words/README" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/data/corpora/words/README" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fdn/nltk_data/corpora/words/en" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/data/corpora/words/en" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fdn/nltk_data/corpora/words/en-basic" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/data/corpora/words/en-basic" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/meta.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/meta.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python-setup-twine-fdn.sh" beforeDir="false" afterPath="$PROJECT_DIR$/python-setup-twine-fdn.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -65,9 +32,6 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProblemsViewState">
-    <option name="selectedIndex" value="1" />
-  </component>
   <component name="ProjectId" id="1sp7jE13jk73N4jDZA3HmYxLTuN" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
@@ -83,7 +47,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="run.code.analysis.last.selected.profile" value="aDefault" />
-    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.reStructuredText" />
   </component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">

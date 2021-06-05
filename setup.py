@@ -2,15 +2,16 @@ import os
 from setuptools import find_packages
 from setuptools import setup
 
+__version = "2021.06.05.2248"
+
 with open(os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                       "README.md"),
+                       "README.rst"),
           encoding="UTF-8") as f:
     long_description = f.read()
 
 setup(
     name='fdn',
-    # version=fdn.__version__,
-    version="2021.06.04.3329",
+    version=__version,
     packages=find_packages('.'),
     url='https://github.com/hobbymarks/fdn',
     license='MIT',
@@ -24,7 +25,7 @@ setup(
     author_email='ihobbymarks@gmail.com',
     description="uniformly change file or directory names",
     long_description=long_description,
-    long_description_content_type="text/markdown",
+    long_description_content_type="text/x-rst",
     include_package_data=True,
     install_requires=[
         "click>=8.0.0", "setuptools>=49.6.0", "unidecode>=1.2.0",
