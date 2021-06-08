@@ -4,26 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b3f02cd7-eadd-4c57-8da5-af782de82446" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/tests/Context.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/Fnx4T_nb.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/Init.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/Test_fnx.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/Test_ucrypt.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fdn/data/config.json" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/data/config.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fdn/fdnlib/fdncfg.py" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/fdnlib/fdncfg.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fdn/fdnlib/fdncli.py" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/fdnlib/fdncli.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fdn/fdnlib/fdnutils.py" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/fdnlib/fdnutils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fdn/fdnlib/ucrypt.py" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/fdnlib/ucrypt.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fdn/fdnlib/udb.py" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/fdnlib/udb.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fdn/fdnlib/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/fdnlib/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/context.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/fnx4T_nb.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_fnx.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_ucrypt.py" beforeDir="false" />
-    </list>
+    <list default="true" id="b3f02cd7-eadd-4c57-8da5-af782de82446" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
