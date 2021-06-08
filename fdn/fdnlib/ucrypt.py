@@ -1,5 +1,5 @@
 import base64
-from typing import Union, Optional
+from typing import Optional, Union
 
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes

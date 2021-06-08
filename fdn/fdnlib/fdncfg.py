@@ -3,12 +3,11 @@ import json
 import os
 from pathlib import Path
 
+# From Project
+import fdn.data
 # From Third party
 import nltk
 from nltk.corpus import words
-
-# From Project
-import fdn.data
 
 gParamDict: dict = {}
 with importlib.resources.path("fdn.data", "config.json") as cfg_path:

@@ -2,7 +2,7 @@ import difflib
 import hashlib
 import os
 from pathlib import Path
-from typing import Tuple, List, Optional, Generator, Union
+from typing import Generator, List, Optional, Tuple, Union
 
 # From Third Party
 import click

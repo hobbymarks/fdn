@@ -1,15 +1,13 @@
 import os
 import shutil
 from pathlib import Path
-from typing import Optional, List
+from typing import List, Optional
 
 # From Third party
 import click
 from colorama import Fore
-
 # From This Project
-from fdn.fdnlib import fdnutils
-from fdn.fdnlib import utils
+from fdn.fdnlib import fdnutils, utils
 from fdn.fdnlib.fdncfg import gParamDict as ugPD
 
 

@@ -3,18 +3,16 @@ import re
 import string
 import sys
 from pathlib import Path
-from typing import Tuple, List, Optional, Union
+from typing import List, Optional, Tuple, Union
 
 # From Third Party
 import click
 from colorama import Back
-from unidecode import unidecode
-
-from fdn.fdnlib import ucrypt
-from fdn.fdnlib import utils
+from fdn.fdnlib import ucrypt, utils
 # From This Project
 from fdn.fdnlib.fdncfg import gParamDict as ugPD
-from fdn.fdnlib.udb import UDB
+from fdn.fdnlib.udb import FDNDB
+from unidecode import unidecode
 
 
 def _replace_char(s: str) -> str:
@@ -385,9 +383,8 @@ def _used_name_lookup(cur_name: str,
     if not db_path:
         db_path = ugPD["db_path"]
     _cur_id = utils.sha2_id(cur_name)
-    db = UDB(db_path)
+    db = FDNDB(db_path)
     df = db.checkout_rd(_cur_id)
-    db.close()
     if "curCrypt" not in df.columns:
         return None
     rlt = list(df["curCrypt"])
@@ -415,8 +412,5 @@ def log_to_db(cur_name: str,
     _cur_crypt = ucrypt.encrypt_b64_str(cur_name, _new)
     _sep_dp_id = "_|_".join([utils.sha2_id(d) for d in abs_dp.split(os.sep)])
     _abs_dp_id = utils.sha2_id(abs_dp)
-    db = UDB(db_path)
-    try:
-        db.insert_rd(_new_id, _cur_id, _cur_crypt, _sep_dp_id, _abs_dp_id)
-    finally:
-        db.close()
+    db = FDNDB(db_path)
+    db.insert_rd(_new_id, _cur_id, _cur_crypt, _sep_dp_id, _abs_dp_id)
