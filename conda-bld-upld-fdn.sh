@@ -52,6 +52,19 @@ fi
 
 printf '%*s\n\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 ###############################################################################
+printf 'Please check anaconda current user information'
+printf '\n'
+printf '********************************************'
+printf '\n'
+anaconda whoami
+printf '********************************************'
+printf '\n'
+read -p "User information is right? yes/[no] " -r
+printf '\n'
+if [[ $REPLY =~ ^[Nn][Oo]$ ]]; then
+  anaconda login
+fi
+###############################################################################
 read -p "Upload to anaconda? yes/[no] " -r
 printf '\n'
 if [[ $REPLY =~ ^[Yy][Ee][Ss]$ ]]; then
