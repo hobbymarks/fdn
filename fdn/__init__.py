@@ -14,7 +14,7 @@ from colorama import Style
 # From Project
 from fdn.fdnlib.fdncli import ufn
 
-__version__ = "2021.06.08.2214"
+__version__ = "2021.09.14.2734"
 
 
 def main() -> None:
