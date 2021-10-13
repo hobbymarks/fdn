@@ -75,8 +75,8 @@ def _del_head_tail_sep(s: str) -> str:
 
 def _process_head_tail(s: str) -> str:
     # Capitalize The First Letter
-    if s[0].islower():
-        return s[0].upper() + s[1:]
+    # if s[0].islower():
+    #     return s[0].upper() + s[1:]
     return s
 
 
