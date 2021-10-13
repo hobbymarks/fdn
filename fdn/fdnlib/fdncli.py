@@ -95,7 +95,7 @@ from fdn.fdnlib.fdncfg import gParamDict as ugPD
               is_flag=True,
               help=f"Enhanced display output.",
               show_default=True)
-@click.version_option(version="2021.06.04")
+@click.version_option(version="2021.10.13")
 def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
         in_place: bool, confirm: bool, is_link: bool, full_path: bool,
         absolute_path: bool, roll_back: bool, overwrite: bool, pretty: bool,
