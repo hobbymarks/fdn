@@ -11,7 +11,7 @@ from nltk.corpus import words
 
 gParamDict: dict = {}
 with importlib.resources.path("fdn.data", "config.json") as cfg_path:
-    with open(cfg_path) as fh:
+    with open(cfg_path, encoding="UTF-8") as fh:
         gParamDict.update(json.load(fh))
 
 # TODO: can optimize to not require nltk package

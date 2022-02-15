@@ -20,7 +20,7 @@ def is_hidden(f_path: Path) -> bool:
         import win32api
         import win32con
     if os.name == "nt":
-        attribute = win32api.GetFileAttributes(f_path)
+        attribute = win32api.GetFileAttributes(str(f_path))
         return attribute & (win32con.FILE_ATTRIBUTE_HIDDEN
                             | win32con.FILE_ATTRIBUTE_SYSTEM)
     else:
