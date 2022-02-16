@@ -21,8 +21,8 @@ for i in "${array[@]}"; do
 done
 
 # clear setting
-sed -i "s/.*{% set ver = \".*\" %}.*/{% set ver = \"XXXX.XX.XX\" %}/" meta.yaml
-sed -i "s/.*{% set num = \".*\" %}.*/{% set num = \"XXXX\" %}/" meta.yaml
+#sed -i "s/.*{% set ver = \".*\" %}.*/{% set ver = \"XXXX.XX.XX\" %}/" meta.yaml
+#sed -i "s/.*{% set num = \".*\" %}.*/{% set num = \"XXXX\" %}/" meta.yaml
 #sed -i "s/.*_ver.*=.*\".*\".*/_ver = \"XXXX.XX.XX\"/" fdn/fdnlib/fdncli.py
 
 printf '%*s\n\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
