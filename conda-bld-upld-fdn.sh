@@ -2,17 +2,17 @@
 
 # set Python versions
 pkg="fdn"
-array=(3.8 3.9)
+array=(3.8 3.9 3.10)
 printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 ###############################################################################
 printf "Building conda package ..."
 
 # create package version and number
-ver=$(date '+%Y.%m.%d')
-num=$(date '+%H%M')
-
-sed -i "s/.*{% set ver = \".*\" %}.*/{% set ver = \"$ver\" %}/" meta.yaml
-sed -i "s/.*{% set num = \".*\" %}.*/{% set num = \"$num\" %}/" meta.yaml
+#ver=$(date '+%Y.%m.%d')
+#num=$(date '+%H%M')
+#
+#sed -i "s/.*{% set ver = \".*\" %}.*/{% set ver = \"$ver\" %}/" meta.yaml
+#sed -i "s/.*{% set num = \".*\" %}.*/{% set num = \"$num\" %}/" meta.yaml
 #sed -i "s/.*_ver.*=.*\".*\".*/_ver = \"$ver.$num\"/" fdn/fdnlib/fdncli.py
 
 # building conda packages
