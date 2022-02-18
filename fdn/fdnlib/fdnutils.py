@@ -21,6 +21,7 @@ def _replace_char(s: str) -> str:
     :param s:string,if "BeReplacedChar" in s ,then will be replaced
     :return:string,be replaced
     """
+
     def _mask_ruw(_s: str) -> Tuple[List[str], List[bool]]:
         """
         Mask a input string by RemainUnchangedWordList value
@@ -97,6 +98,7 @@ def _process_terminology(s: str) -> str:
     :param s:
     :return:
     """
+
     def _swt(_s: str) -> Optional[str]:
         """
         Check if the s startswith a terminology word.If the s startswith a
@@ -118,8 +120,11 @@ def _process_terminology(s: str) -> str:
         if word.lower() in term_dict.keys():
             new_word_list.append(term_dict[word.lower()])
         elif key := _swt(word):
-            new_word = term_dict[key] + word[len(key):]
-            new_word_list.append(new_word)
+            if word.lower() in ugPD["LowerCaseWordSet"]:
+                new_word_list.append(word)
+            else:
+                new_word = term_dict[key] + word[len(key):]
+                new_word_list.append(new_word)
         else:
             new_word_list.append(word)
     return sep_char.join(new_word_list)

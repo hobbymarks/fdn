@@ -82,6 +82,7 @@
     "cypress": "CYPRESS",
     "c++": "C++",
     "dji": "DJI",
+    "fram": "FRAM",
     "google": "Google",
     "i2c": "I2C",
     "idata": "iData",
