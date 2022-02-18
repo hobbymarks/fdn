@@ -95,7 +95,7 @@ from fdn.fdnlib.fdncfg import gParamDict as ugPD
               is_flag=True,
               help=f"Enhanced display output.",
               show_default=True)
-@click.version_option(version="2022.02.18.2205")
+@click.version_option(version="2022.02.18.3128")
 def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
         in_place: bool, confirm: bool, is_link: bool, full_path: bool,
         absolute_path: bool, roll_back: bool, overwrite: bool, pretty: bool,
@@ -144,7 +144,6 @@ def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
 
 
 # TODO: terminology not a word but sourround different type as a word
-# TODO: Tiny to TIny ? How
 # TODO: global version how to
 # TODO: **support edit config data
 # TODO: display config data
@@ -162,4 +161,3 @@ def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
 # TODO: bug:fd -x can not get terminal size .so fall back and no color display
 # TODO: autocomplete
 # TODO: different language can use separator for terminology
-# TODO: C++ --> C ...?!

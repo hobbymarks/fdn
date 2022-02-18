@@ -28,7 +28,8 @@ def _replace_char(s: str) -> str:
         :param _s: string,input string to be masked
         :return: word list and mask list
         """
-        ruw_list = ugPD["RemainUnchangedWordList"]
+        ruw_list = ugPD["RemainUnchangedWordList"][:]
+        ruw_list.extend([*ugPD["TerminologyDictionary"]])
         re_str = "|".join([re.escape(ruw) for ruw in ruw_list])
         w_list = re.split(f"({re_str})", _s)
         m_list = []

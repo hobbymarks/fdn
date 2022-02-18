@@ -5,10 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b3f02cd7-eadd-4c57-8da5-af782de82446" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fdn/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fdn/data/config.json" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/data/config.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fdn/fdnlib/fdncli.py" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/fdnlib/fdncli.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fdn/fdnlib/fdnutils.py" beforeDir="false" afterPath="$PROJECT_DIR$/fdn/fdnlib/fdnutils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/meta.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/meta.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

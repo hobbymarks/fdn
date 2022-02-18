@@ -2,7 +2,7 @@ import os
 from setuptools import find_packages
 from setuptools import setup
 
-__version = "2022.02.18.2205"
+__version = "2022.02.18.3128"
 
 with open(os.path.join(os.path.abspath(os.path.dirname(__file__)),
                        "README.rst"),
@@ -19,7 +19,8 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9"
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10"
     ],
     author='hobbymarks',
     author_email='ihobbymarks@gmail.com',
