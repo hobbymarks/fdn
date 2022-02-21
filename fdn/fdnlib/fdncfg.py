@@ -2,6 +2,7 @@ import importlib.resources
 import json
 import os
 from pathlib import Path
+import shutil
 
 # From Project
 import fdn.data
@@ -18,8 +19,16 @@ with importlib.resources.path("fdn.data", "config.json") as cfg_path:
 nltk_path = os.path.dirname(fdn.data.__file__)
 if os.path.isdir(nltk_path):
     nltk.data.path.append(nltk_path)
-    if not os.path.isfile(os.path.join(nltk_path, "corpora", "words.zip")):
-        nltk.download("words", download_dir=nltk_path)
+    if not os.path.isdir(
+            words_path := os.path.join(nltk_path, "corpora", "words")) or len(
+            os.listdir(words_path)) == 0:
+        if os.path.isfile(
+                zip_path := os.path.join(nltk_path, "corpora", "words.zip")):
+            shutil.unpack_archive(
+                zip_path,
+                os.path.join(nltk_path, "corpora"))
+        else:
+            nltk.download("words", download_dir=nltk_path)
 else:
     try:
         from nltk.corpus import words
