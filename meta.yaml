@@ -1,5 +1,5 @@
-{% set ver = "2022.02.21" %}
-{% set num = "3128" %}
+{% set ver = "2022.2.22" %}
+{% set num = "3003" %}
 
 package:
     name: fdn
@@ -12,7 +12,7 @@ build:
         - fdn = fdn:run_main
 
 source:
-    git_url: https://github.com/hobbymarks/fdn.git
+    url: "https://pypi.io/packages/source/f/fdn/fdn-{{ ver }}.{{ num }}.tar.gz"
 
 requirements:
     build:
