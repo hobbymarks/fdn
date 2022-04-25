@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # set Python versions
+platform=$(conda info | grep -i platform | cut -d ":" -f 2 | xargs)
 pkg="fdn"
 array=(3.8 3.9 3.10)
 printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
@@ -36,11 +37,16 @@ if [[ $REPLY =~ ^[Yy][Ee][Ss]$ ]]; then
   # convert package to other platforms
   platforms=(osx-64 osx-arm64 linux-32 linux-64 win-32 win-64)
 
-  find $bld_dir/linux-64/ -name $pkg*$ver*$num*.tar.bz2 | while read file; do
-    printf $file
+  # shellcheck disable=SC2061
+  # shellcheck disable=SC2154
+  # shellcheck disable=SC2162
+  find "$bld_dir"/"$platform"/ -name $pkg*"$ver"*"$num"*.tar.bz2 | while read file; do
+    # shellcheck disable=SC2059
+    printf "$file"
     #conda convert --platform all $file  -o $HOME/conda-bld/
     for platform in "${platforms[@]}"; do
-      conda convert --platform $platform $file -o $bld_dir/
+      # shellcheck disable=SC2086
+      conda convert --platform "$platform" $file -o $bld_dir/
     done
 
   done
@@ -69,9 +75,12 @@ read -p "Upload to anaconda? yes/[no] " -r
 printf '\n'
 if [[ $REPLY =~ ^[Yy][Ee][Ss]$ ]]; then
   # upload packages to conda
-  find $bld_dir/ -name $pkg*$ver*$num*.tar.bz2 | while read file; do
-    printf $file
-    anaconda upload $file
+  # shellcheck disable=SC2061
+  # shellcheck disable=SC2162
+  find "$bld_dir"/ -name $pkg*"$ver"*"$num"*.tar.bz2 | while read file; do
+    # shellcheck disable=SC2059
+    printf "$file"
+    anaconda upload "$file"
   done
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' \#
   printf "Upload finished.\n"
@@ -85,10 +94,13 @@ read -p "Purge all and Delete all local packages? yes/[no] " -r
 printf '\n'
 if [[ $REPLY =~ ^[Yy][Ee][Ss]$ ]]; then
   conda build purge-all
-  find $bld_dir/ -name $pkg*.tar.bz2* | while read file; do
-    printf $file
+  # shellcheck disable=SC2061
+  # shellcheck disable=SC2162
+  find "$bld_dir"/ -name $pkg*.tar.bz2* | while read file; do
+    # shellcheck disable=SC2059
+    printf "$file"
     printf "\n"
-    rm $file
+    rm "$file"
   done
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' \#
   printf "All packages deleted.\n"
