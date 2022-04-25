@@ -9,3 +9,6 @@ cryptography>=3.4.7
 colorama>=0.4.4
 pandas>=1.2.4
 wcwidth>=0.2.5
+sqlalchemy>=1.4.35
+nltk==3.7
+emoji>=1.7.0

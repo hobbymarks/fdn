@@ -7,12 +7,14 @@ from typing import List, Optional, Tuple, Union
 
 # From Third Party
 import click
+import emoji
 from colorama import Back
-from fdn.fdnlib import ucrypt, utils
+from unidecode import unidecode
+
 # From This Project
+from fdn.fdnlib import ucrypt, utils
 from fdn.fdnlib.fdncfg import gParamDict as ugPD
 from fdn.fdnlib.udb import FDNDB
-from unidecode import unidecode
 
 
 def _replace_char(s: str) -> str:
@@ -55,6 +57,13 @@ def _replace_char(s: str) -> str:
             for c_key, c_value in c_dict.items():
                 if c_key in word:  # If need replace ,then go ...
                     word = word.replace(c_key, c_value)
+            tcs = []
+            for c in word:
+                if c in emoji.UNICODE_EMOJI_ENGLISH:
+                    tcs.append(sep_c)
+                else:
+                    tcs.append(c)
+            word = ''.join(tcs)
             word = re_cns.sub(sep_c, word)  # When continuous separator,remain
             # only one
             new_word_list.append(word)

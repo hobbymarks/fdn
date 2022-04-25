@@ -7,14 +7,12 @@ import sys
 # From Third party
 import click
 import colorama
-from colorama import Back
-from colorama import Fore
-from colorama import Style
+from colorama import Back, Fore, Style
 
 # From Project
 from fdn.fdnlib.fdncli import ufn
 
-__version__ = "2022.2.22.3003"
+__version__ = "2022.4.25.2819"
 
 
 def main() -> None:

@@ -6,6 +6,7 @@ from typing import List, Optional
 # From Third party
 import click
 from colorama import Fore
+
 # From This Project
 from fdn.fdnlib import fdnutils, utils
 from fdn.fdnlib.fdncfg import gParamDict as ugPD
@@ -95,7 +96,7 @@ from fdn.fdnlib.fdncfg import gParamDict as ugPD
               is_flag=True,
               help=f"Enhanced display output.",
               show_default=True)
-@click.version_option(version="2022.2.22.3003")
+@click.version_option(version="2022.4.25.2819")
 def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
         in_place: bool, confirm: bool, is_link: bool, full_path: bool,
         absolute_path: bool, roll_back: bool, overwrite: bool, pretty: bool,
