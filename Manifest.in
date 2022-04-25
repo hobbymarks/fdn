@@ -1,0 +1,5 @@
+graft fdn/data
+graft docs
+prune tests
+
+include README.md

@@ -28,10 +28,10 @@ def is_hidden(f_path: Path) -> bool:
 
 
 def depth_walk(
-    top_path: Path,
-    top_down: bool = False,
-    follow_links: bool = False,
-    max_depth: int = 1
+        top_path: Path,
+        top_down: bool = False,
+        follow_links: bool = False,
+        max_depth: int = 1
 ) -> Optional[Generator[Tuple[str], List[str], List[str]]]:
     if str(max_depth).isnumeric():
         max_depth = int(max_depth)
@@ -65,10 +65,10 @@ def depth_walk(
 
 
 def rich_style(
-    original: str,
-    processed: str,
-    pretty: bool = False,
-    enhanced_display: bool = False
+        original: str,
+        processed: str,
+        pretty: bool = False,
+        enhanced_display: bool = False
 ) -> Union[Tuple[None, None], Tuple[str, str]]:
     if (type(original) is not str) or (type(processed) is not str):
         return None, None
@@ -131,6 +131,15 @@ def unify_confirm(x: str = "") -> str:
         "q": "quit",
         "quit": "quit"
     }.get(x, "no")
+
+
+def path_exist(path: str) -> bool:
+    bn = os.path.basename(path)
+    bns = os.listdir(os.path.dirname(path))
+    if bn in bns:
+        return True
+    else:
+        return False
 
 
 ###############################################################################

@@ -275,13 +275,12 @@ def one_file_ufn(f_path: Path) -> None:
     else:
         ip = _in_place(file)
     if ip:
-        if (os.path.exists(new_path)) and (not ugPD["overwrite_flag"]):
+        if utils.path_exist(new_path) and (not ugPD["overwrite_flag"]):
             click.echo(f"{Back.RED}Exist:{Back.RESET}"
                        f"{new_path if _fp else new_name}\n"
                        f"Skipped:{f_path if _fp else file}\n"
                        f"With option '-o' to enable overwrite.")
             return None
-
         else:
             log_to_db(cur_name=file, new_path=Path(new_path))
             os.rename(f_path, new_path)
@@ -342,15 +341,14 @@ def one_file_rbk(f_path: Path) -> None:
     else:
         ip = _in_place(file)
     if ip:
-        if (os.path.exists(new_path)) and (not ugPD["overwrite_flag"]):
-            click.echo(f"{new_path if _fp else new_name} exist.\n"
-                       f"{f_path if _fp else file} Skipped."
-                       f"You can with option '-o' to enable overwrite.")
+        if utils.path_exist(new_path) and (not ugPD["overwrite_flag"]):
+            click.echo(f"{Back.RED}Exist:{Back.RESET}"
+                       f"{new_path if _fp else new_name}\n"
+                       f"Skipped:{f_path if _fp else file}\n"
+                       f"With option '-o' to enable overwrite.")
             return None
-
         else:
-            os.replace(f_path, new_path)  # os.place is atomic and match
-            # cross platform :https://docs.python.org/dev/library/os.html
+            os.rename(f_path, new_path)
     if _ap:
         _out_info(str(os.path.abspath(f_path)),
                   os.path.abspath(new_path),
