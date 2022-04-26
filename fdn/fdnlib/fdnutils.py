@@ -284,7 +284,7 @@ def one_file_ufn(f_path: Path) -> None:
     else:
         ip = _in_place(file)
     if ip:
-        if utils.path_exist(new_path) and (not ugPD["overwrite_flag"]):
+        if utils.path_exist(os.path.abspath(new_path)) and (not ugPD["overwrite_flag"]):
             click.echo(f"{Back.RED}Exist:{Back.RESET}"
                        f"{new_path if _fp else new_name}\n"
                        f"Skipped:{f_path if _fp else file}\n"

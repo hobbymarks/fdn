@@ -31,7 +31,7 @@ from fdn.fdnlib.fdncfg import gParamDict as ugPD
     default="file",
     type=click.Choice(["file", "dir"]),
     help=f"Set type.If 'file',operations are only valid for file,If 'dir',"
-    f"operations are only valid for directory.",
+         f"operations are only valid for directory.",
     show_default=True)
 @click.option("--in-place",
               "-i",
@@ -96,13 +96,28 @@ from fdn.fdnlib.fdncfg import gParamDict as ugPD
               is_flag=True,
               help=f"Enhanced display output.",
               show_default=True)
-@click.version_option(version="2022.4.25.2819")
+@click.option("--verbose",
+              default=False,
+              type=bool,
+              is_flag=True,
+              help=f"Display more information.",
+              show_default=True)
+@click.option("--debug",
+              default=False,
+              type=bool,
+              is_flag=True,
+              hidden=True)
+@click.version_option(version="2022.4.26.2119")
 def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
         in_place: bool, confirm: bool, is_link: bool, full_path: bool,
         absolute_path: bool, roll_back: bool, overwrite: bool, pretty: bool,
-        enhanced_display: bool):
+        enhanced_display: bool, verbose: bool, debug: bool):
     """Files in PATH will be changed file names unified.
     """
+    if verbose:
+        print(f"verbose mode")
+    if debug:
+        print(f"debug mode")
     if not path:
         ugPD["path"] = ["."]
     else:
@@ -142,7 +157,6 @@ def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
         click.echo("*" * cols)
         click.echo("In order to take effect,add option '-i' or '-c'")
         ugPD["target_appeared"] = False
-
 
 # TODO: terminology not a word but sourround different type as a word
 # TODO: global version how to
