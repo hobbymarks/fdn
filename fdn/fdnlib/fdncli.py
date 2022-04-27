@@ -107,7 +107,7 @@ from fdn.fdnlib.fdncfg import gParamDict as ugPD
               type=bool,
               is_flag=True,
               hidden=True)
-@click.version_option(version="2022.4.27.2611")
+@click.version_option(version="2022.4.27.2744")
 def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
         in_place: bool, confirm: bool, is_link: bool, full_path: bool,
         absolute_path: bool, roll_back: bool, overwrite: bool, pretty: bool,
@@ -158,7 +158,7 @@ def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
         click.echo("In order to take effect,add option '-i' or '-c'")
         ugPD["target_appeared"] = False
 
-# TODO: terminology not a word but sourround different type as a word
+# TODO: terminology not a word but surround different type as a word
 # TODO: global version how to
 # TODO: **support edit config data
 # TODO: display config data
@@ -169,7 +169,7 @@ def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
 
 # TODO: unify full_path request to a function ...
 # TODO: Embed nltk ,but need download first time ,why?
-# TODO: multi dir may accure same name conflict so record path ID?
+# TODO: multi dir may occur same name conflict so record path ID?
 # TODO: support user select roll back when multi target
 
 # TODO: bug:mac osx begin with ._ hidden check wrong

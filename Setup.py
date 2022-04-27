@@ -2,7 +2,7 @@ import os
 
 from setuptools import find_packages, setup
 
-__version = "2022.4.27.2611"
+__version = "2022.4.27.2744"
 
 with open(os.path.join(os.path.abspath(os.path.dirname(__file__)),
                        "README.rst"),
