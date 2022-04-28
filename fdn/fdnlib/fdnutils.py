@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import string
@@ -427,3 +428,14 @@ def log_to_db(cur_name: str,
     _abs_dp_id = utils.sha2_id(abs_dp)
     db = FDNDB(db_path)
     db.insert_rd(_new_id, _cur_id, _cur_crypt, _sep_dp_id, _abs_dp_id)
+
+
+def load_config(config: Path) -> None:
+    if config and os.path.isfile(config):
+        try:
+            with open(config, encoding="UTF-8") as fh:
+                _cfg = json.load(fh)
+                for k, v in _cfg["ReplacedDictionary"].items():
+                    ugPD["BeReplacedCharDictionary"][k] = v
+        except Exception as e:
+            pass

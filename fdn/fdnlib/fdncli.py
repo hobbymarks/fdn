@@ -18,21 +18,23 @@ from fdn.fdnlib.fdncfg import gParamDict as ugPD
         "help_option_names": ["-h", "--help"],
         "max_content_width": shutil.get_terminal_size()[0]
     })
-@click.argument("path", required=False, type=click.Path(exists=True), nargs=-1)
+@click.argument("path",
+                required=False,
+                type=click.Path(exists=True),
+                nargs=-1)
 @click.option("--max-depth",
               "-d",
               default=1,
               type=int,
               help=f"Set travel directory tree with max depth.",
               show_default=True)
-@click.option(
-    "--file-type",
-    "-t",
-    default="file",
-    type=click.Choice(["file", "dir"]),
-    help=f"Set type.If 'file',operations are only valid for file,If 'dir',"
-         f"operations are only valid for directory.",
-    show_default=True)
+@click.option("--file-type",
+              "-t",
+              default="file",
+              type=click.Choice(["file", "dir"]),
+              help=f"Set type.If 'file',operations are only valid for file,If 'dir',"
+                   f"operations are only valid for directory.",
+              show_default=True)
 @click.option("--in-place",
               "-i",
               default=False,
@@ -101,17 +103,22 @@ from fdn.fdnlib.fdncfg import gParamDict as ugPD
               type=bool,
               is_flag=True,
               help=f"Display more information.",
-              show_default=True)
+              show_default=True,
+              hidden=True)
 @click.option("--debug",
               default=False,
               type=bool,
               is_flag=True,
               hidden=True)
-@click.version_option(version="2022.4.27.2744")
+@click.option("--external_config",
+              "-xf",
+              required=False,
+              type=click.Path(exists=True))
+@click.version_option(version="2022.4.28.2849")
 def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
         in_place: bool, confirm: bool, is_link: bool, full_path: bool,
         absolute_path: bool, roll_back: bool, overwrite: bool, pretty: bool,
-        enhanced_display: bool, verbose: bool, debug: bool):
+        enhanced_display: bool, verbose: bool, debug: bool, external_config: Path):
     """Files in PATH will be changed file names unified.
     """
     if verbose:
@@ -136,6 +143,9 @@ def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
     ugPD["latest_confirm"] = utils.unify_confirm(
     )  # Parameter is Null to get default return
     ugPD["target_appeared"] = False
+
+    fdnutils.load_config(external_config)
+    
     for pth in ugPD["path"]:
         pth = (pth[:-1] if pth.endswith(os.sep) else pth)
         if os.path.isfile(pth) and fdnutils.type_matched(pth):
