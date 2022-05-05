@@ -430,12 +430,11 @@ def log_to_db(cur_name: str,
     db.insert_rd(_new_id, _cur_id, _cur_crypt, _sep_dp_id, _abs_dp_id)
 
 
-def load_config(config: Path) -> None:
-    if config and os.path.isfile(config):
-        try:
-            with open(config, encoding="UTF-8") as fh:
-                _cfg = json.load(fh)
-                for k, v in _cfg["ReplacedDictionary"].items():
-                    ugPD["BeReplacedCharDictionary"][k] = v
-        except Exception as e:
-            pass
+def load_config() -> None:
+    try:
+        with open(ugPD["config_path"], encoding="UTF-8") as fh:
+            _cfg = json.load(fh)
+            for k, v in _cfg["ReplacedDictionary"].items():
+                ugPD["BeReplacedCharDictionary"][k] = v
+    except Exception as e:
+        pass

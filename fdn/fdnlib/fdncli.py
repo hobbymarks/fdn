@@ -112,13 +112,15 @@ from fdn.fdnlib.fdncfg import gParamDict as ugPD
               hidden=True)
 @click.option("--external_config",
               "-xf",
+              default=False,
               required=False,
-              type=click.Path(exists=True))
-@click.version_option(version="2022.4.28.2849")
+              type=bool,
+              is_flag=True)
+@click.version_option(version="2022.5.5.3240")
 def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
         in_place: bool, confirm: bool, is_link: bool, full_path: bool,
         absolute_path: bool, roll_back: bool, overwrite: bool, pretty: bool,
-        enhanced_display: bool, verbose: bool, debug: bool, external_config: Path):
+        enhanced_display: bool, verbose: bool, debug: bool, external_config: bool):
     """Files in PATH will be changed file names unified.
     """
     if verbose:
@@ -144,8 +146,9 @@ def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
     )  # Parameter is Null to get default return
     ugPD["target_appeared"] = False
 
-    fdnutils.load_config(external_config)
-    
+    if external_config:
+        fdnutils.load_config()
+
     for pth in ugPD["path"]:
         pth = (pth[:-1] if pth.endswith(os.sep) else pth)
         if os.path.isfile(pth) and fdnutils.type_matched(pth):

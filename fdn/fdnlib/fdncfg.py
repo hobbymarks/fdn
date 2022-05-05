@@ -1,14 +1,15 @@
 import importlib.resources
 import json
 import os
-from pathlib import Path
 import shutil
+from pathlib import Path
 
-# From Project
-import fdn.data
 # From Third party
 import nltk
 from nltk.corpus import words
+
+# From Project
+import fdn.data
 
 gParamDict: dict = {}
 with importlib.resources.path("fdn.data", "config.json") as cfg_path:
@@ -21,7 +22,7 @@ if os.path.isdir(nltk_path):
     nltk.data.path.append(nltk_path)
     if not os.path.isdir(
             words_path := os.path.join(nltk_path, "corpora", "words")) or len(
-            os.listdir(words_path)) == 0:
+        os.listdir(words_path)) == 0:
         if os.path.isfile(
                 zip_path := os.path.join(nltk_path, "corpora", "words.zip")):
             shutil.unpack_archive(
@@ -43,3 +44,9 @@ gParamDict["LowerCaseWordSet"] = set(
 gParamDict["record_path"] = os.path.join(Path.home(), ".fdn")
 Path(gParamDict["record_path"]).mkdir(parents=True, exist_ok=True)
 gParamDict["db_path"] = os.path.join(gParamDict["record_path"], "rdsa.db")
+gParamDict["config_path"] = os.path.join(gParamDict["record_path"], "config.json")
+if not os.path.isfile(gParamDict["config_path"]):
+    _configDict = {"ReplacedDictionary": {}, "RemainedList": []}
+    json.dumps(_configDict)
+    with open(file=gParamDict["config_path"], mode="w", encoding="UTF-8") as fh:
+        json.dump(_configDict, fh)
