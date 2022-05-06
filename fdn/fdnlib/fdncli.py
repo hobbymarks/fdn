@@ -115,7 +115,8 @@ from fdn.fdnlib.fdncfg import gParamDict as ugPD
               default=False,
               required=False,
               type=bool,
-              is_flag=True)
+              is_flag=True,
+              help=f"Enable external config")
 @click.version_option(version="2022.5.5.3240")
 def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
         in_place: bool, confirm: bool, is_link: bool, full_path: bool,
