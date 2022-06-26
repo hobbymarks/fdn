@@ -12,7 +12,7 @@ from colorama import Back, Fore, Style
 # From Project
 from fdn.fdnlib.fdncli import ufn
 
-__version__ = "2022.5.5.3240"
+__version__ = "2022.6.26.2937"
 
 
 def main() -> None:

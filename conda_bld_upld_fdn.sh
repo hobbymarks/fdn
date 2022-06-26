@@ -1,5 +1,21 @@
 #!/bin/bash
 
+if ! command -v conda &>/dev/null;then
+  alias conda=/usr/local/anaconda3/bin/conda
+  if ! command -v conda &>/dev/null;then
+    echo "conda not exist"
+    exit 127
+  fi
+fi
+
+if ! command -v anaconda &>/dev/null;then
+  alias anaconda=/usr/local/anaconda3/bin/anaconda
+  if ! command -v anaconda &>/dev/null;then
+    echo "anaconda not exist"
+    exit 127
+  fi
+fi
+
 # set Python versions
 platform=$(conda info | grep -i platform | cut -d ":" -f 2 | xargs)
 pkg="fdn"

@@ -4,7 +4,22 @@ printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 ###############################################################################
 printf "Clean Projec ...\n"
 p='fdn/data/corpora/words'
-if [ -d $p ];then
+if [ -d $p ]; then
+  printf "delete $p\n"
+  rm -rf "$p"
+fi
+p='build'
+if [ -d $p ]; then
+  printf "delete $p\n"
+  rm -rf "$p"
+fi
+p='dist'
+if [ -d $p ]; then
+  printf "delete $p\n"
+  rm -rf "$p"
+fi
+p='fdn.egg-info'
+if [ -d $p ]; then
   printf "delete $p\n"
   rm -rf "$p"
 fi
@@ -14,10 +29,13 @@ printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 printf "Building pypi package ..."
 python setup.py bdist_wheel sdist
 
-
 printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 ###############################################################################
 printf "Twine checking ..."
+if ! command -v twine &>/dev/null; then
+  echo "twine(https://github.com/pypa/twine) not exist."
+  exit 127
+fi
 twine check dist/*
 
 printf '%*s\n\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
@@ -43,4 +61,3 @@ if [[ $REPLY =~ ^[Yy][Ee][Ss]$ ]]; then
 else
   exit 1
 fi
-

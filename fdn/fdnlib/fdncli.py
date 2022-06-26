@@ -117,11 +117,12 @@ from fdn.fdnlib.fdncfg import gParamDict as ugPD
               type=bool,
               is_flag=True,
               help=f"Enable external config")
-@click.version_option(version="2022.5.5.3240")
+@click.version_option(version="2022.6.26.2937")
 def ufn(path: Optional[List[Path]], max_depth: int, file_type: str,
         in_place: bool, confirm: bool, is_link: bool, full_path: bool,
         absolute_path: bool, roll_back: bool, overwrite: bool, pretty: bool,
-        enhanced_display: bool, verbose: bool, debug: bool, external_config: bool):
+        enhanced_display: bool, verbose: bool, debug: bool,
+        external_config: bool):
     """Files in PATH will be changed file names unified.
     """
     if verbose:

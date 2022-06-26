@@ -254,7 +254,13 @@ def one_file_ufn(f_path: Path) -> None:
         return None
 
     subdir, file = os.path.split(f_path)
-    root, ext = os.path.splitext(file)
+    if os.path.isfile(f_path):
+        root, ext = os.path.splitext(file)
+    elif os.path.isdir(f_path):
+        root, ext = file, ''
+    else:
+        root, ext = file, ''
+        # TODO:not best solution
     # all whitespace replace by sep_char
     root = _del_white_space(root)
     # replace characters by defined Dictionary
@@ -285,7 +291,8 @@ def one_file_ufn(f_path: Path) -> None:
     else:
         ip = _in_place(file)
     if ip:
-        if utils.path_exist(os.path.abspath(new_path)) and (not ugPD["overwrite_flag"]):
+        if utils.path_exist(os.path.abspath(new_path)) and (
+                not ugPD["overwrite_flag"]):
             click.echo(f"{Back.RED}Exist:{Back.RESET}"
                        f"{new_path if _fp else new_name}\n"
                        f"Skipped:{f_path if _fp else file}\n"
