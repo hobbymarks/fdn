@@ -2,6 +2,15 @@
 
 printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 ###############################################################################
+printf "Clean Projec ...\n"
+p='fdn/data/corpora/words'
+if [ -d $p ];then
+  printf "delete $p\n"
+  rm -rf "$p"
+fi
+
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+###############################################################################
 printf "Building pypi package ..."
 python setup.py bdist_wheel sdist
 
