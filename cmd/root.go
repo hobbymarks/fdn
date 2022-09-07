@@ -15,6 +15,8 @@ import (
 
 var version = "0.0.0"
 
+var onlyDirectory bool
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:     "fdn",
@@ -22,23 +24,21 @@ var rootCmd = &cobra.Command{
 	Short:   "A Tool For Unify File Names",
 	Long:    ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		onlyDirectory, err := cmd.Flags().GetBool("directory")
-		if err != nil {
-			log.Fatal(err)
+		if len(args) == 0 {
+			args = []string{"./"}
 		}
-		fmt.Println(onlyDirectory)
-		notUnitTest, err := cmd.Flags().GetString("nut")
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println(notUnitTest)
 		for _, arg := range args {
 			if fileInfo, err := os.Stat(arg); err != nil {
 				log.Error(err)
 				continue
 			} else {
 				if fileInfo.IsDir() {
-					fmt.Println("isDir:", arg)
+					paths, err := FilteredSubPaths(arg, onlyDirectory)
+					if err != nil {
+						log.Error(err)
+					} else {
+						fmt.Println("isDir:", paths)
+					}
 				} else if fileInfo.Mode().IsRegular() {
 					fmt.Println("isRegular:", arg)
 				} else {
@@ -46,7 +46,7 @@ var rootCmd = &cobra.Command{
 				}
 			}
 		}
-		fmt.Println("root called.", len(args))
+		fmt.Println("root called.", len(args), onlyDirectory)
 	},
 }
 
@@ -60,21 +60,12 @@ func Execute() {
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.fdn.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	rootCmd.Flags().BoolP("directory", "d", false, "directory only")
-	rootCmd.Flags().StringP("nut", "t", "NotUnitTest", "not unit test")
+	rootCmd.Flags().BoolVarP(&onlyDirectory, "directory", "d", false, "directory only")
 }
 
-func DirFiles(dirPath string) ([]string, error) {
-	var relativePaths []string
+// retrieve absolute paths
+func FilteredSubPaths(dirPath string, onlyDirectory bool) ([]string, error) {
+	var absolutePaths []string
 	dirPath = filepath.Clean(dirPath)
 	log.Trace(dirPath)
 	err := filepath.WalkDir(dirPath, func(path string, info fs.DirEntry, err error) error {
@@ -82,24 +73,30 @@ func DirFiles(dirPath string) ([]string, error) {
 			log.Trace(err)
 			return err
 		}
-		if info.IsDir() {
+		if onlyDirectory && info.IsDir() {
 			log.Trace("isDir:", path)
+			if absPath, err := filepath.Abs(filepath.Join(dirPath, path)); err != nil {
+				log.Error(err)
+			} else {
+				absolutePaths = append(absolutePaths, absPath)
+			}
 			return nil
 		}
-		if info.Type().IsRegular() {
-			relativePath := path
-			if dirPath != "." {
-				relativePath = path[len(dirPath)+1:]
+		if !onlyDirectory && info.Type().IsRegular() {
+			if absPath, err := filepath.Abs(filepath.Join(dirPath, path)); err != nil {
+				log.Error(err)
+			} else {
+				absolutePaths = append(absolutePaths, absPath)
 			}
-			relativePaths = append(relativePaths, filepath.ToSlash(relativePath))
-		} else {
-			log.Warn("skipped:", path)
+			return nil
 		}
+		log.Trace("skipped:", path)
 
 		return nil
 	})
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
-	return relativePaths, nil
+	return absolutePaths, nil
 }
