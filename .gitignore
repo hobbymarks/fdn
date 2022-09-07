@@ -1,12 +1,2 @@
-.idea/
-.ipynb_checkpoints/
-.virtual_documents/
-fdn/.ipynb_checkpoints/
-fdn/__pycache__/
-fdn/fdnlib/__pycache__/
-fdn/data/__pycache__/
-tests/__pycache__/
-build/
 dist/
-fdn.egg-info/
-fdn/data/corpora/words/
+.DS_Store
