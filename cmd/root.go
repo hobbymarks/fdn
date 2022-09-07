@@ -16,6 +16,7 @@ import (
 var version = "0.0.0"
 
 var onlyDirectory bool
+var inputPaths []string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -24,10 +25,7 @@ var rootCmd = &cobra.Command{
 	Short:   "A Tool For Unify File Names",
 	Long:    ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			args = []string{"./"}
-		}
-		if paths, err := RetrievedAbsPaths(args, onlyDirectory); err != nil {
+		if paths, err := RetrievedAbsPaths(inputPaths, onlyDirectory); err != nil {
 			log.Fatal(err)
 		} else {
 			fmt.Println(paths)
@@ -45,7 +43,8 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().BoolVarP(&onlyDirectory, "directory", "d", false, "directory only")
+	rootCmd.Flags().BoolVarP(&onlyDirectory, "directory", "d", false, "if enable,directory only.Default file only")
+	rootCmd.Flags().StringArrayVarP(&inputPaths, "path", "p", []string{"./"}, "input paths")
 }
 
 // Paths form args by flag
@@ -116,3 +115,5 @@ func FilteredSubPaths(dirPath string, onlyDirectory bool) ([]string, error) {
 	}
 	return absolutePaths, nil
 }
+
+//TODO:dry run result buffered for next step
