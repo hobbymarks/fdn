@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -28,7 +29,10 @@ var rootCmd = &cobra.Command{
 		if paths, err := RetrievedAbsPaths(inputPaths, onlyDirectory); err != nil {
 			log.Fatal(err)
 		} else {
-			fmt.Println(paths)
+			sort.SliceStable(paths, func(i, j int) bool { return paths[i] > paths[j] })
+			for _, path := range paths {
+				fmt.Println(path)
+			}
 		}
 	},
 }
