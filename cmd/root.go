@@ -27,26 +27,11 @@ var rootCmd = &cobra.Command{
 		if len(args) == 0 {
 			args = []string{"./"}
 		}
-		for _, arg := range args {
-			if fileInfo, err := os.Stat(arg); err != nil {
-				log.Error(err)
-				continue
-			} else {
-				if fileInfo.IsDir() {
-					paths, err := FilteredSubPaths(arg, onlyDirectory)
-					if err != nil {
-						log.Error(err)
-					} else {
-						fmt.Println("isDir:", paths)
-					}
-				} else if fileInfo.Mode().IsRegular() {
-					fmt.Println("isRegular:", arg)
-				} else {
-					continue
-				}
-			}
+		if paths, err := RetrievedAbsPaths(args, onlyDirectory); err != nil {
+			log.Fatal(err)
+		} else {
+			fmt.Println(paths)
 		}
-		fmt.Println("root called.", len(args), onlyDirectory)
 	},
 }
 
@@ -61,6 +46,37 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().BoolVarP(&onlyDirectory, "directory", "d", false, "directory only")
+}
+
+// Paths form args by flag
+func RetrievedAbsPaths(inputPaths []string, onlyDirectory bool) ([]string, error) {
+	var absolutePaths []string
+
+	for _, path := range inputPaths {
+		if fileInfo, err := os.Stat(path); err != nil {
+			log.Error(err)
+			continue
+		} else {
+			if fileInfo.IsDir() {
+				paths, err := FilteredSubPaths(path, onlyDirectory)
+				if err != nil {
+					log.Error(err)
+				} else {
+					absolutePaths = append(absolutePaths, paths...)
+				}
+			} else if !onlyDirectory && fileInfo.Mode().IsRegular() {
+				if absPath, err := filepath.Abs(path); err != nil {
+					log.Error(err)
+				} else {
+					absolutePaths = append(absolutePaths, absPath)
+				}
+			} else {
+				log.Trace("skipped:", path)
+			}
+		}
+	}
+
+	return absolutePaths, nil
 }
 
 // retrieve absolute paths
