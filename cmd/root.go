@@ -18,6 +18,7 @@ var version = "0.0.0"
 
 var onlyDirectory bool
 var inputPaths []string
+var depthLevel int
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -26,7 +27,7 @@ var rootCmd = &cobra.Command{
 	Short:   "A Tool For Unify File Names",
 	Long:    ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		if paths, err := RetrievedAbsPaths(inputPaths, onlyDirectory); err != nil {
+		if paths, err := RetrievedAbsPaths(inputPaths, depthLevel, onlyDirectory); err != nil {
 			log.Fatal(err)
 		} else {
 			sort.SliceStable(paths, func(i, j int) bool { return paths[i] > paths[j] })
@@ -48,11 +49,12 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().BoolVarP(&onlyDirectory, "directory", "d", false, "if enable,directory only.Default file only")
+	rootCmd.Flags().IntVarP(&depthLevel, "level", "l", 1, "maxdepth level")
 	rootCmd.Flags().StringArrayVarP(&inputPaths, "path", "p", []string{"./"}, "input paths")
 }
 
 // Paths form args by flag
-func RetrievedAbsPaths(inputPaths []string, onlyDirectory bool) ([]string, error) {
+func RetrievedAbsPaths(inputPaths []string, depthLevel int, onlyDirectory bool) ([]string, error) {
 	var absolutePaths []string
 
 	for _, path := range inputPaths {
@@ -61,7 +63,7 @@ func RetrievedAbsPaths(inputPaths []string, onlyDirectory bool) ([]string, error
 			continue
 		} else {
 			if fileInfo.IsDir() {
-				paths, err := FilteredSubPaths(path, onlyDirectory)
+				paths, err := FilteredSubPaths(path, depthLevel, onlyDirectory)
 				if err != nil {
 					log.Error(err)
 				} else {
@@ -83,41 +85,107 @@ func RetrievedAbsPaths(inputPaths []string, onlyDirectory bool) ([]string, error
 }
 
 // retrieve absolute paths
-func FilteredSubPaths(dirPath string, onlyDirectory bool) ([]string, error) {
+func FilteredSubPaths(dirPath string, depthLevel int, onlyDirectory bool) ([]string, error) {
 	var absolutePaths []string
 	dirPath = filepath.Clean(dirPath)
 	log.Trace(dirPath)
-	err := filepath.WalkDir(dirPath, func(path string, info fs.DirEntry, err error) error {
-		if err != nil {
-			log.Trace(err)
-			return err
-		}
-		if onlyDirectory && info.IsDir() {
-			log.Trace("isDir:", path)
-			if absPath, err := filepath.Abs(filepath.Join(dirPath, path)); err != nil {
-				log.Error(err)
-			} else {
-				absolutePaths = append(absolutePaths, absPath)
+	if depthLevel == -1 {
+		err := filepath.WalkDir(dirPath, func(path string, info fs.DirEntry, err error) error {
+			if err != nil {
+				log.Trace(err)
+				return err
 			}
-			return nil
-		}
-		if !onlyDirectory && info.Type().IsRegular() {
-			if absPath, err := filepath.Abs(filepath.Join(dirPath, path)); err != nil {
-				log.Error(err)
-			} else {
-				absolutePaths = append(absolutePaths, absPath)
+			if onlyDirectory && info.IsDir() {
+				log.Trace("isDir:", path)
+				if absPath, err := filepath.Abs(filepath.Join(dirPath, path)); err != nil {
+					log.Error(err)
+				} else {
+					absolutePaths = append(absolutePaths, absPath)
+				}
+				return nil
 			}
-			return nil
-		}
-		log.Trace("skipped:", path)
+			if !onlyDirectory && info.Type().IsRegular() {
+				if absPath, err := filepath.Abs(filepath.Join(dirPath, path)); err != nil {
+					log.Error(err)
+				} else {
+					absolutePaths = append(absolutePaths, absPath)
+				}
+				return nil
+			}
+			log.Trace("skipped:", path)
 
-		return nil
-	})
-	if err != nil {
-		log.Error(err)
-		return nil, err
+			return nil
+		})
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+	} else {
+		if paths, err := DepthFiles(dirPath, depthLevel, onlyDirectory); err != nil {
+			log.Error(err)
+			return nil, err
+		} else {
+			absolutePaths = paths
+		}
 	}
+
 	return absolutePaths, nil
 }
 
+// Depth read dir
+func DepthFiles(dirPath string, depthLevel int, onlyDirectory bool) ([]string, error) {
+	absolutePaths := []string{}
+
+	if depthLevel == 1 {
+		log.Debug(depthLevel)
+		files, err := os.ReadDir(dirPath)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		for _, file := range files {
+			if absPath, err := filepath.Abs(filepath.Join(dirPath, file.Name())); err != nil {
+				log.Error(err)
+			} else {
+				if onlyDirectory && file.IsDir() {
+					absolutePaths = append(absolutePaths, absPath)
+				}
+				if !onlyDirectory && file.Type().IsRegular() {
+					absolutePaths = append(absolutePaths, absPath)
+				}
+			}
+		}
+	} else if depthLevel > 1 {
+		log.Debug(depthLevel)
+		depthLevel -= 1
+		files, err := os.ReadDir(dirPath)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		for _, file := range files {
+			if absPath, err := filepath.Abs(filepath.Join(dirPath, file.Name())); err != nil {
+				log.Error(err)
+			} else {
+				if onlyDirectory && file.IsDir() {
+					absolutePaths = append(absolutePaths, absPath)
+				}
+				if !onlyDirectory && file.Type().IsRegular() {
+					absolutePaths = append(absolutePaths, absPath)
+				}
+				if file.Type().IsDir() {
+					if files, err := DepthFiles(absPath, depthLevel, onlyDirectory); err != nil {
+						log.Error(err)
+					} else {
+						absolutePaths = append(absolutePaths, files...)
+					}
+				}
+			}
+		}
+	}
+
+	return absolutePaths, nil
+}
+
+//TODO:support directory and files
 //TODO:dry run result buffered for next step
