@@ -33,17 +33,12 @@ Installation
 ------------
 
 To install fdn via
-`conda <https://www.anaconda.com/products/individual>`__:
+`brew <https://brew.sh/>`__:
 
 .. code:: bash
 
-   $ conda install -c hobbymarks fdn
-
-To install fdn via `pip <https://pypi.org/project/pip/>`__:
-
-.. code:: bash
-
-   $ pip install fdn 
+   $ brew tap hobbymarks/hobbymarks
+   $ brew install fdn
 
 Usage/参数
 ----------
