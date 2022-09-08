@@ -406,18 +406,13 @@ find.*
 安装
 ----
 
-建议使用\ `conda <https://www.anaconda.com/products/individual>`__
+建议使用\ `brew <https://brew.sh/>`__
 进行安装:
 
-.. code-block:: bash
+.. code:: bash
 
-   $ conda install -c hobbymarks fdn
-
-使用\ `pip <https://pypi.org/project/pip/>`__ 进行安装:
-
-.. code-block:: bash
-
-   $ pip install fdn
+   $ brew tap hobbymarks/hobbymarks
+   $ brew install fdn
 
 参数
 ----
