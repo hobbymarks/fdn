@@ -137,10 +137,7 @@ func DepthFiles(dirPath string, depthLevel int, onlyDirectory bool) ([]string, e
 		if absPath, err := filepath.Abs(filepath.Join(dirPath, file.Name())); err != nil {
 			log.Error(err)
 		} else {
-			if onlyDirectory && file.IsDir() {
-				absolutePaths = append(absolutePaths, absPath)
-			}
-			if !onlyDirectory && file.Type().IsRegular() {
+			if (onlyDirectory && file.IsDir()) || (!onlyDirectory && file.Type().IsRegular()) {
 				absolutePaths = append(absolutePaths, absPath)
 			}
 			if depthLevel > 1 && file.Type().IsDir() {
