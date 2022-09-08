@@ -4,13 +4,8 @@ fdn
 Introduction
 ------------
 
-A tool for uniformly change file sor directory names and also support
+A tool for uniformly change file or directory names and support
 rollback these operations.
-
-*In short,fdn is about file names operation.*
-
-A `Python <https://www.python.org/>`__ tool to unify file or directory
-name.
 
 File or directory name format:
 
@@ -393,9 +388,6 @@ find.*
 ----
 
 一个小工具，用于日常统一更改文件（或者文件夹）名称
-
-用\ `Python <https://www.python.org/>`__
-编写，用于日常统一更改资料的文件名。
 
 目前的具体格式：
 
