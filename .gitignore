@@ -1,2 +1,4 @@
 dist/
+bin/
+prof/
 .DS_Store
