@@ -50,7 +50,7 @@ func Execute() {
 func init() {
 	rootCmd.Flags().BoolVarP(&onlyDirectory, "directory", "d", false, "if enable,directory only.Default file only")
 	rootCmd.Flags().IntVarP(&depthLevel, "level", "l", 1, "maxdepth level")
-	rootCmd.Flags().StringArrayVarP(&inputPaths, "path", "p", []string{"./"}, "input paths")
+	rootCmd.Flags().StringArrayVarP(&inputPaths, "path", "p", []string{"."}, "input paths")
 }
 
 // Paths form args by flag
