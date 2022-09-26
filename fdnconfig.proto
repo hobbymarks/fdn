@@ -1,0 +1,26 @@
+// [START declaration]
+syntax="proto3";
+
+package main;
+import "google/protobuf/timestamp.proto";
+// [END declaration]
+
+// [START go_declaration]
+option go_package = "/pb";
+// [END go_declaration]
+
+// [START message]
+
+message fdnconfig{
+    string Separator=1;
+    repeated string ToBeSepWords=6;
+    repeated TermWord TermWords=7;
+
+    google.protobuf.Timestamp LastUpdated=15;
+}
+
+message TermWord{
+    string OriginalLower=2;
+    string TargetWord=3;
+}
+// [END message]
