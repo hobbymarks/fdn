@@ -50,7 +50,7 @@ func Execute() {
 func init() {
 	rootCmd.Flags().BoolVarP(&onlyDirectory, "directory", "d", false, "if enable,directory only.Default file only")
 	rootCmd.Flags().IntVarP(&depthLevel, "level", "l", 1, "maxdepth level")
-	rootCmd.Flags().StringArrayVarP(&inputPaths, "path", "p", []string{"./"}, "input paths")
+	rootCmd.Flags().StringArrayVarP(&inputPaths, "path", "p", []string{"."}, "input paths")
 }
 
 // Paths form args by flag
@@ -84,7 +84,7 @@ func RetrievedAbsPaths(inputPaths []string, depthLevel int, onlyDirectory bool) 
 }
 
 // retrieve absolute paths
-func FilteredSubPaths(dirPath string, depthLevel int, onlyDirectory bool) ([]string, error) {
+func FilteredSubPaths(dirPath string, depthLevel int, OnlyDir bool) ([]string, error) {
 	var absolutePaths []string
 
 	dirPath = filepath.Clean(dirPath)
@@ -95,7 +95,7 @@ func FilteredSubPaths(dirPath string, depthLevel int, onlyDirectory bool) ([]str
 				log.Trace(err)
 				return err
 			}
-			if (onlyDirectory && info.IsDir()) || (!onlyDirectory && info.Type().IsRegular()) {
+			if (OnlyDir && info.IsDir()) || (!OnlyDir && info.Type().IsRegular()) {
 				log.Trace("isDir:", path)
 				if absPath, err := filepath.Abs(filepath.Join(dirPath, path)); err != nil {
 					log.Error(err)
@@ -113,7 +113,7 @@ func FilteredSubPaths(dirPath string, depthLevel int, onlyDirectory bool) ([]str
 			return nil, err
 		}
 	} else {
-		if paths, err := DepthFiles(dirPath, depthLevel, onlyDirectory); err != nil {
+		if paths, err := DepthFiles(dirPath, depthLevel, OnlyDir); err != nil {
 			log.Error(err)
 			return nil, err
 		} else {
