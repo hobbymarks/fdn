@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +16,11 @@ var configCmd = &cobra.Command{
 	Short: "config fdn",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("config called")
+		cfg, err := cmd.Flags().GetString("config")
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(cfg)
 	},
 }
 
@@ -30,5 +35,5 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// configCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	configCmd.Flags().StringP("config", "c", "", "Config")
 }
