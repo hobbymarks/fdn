@@ -4,14 +4,17 @@ Copyright © 2022 hobbymarks ihobbymarks@gmail.com
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"sort"
 
+	"github.com/hobbymarks/fdn/pb"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/proto"
 )
 
 var version = "0.0.0"
@@ -19,6 +22,8 @@ var version = "0.0.0"
 var onlyDirectory bool
 var inputPaths []string
 var depthLevel int
+
+var FDNConfigPath string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -51,6 +56,28 @@ func init() {
 	rootCmd.Flags().BoolVarP(&onlyDirectory, "directory", "d", false, "if enable,directory only.Default file only")
 	rootCmd.Flags().IntVarP(&depthLevel, "level", "l", 1, "maxdepth level")
 	rootCmd.Flags().StringArrayVarP(&inputPaths, "path", "p", []string{"."}, "input paths")
+
+	homeDir, err := os.UserHomeDir() //get home dir
+	if err != nil {
+		log.Fatal(err)
+	}
+	FDNConfigPath = filepath.Join(homeDir, ".fdn")
+	if _, err := os.Lstat(FDNConfigPath); errors.Is(err, os.ErrNotExist) {
+		if err := os.Mkdir(FDNConfigPath, os.ModePerm); err != nil {
+			log.Fatal(err)
+		}
+	}
+	FDNConfigPath = filepath.Join(FDNConfigPath, "fdncfg")
+	if _, err := os.Stat(FDNConfigPath); err != nil { //if not exist then create
+		giatrds := pb.Fdnconfig{}
+		if data, err := proto.Marshal(&giatrds); err != nil {
+			log.Fatal(err)
+		} else {
+			if err := os.WriteFile(FDNConfigPath, data, 0644); err != nil {
+				log.Fatal(err)
+			}
+		}
+	}
 }
 
 // Paths form args by flag
