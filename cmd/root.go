@@ -179,5 +179,33 @@ func DepthFiles(dirPath string, depthLevel int, onlyDirectory bool) ([]string, e
 	return absolutePaths, nil
 }
 
+func UpdateConfigTerm(kvs map[string]string) error {
+	if data, err := os.ReadFile(FDNConfigPath); err != nil {
+		log.Error(err)
+		return err
+	} else {
+		fdncfg := pb.Fdnconfig{}
+		if err := proto.Unmarshal(data, &fdncfg); err != nil {
+			log.Error(err)
+			return err
+		}
+		for key, value := range kvs { //FIXME:check exist
+			fdncfg.TermWords = append(fdncfg.TermWords, &pb.TermWord{
+				OriginalLower: key,
+				TargetWord:    value})
+		}
+		if data, err := proto.Marshal(&fdncfg); err != nil {
+			log.Error(err)
+			return err
+		} else {
+			if err := os.WriteFile(FDNConfigPath, data, 0644); err != nil {
+				log.Error(err)
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 //TODO:support directory and files
 //TODO:dry run result buffered for next step

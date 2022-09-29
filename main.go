@@ -10,7 +10,7 @@ import (
 
 func main() {
 	log.SetReportCaller(true)
-	// log.SetLevel(log.TraceLevel)
+	log.SetLevel(log.TraceLevel)
 
 	cmd.Execute()
 }
