@@ -46,6 +46,8 @@ var configCmd = &cobra.Command{
 				log.Error(err)
 			}
 			log.Trace("✓ConfigSeparator")
+		} else {
+			ConfigMap()
 		}
 	},
 }
