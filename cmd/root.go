@@ -207,5 +207,30 @@ func UpdateConfigTerm(kvs map[string]string) error {
 	return nil
 }
 
+func UpdateConfigToBeSepWords(words []string) error {
+	if data, err := os.ReadFile(FDNConfigPath); err != nil {
+		log.Error(err)
+		return err
+	} else {
+		fdncfg := pb.Fdnconfig{}
+		if err := proto.Unmarshal(data, &fdncfg); err != nil {
+			log.Error(err)
+			return err
+		}
+		//FIXME:check exist
+		fdncfg.ToBeSepWords = append(fdncfg.ToBeSepWords, words...)
+		if data, err := proto.Marshal(&fdncfg); err != nil {
+			log.Error(err)
+			return err
+		} else {
+			if err := os.WriteFile(FDNConfigPath, data, 0644); err != nil {
+				log.Error(err)
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 //TODO:support directory and files
 //TODO:dry run result buffered for next step
