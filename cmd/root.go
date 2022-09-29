@@ -179,7 +179,7 @@ func DepthFiles(dirPath string, depthLevel int, onlyDirectory bool) ([]string, e
 	return absolutePaths, nil
 }
 
-func UpdateConfigTerm(kvs map[string]string) error {
+func ConfigTerm(kvs map[string]string) error {
 	if data, err := os.ReadFile(FDNConfigPath); err != nil {
 		log.Error(err)
 		return err
@@ -194,6 +194,7 @@ func UpdateConfigTerm(kvs map[string]string) error {
 				OriginalLower: key,
 				TargetWord:    value})
 		}
+		log.Trace(fdncfg.GetToBeSepWords())
 		if data, err := proto.Marshal(&fdncfg); err != nil {
 			log.Error(err)
 			return err
@@ -207,7 +208,7 @@ func UpdateConfigTerm(kvs map[string]string) error {
 	return nil
 }
 
-func UpdateConfigToBeSepWords(words []string) error {
+func ConfigToBeSepWords(words []string) error {
 	if data, err := os.ReadFile(FDNConfigPath); err != nil {
 		log.Error(err)
 		return err
@@ -219,6 +220,33 @@ func UpdateConfigToBeSepWords(words []string) error {
 		}
 		//FIXME:check exist
 		fdncfg.ToBeSepWords = append(fdncfg.ToBeSepWords, words...)
+		log.Trace(fdncfg.GetToBeSepWords())
+		if data, err := proto.Marshal(&fdncfg); err != nil {
+			log.Error(err)
+			return err
+		} else {
+			if err := os.WriteFile(FDNConfigPath, data, 0644); err != nil {
+				log.Error(err)
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func ConfigSeparator(separator string) error {
+	if data, err := os.ReadFile(FDNConfigPath); err != nil {
+		log.Error(err)
+		return err
+	} else {
+		fdncfg := pb.Fdnconfig{}
+		if err := proto.Unmarshal(data, &fdncfg); err != nil {
+			log.Error(err)
+			return err
+		}
+		//FIXME:check exist
+		fdncfg.Separator = separator
+		log.Trace(fdncfg.GetSeparator())
 		if data, err := proto.Marshal(&fdncfg); err != nil {
 			log.Error(err)
 			return err
