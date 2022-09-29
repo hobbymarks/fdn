@@ -32,51 +32,29 @@ var configCmd = &cobra.Command{
 				kvs := strings.Split(arg, ":")
 				data[kvs[0]] = kvs[1]
 			}
-			if err := UpdateConfigTerm(data); err != nil {
+			if err := ConfigTerm(data); err != nil {
 				log.Error(err)
 			}
-			log.Trace("✓UpdateConfigTerm")
+			log.Trace("✓ConfigTerm")
 		} else if cfg == "tbswl" || cfg == "to_be_separator_word_list" {
-			if err := UpdateConfigToBeSepWords(args); err != nil {
+			if err := ConfigToBeSepWords(args); err != nil {
 				log.Error(err)
 			}
-			log.Trace("✓UpdateConfigToBeSeparatorWord")
-		} //✕
-
-		// bytes, err := os.ReadFile(cfg)
-		// if err != nil {
-		// 	log.Fatal(err)
-		// }
-
-		// var result map[string]interface{}
-		// json.Unmarshal(bytes, &result)
-
-		// for key, _ := range result {
-		// 	fmt.Println(key)
-		// }
-		// fmt.Println(result["BeReplacedCharDictionary"])
-		// cmds := "ls -l"
-		// out, err := exec.Command(strings.Fields(cmds)[0], strings.Fields(cmds)[1:]...).Output()
-		// if err != nil {
-		// 	log.Error(err)
-		// } else {
-		// 	fmt.Println(string(out))
-		// }
+			log.Trace("✓ConfigToBeSeparatorWord") /*✕*/
+		} else if cfg == "sep" || cfg == "separator" {
+			if err := ConfigSeparator(args[0]); err != nil {
+				log.Error(err)
+			}
+			log.Trace("✓ConfigSeparator")
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(configCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// configCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
 	configCmd.Flags().StringP("config", "c", "", `Config
-	key_colon_value_list 	  kcvl,
+	separator                 sep,
+	key_colon_value_list      kcvl,
 	to_be_separator_word_list tbswl`)
 }
