@@ -15,6 +15,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 var version = "0.0.0"
@@ -194,6 +195,7 @@ func ConfigTerm(kvs map[string]string) error {
 				OriginalLower: key,
 				TargetWord:    value})
 		}
+		fdncfg.LastUpdated = timestamppb.Now()
 		log.Trace(fdncfg.GetToBeSepWords())
 		if data, err := proto.Marshal(&fdncfg); err != nil {
 			log.Error(err)
@@ -220,6 +222,7 @@ func ConfigToBeSepWords(words []string) error {
 		}
 		//FIXME:check exist
 		fdncfg.ToBeSepWords = append(fdncfg.ToBeSepWords, words...)
+		fdncfg.LastUpdated = timestamppb.Now()
 		log.Trace(fdncfg.GetToBeSepWords())
 		if data, err := proto.Marshal(&fdncfg); err != nil {
 			log.Error(err)
@@ -246,6 +249,7 @@ func ConfigSeparator(separator string) error {
 		}
 		//FIXME:check exist
 		fdncfg.Separator = separator
+		fdncfg.LastUpdated = timestamppb.Now()
 		log.Trace(fdncfg.GetSeparator())
 		if data, err := proto.Marshal(&fdncfg); err != nil {
 			log.Error(err)
@@ -256,6 +260,23 @@ func ConfigSeparator(separator string) error {
 				return err
 			}
 		}
+	}
+	return nil
+}
+
+func ConfigMap() error {
+	if data, err := os.ReadFile(FDNConfigPath); err != nil {
+		log.Error(err)
+		return err
+	} else {
+		fdncfg := pb.Fdnconfig{}
+		if err := proto.Unmarshal(data, &fdncfg); err != nil {
+			log.Error(err)
+			return err
+		} //TODO:pretty
+		fmt.Println("Separator:", fdncfg.Separator)
+		fmt.Println("ToBeSepWords:", fdncfg.ToBeSepWords)
+		fmt.Println("TermWords:", fdncfg.TermWords)
 	}
 	return nil
 }
