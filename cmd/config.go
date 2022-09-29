@@ -35,8 +35,13 @@ var configCmd = &cobra.Command{
 			if err := UpdateConfigTerm(data); err != nil {
 				log.Error(err)
 			}
-			log.Trace("UpdateConfigTerm finished")
-		}
+			log.Trace("✓UpdateConfigTerm")
+		} else if cfg == "tbswl" || cfg == "to_be_separator_word_list" {
+			if err := UpdateConfigToBeSepWords(args); err != nil {
+				log.Error(err)
+			}
+			log.Trace("✓UpdateConfigToBeSeparatorWord")
+		} //✕
 
 		// bytes, err := os.ReadFile(cfg)
 		// if err != nil {
@@ -71,5 +76,7 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	configCmd.Flags().StringP("config", "c", "", "Config(key_colon_value_list-kcvl)")
+	configCmd.Flags().StringP("config", "c", "", `Config
+	key_colon_value_list 	  kcvl,
+	to_be_separator_word_list tbswl`)
 }
