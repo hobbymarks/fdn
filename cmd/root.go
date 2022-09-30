@@ -9,7 +9,9 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
+	"strings"
 
 	"github.com/hobbymarks/fdn/pb"
 	log "github.com/sirupsen/logrus"
@@ -38,7 +40,7 @@ var rootCmd = &cobra.Command{
 		} else {
 			sort.SliceStable(paths, func(i, j int) bool { return paths[i] > paths[j] })
 			for _, path := range paths {
-				fmt.Println(path)
+				fmt.Println(ReplaceWords(filepath.Base(path)))
 			}
 		}
 	},
@@ -300,12 +302,39 @@ func GetConfig() (*pb.Fdnconfig, error) {
 }
 
 func ReplaceWords(inputName string) string {
+	var mask = func(s string) ([]string, []bool) {
+		words := []string{}
+		wdmsk := []bool{}
+		// fdncfg, err := GetConfig()
+		// if err != nil {
+		// 	log.Error(err)
+		// }
+		pts := []string{"1956", "10 月"}
+		// for _, twd := range fdncfg.TermWords {
+		// 	pts = append(pts, "["+twd.OriginalLower+"]")
+		// }
+		rp := regexp.MustCompile(strings.Join(pts, "|"))
+		allSliceIndex := rp.FindAllStringIndex(s, -1)
+		cur := 0
+		for _, slice := range allSliceIndex {
+			if slice[0] > cur {
+				words = append(words, s[cur:slice[0]])
+				wdmsk = append(wdmsk, false)
+			}
+			words = append(words, s[slice[0]:slice[1]])
+			wdmsk = append(wdmsk, true)
+			cur = slice[1]
+		}
+		if cur < len(s) {
+			words = append(words, s[cur:])
+			wdmsk = append(wdmsk, false)
+		}
+		return words, wdmsk
+	}
+	fmt.Println(mask(inputName))
+
 	outName := inputName
-	// fdncfg, err := GetConfig()
-	// if err != nil {
-	// 	log.Error(err)
-	// }
-	// regexp.MustCompile()
+
 	// for _, s := range inputName {
 
 	// }
