@@ -303,16 +303,20 @@ func GetConfig() (*pb.Fdnconfig, error) {
 
 func ReplaceWords(inputName string) string {
 	var mask = func(s string) ([]string, []bool) {
+		var regescape = func(s string) string {
+			return strings.Replace(s, "+", "\\+", -1)
+		}
+
 		words := []string{}
 		wdmsk := []bool{}
-		// fdncfg, err := GetConfig()
-		// if err != nil {
-		// 	log.Error(err)
-		// }
-		pts := []string{"1956", "10 月"}
-		// for _, twd := range fdncfg.TermWords {
-		// 	pts = append(pts, "["+twd.OriginalLower+"]")
-		// }
+		fdncfg, err := GetConfig()
+		if err != nil {
+			log.Error(err)
+		}
+		pts := []string{}
+		for _, twd := range fdncfg.TermWords {
+			pts = append(pts, regescape(twd.OriginalLower))
+		}
 		rp := regexp.MustCompile(strings.Join(pts, "|"))
 		allSliceIndex := rp.FindAllStringIndex(s, -1)
 		cur := 0
@@ -331,7 +335,9 @@ func ReplaceWords(inputName string) string {
 		}
 		return words, wdmsk
 	}
-	fmt.Println(mask(inputName))
+
+	words, bools := mask(inputName)
+	fmt.Println(words, bools)
 
 	outName := inputName
 
