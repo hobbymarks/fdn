@@ -47,7 +47,7 @@ var configCmd = &cobra.Command{
 			}
 			log.Trace("✓ConfigSeparator")
 		} else {
-			ConfigMap()
+			PrintFDNConfig()
 		}
 	},
 }
