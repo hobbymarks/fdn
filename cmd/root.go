@@ -264,7 +264,7 @@ func ConfigSeparator(separator string) error {
 	return nil
 }
 
-func ConfigMap() error {
+func PrintFDNConfig() error {
 	if data, err := os.ReadFile(FDNConfigPath); err != nil {
 		log.Error(err)
 		return err
@@ -276,9 +276,40 @@ func ConfigMap() error {
 		} //TODO:pretty
 		fmt.Println("Separator:", fdncfg.Separator)
 		fmt.Println("ToBeSepWords:", fdncfg.ToBeSepWords)
-		fmt.Println("TermWords:", fdncfg.TermWords)
+		kvs := map[string]string{}
+		for _, tw := range fdncfg.TermWords {
+			kvs[tw.OriginalLower] = tw.TargetWord
+		}
+		fmt.Println("TermWords:", kvs)
 	}
 	return nil
+}
+
+func GetConfig() (*pb.Fdnconfig, error) {
+	fdncfg := pb.Fdnconfig{}
+	if data, err := os.ReadFile(FDNConfigPath); err != nil {
+		log.Error(err)
+		return &fdncfg, err
+	} else {
+		if err := proto.Unmarshal(data, &fdncfg); err != nil {
+			log.Error(err)
+			return &fdncfg, err
+		}
+	}
+	return &fdncfg, nil
+}
+
+func ReplaceWords(inputName string) string {
+	outName := inputName
+	// fdncfg, err := GetConfig()
+	// if err != nil {
+	// 	log.Error(err)
+	// }
+	// regexp.MustCompile()
+	// for _, s := range inputName {
+
+	// }
+	return outName
 }
 
 //TODO:support directory and files
