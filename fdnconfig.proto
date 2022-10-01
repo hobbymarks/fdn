@@ -12,15 +12,26 @@ option go_package = "/pb";
 // [START message]
 
 message fdnconfig{
-    string Separator=1;
-    repeated string ToBeSepWords=6;
+    Separator Separator=1;
+    repeated ToSepWord ToSepWords=6;
     repeated TermWord TermWords=7;
 
     google.protobuf.Timestamp LastUpdated=15;
 }
 
 message TermWord{
+    string KeyHash=1;
     string OriginalLower=2;
     string TargetWord=3;
+}
+
+message ToSepWord{
+    string KeyHash=1;
+    string Value=2;
+}
+
+message Separator{
+    string KeyHash=1;
+    string Value=2;
 }
 // [END message]

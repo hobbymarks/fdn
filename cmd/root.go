@@ -4,6 +4,7 @@ Copyright © 2022 hobbymarks ihobbymarks@gmail.com
 package cmd
 
 import (
+	"crypto/md5"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -194,11 +195,12 @@ func ConfigTerm(kvs map[string]string) error {
 		}
 		for key, value := range kvs { //FIXME:check exist
 			fdncfg.TermWords = append(fdncfg.TermWords, &pb.TermWord{
+				KeyHash:       KeyHash(key),
 				OriginalLower: key,
 				TargetWord:    value})
 		}
 		fdncfg.LastUpdated = timestamppb.Now()
-		log.Trace(fdncfg.GetToBeSepWords())
+		log.Trace(fdncfg.GetToSepWords())
 		if data, err := proto.Marshal(&fdncfg); err != nil {
 			log.Error(err)
 			return err
@@ -212,7 +214,7 @@ func ConfigTerm(kvs map[string]string) error {
 	return nil
 }
 
-func ConfigToBeSepWords(words []string) error {
+func ConfigToSepWords(words []string) error {
 	if data, err := os.ReadFile(FDNConfigPath); err != nil {
 		log.Error(err)
 		return err
@@ -223,9 +225,13 @@ func ConfigToBeSepWords(words []string) error {
 			return err
 		}
 		//FIXME:check exist
-		fdncfg.ToBeSepWords = append(fdncfg.ToBeSepWords, words...)
+		for _, wd := range words {
+			fdncfg.ToSepWords = append(fdncfg.ToSepWords, &pb.ToSepWord{
+				KeyHash: KeyHash(wd),
+				Value:   wd})
+		}
 		fdncfg.LastUpdated = timestamppb.Now()
-		log.Trace(fdncfg.GetToBeSepWords())
+		log.Trace(fdncfg.GetToSepWords())
 		if data, err := proto.Marshal(&fdncfg); err != nil {
 			log.Error(err)
 			return err
@@ -250,7 +256,9 @@ func ConfigSeparator(separator string) error {
 			return err
 		}
 		//FIXME:check exist
-		fdncfg.Separator = separator
+		fdncfg.Separator = &pb.Separator{
+			KeyHash: KeyHash(separator),
+			Value:   separator}
 		fdncfg.LastUpdated = timestamppb.Now()
 		log.Trace(fdncfg.GetSeparator())
 		if data, err := proto.Marshal(&fdncfg); err != nil {
@@ -277,7 +285,7 @@ func PrintFDNConfig() error {
 			return err
 		} //TODO:pretty
 		fmt.Println("Separator:", fdncfg.Separator)
-		fmt.Println("ToBeSepWords:", fdncfg.ToBeSepWords)
+		fmt.Println("ToBeSepWords:", fdncfg.ToSepWords)
 		kvs := map[string]string{}
 		for _, tw := range fdncfg.TermWords {
 			kvs[tw.OriginalLower] = tw.TargetWord
@@ -321,8 +329,8 @@ func ReplaceWords(inputName string) string {
 		for _, twd := range fdncfg.TermWords {
 			pts = append(pts, regescape(twd.OriginalLower))
 		}
-		for _, wd := range fdncfg.ToBeSepWords {
-			pts = append(pts, regescape(wd))
+		for _, wd := range fdncfg.ToSepWords {
+			pts = append(pts, regescape(wd.Value))
 		}
 		rp := regexp.MustCompile(strings.Join(pts, "|"))
 		allSliceIndex := rp.FindAllStringIndex(s, -1)
@@ -352,6 +360,11 @@ func ReplaceWords(inputName string) string {
 
 	// }
 	return outName
+}
+
+func KeyHash(key string) string {
+	data := []byte(key)
+	return fmt.Sprintf("%x", md5.Sum(data))
 }
 
 //TODO:support directory and files
