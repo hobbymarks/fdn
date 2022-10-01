@@ -29,7 +29,6 @@ var depthLevel int
 
 var FDNConfigPath string
 
-// rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:     "fdn",
 	Version: version,
@@ -47,8 +46,6 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
@@ -184,15 +181,10 @@ func DepthFiles(dirPath string, depthLevel int, onlyDirectory bool) ([]string, e
 }
 
 func ConfigTermWords(keyValueMap map[string]string) error {
-	if data, err := os.ReadFile(FDNConfigPath); err != nil {
+	if fdncfg, err := GetFDNConfig(); err != nil {
 		log.Error(err)
 		return err
 	} else {
-		fdncfg := pb.Fdnconfig{}
-		if err := proto.Unmarshal(data, &fdncfg); err != nil {
-			log.Error(err)
-			return err
-		}
 		ekhs := []string{}
 		for _, tw := range fdncfg.TermWords {
 			ekhs = append(ekhs, tw.KeyHash)
@@ -211,29 +203,42 @@ func ConfigTermWords(keyValueMap map[string]string) error {
 		}
 		fdncfg.LastUpdated = timestamppb.Now()
 		log.Trace(fdncfg.GetToSepWords())
-		if data, err := proto.Marshal(&fdncfg); err != nil {
-			log.Error(err)
+		if err := SaveFDNConfig(fdncfg); err != nil {
 			return err
-		} else {
-			if err := os.WriteFile(FDNConfigPath, data, 0644); err != nil {
-				log.Error(err)
-				return err
+		}
+	}
+	return nil
+}
+
+func DeleteTermWords(keys []string) error {
+	if fdncfg, err := GetFDNConfig(); err != nil {
+		log.Error(err)
+		return err
+	} else {
+		log.Trace(keys)
+		tws := []*pb.TermWord{}
+		for _, tw := range fdncfg.TermWords {
+			if ArrayContainsElemenet(keys, tw.KeyHash) {
+				log.Trace("-:" + tw.OriginalLower)
+				continue
+			} else {
+				tws = append(tws, tw)
 			}
+		}
+		fdncfg.TermWords = tws
+		fdncfg.LastUpdated = timestamppb.Now()
+		if err := SaveFDNConfig(fdncfg); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
 func ConfigToSepWords(words []string) error {
-	if data, err := os.ReadFile(FDNConfigPath); err != nil {
+	if fdncfg, err := GetFDNConfig(); err != nil {
 		log.Error(err)
 		return err
 	} else {
-		fdncfg := pb.Fdnconfig{}
-		if err := proto.Unmarshal(data, &fdncfg); err != nil {
-			log.Error(err)
-			return err
-		}
 		ekhs := []string{}
 		for _, sw := range fdncfg.ToSepWords {
 			ekhs = append(ekhs, sw.KeyHash)
@@ -251,43 +256,49 @@ func ConfigToSepWords(words []string) error {
 		}
 		fdncfg.LastUpdated = timestamppb.Now()
 		log.Trace(fdncfg.GetToSepWords())
-		if data, err := proto.Marshal(&fdncfg); err != nil {
-			log.Error(err)
+		if err := SaveFDNConfig(fdncfg); err != nil {
 			return err
-		} else {
-			if err := os.WriteFile(FDNConfigPath, data, 0644); err != nil {
-				log.Error(err)
-				return err
+		}
+	}
+	return nil
+}
+
+func DeleteToSepWords(keys []string) error {
+	if fdncfg, err := GetFDNConfig(); err != nil {
+		log.Error(err)
+		return err
+	} else {
+		log.Trace(keys)
+		sws := []*pb.ToSepWord{}
+		for _, sw := range fdncfg.ToSepWords {
+			if ArrayContainsElemenet(keys, sw.KeyHash) {
+				log.Trace("-:" + sw.Value)
+				continue
+			} else {
+				sws = append(sws, sw)
 			}
+		}
+		fdncfg.ToSepWords = sws
+		fdncfg.LastUpdated = timestamppb.Now()
+		if err := SaveFDNConfig(fdncfg); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
 func ConfigSeparator(separator string) error {
-	if data, err := os.ReadFile(FDNConfigPath); err != nil {
+	if fdncfg, err := GetFDNConfig(); err != nil {
 		log.Error(err)
 		return err
 	} else {
-		fdncfg := pb.Fdnconfig{}
-		if err := proto.Unmarshal(data, &fdncfg); err != nil {
-			log.Error(err)
-			return err
-		}
-		//FIXME:check exist
 		fdncfg.Separator = &pb.Separator{
 			KeyHash: KeyHash(separator),
 			Value:   separator}
 		fdncfg.LastUpdated = timestamppb.Now()
 		log.Trace(fdncfg.GetSeparator())
-		if data, err := proto.Marshal(&fdncfg); err != nil {
-			log.Error(err)
+		if err := SaveFDNConfig(fdncfg); err != nil {
 			return err
-		} else {
-			if err := os.WriteFile(FDNConfigPath, data, 0644); err != nil {
-				log.Error(err)
-				return err
-			}
 		}
 	}
 	return nil
@@ -305,6 +316,19 @@ func GetFDNConfig() (*pb.Fdnconfig, error) {
 		}
 	}
 	return &fdncfg, nil
+}
+
+func SaveFDNConfig(fdncfg *pb.Fdnconfig) error {
+	if data, err := proto.Marshal(fdncfg); err != nil {
+		log.Error(err)
+		return err
+	} else {
+		if err := os.WriteFile(FDNConfigPath, data, 0644); err != nil {
+			log.Error(err)
+			return err
+		}
+	}
+	return nil
 }
 
 func ReplaceWords(inputName string) string {
