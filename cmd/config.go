@@ -4,6 +4,7 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
 	"strings"
 
 	_ "embed"
@@ -46,8 +47,27 @@ var configCmd = &cobra.Command{
 				log.Error(err)
 			}
 			log.Trace("✓ConfigSeparator")
-		} else {
-			PrintFDNConfig()
+		}
+
+		lst, err := cmd.Flags().GetString("list")
+		if err != nil {
+			log.Fatal(err)
+		}
+		fdncfg, err := GetFDNConfig()
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Trace(lst)
+		if lst == "sep" || lst == "separator" {
+			fmt.Println(fdncfg.Separator)
+		} else if lst == "tws" || lst == "termwords" {
+			kvs := map[string]string{}
+			for _, tw := range fdncfg.TermWords {
+				kvs[tw.OriginalLower] = tw.TargetWord
+			}
+			fmt.Println("TermWords:", kvs)
+		} else if lst == "sws" || lst == "sepwords" {
+			fmt.Println("ToBeSepWords:", fdncfg.ToBeSepWords)
 		}
 	},
 }
@@ -56,7 +76,11 @@ func init() {
 	rootCmd.AddCommand(configCmd)
 
 	configCmd.Flags().StringP("config", "c", "", `Config
-	separator                 sep,
-	key_colon_value_list      kcvl,
-	to_be_separator_word_list tbswl`)
+	separator                     sep,
+	termkey_colon_termvalue_list  kcvl,
+	to_be_separator_word_list     tbswl`)
+	configCmd.Flags().StringP("list", "l", "", `List
+	separator sep,
+	termwords tws
+	sepwords  sws`)
 }
