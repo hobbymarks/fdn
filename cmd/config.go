@@ -27,7 +27,7 @@ var configCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 		log.Trace(cfg)
-		if cfg == "kcvl" || cfg == "key_colon_value_list" {
+		if cfg == "twl" || cfg == "termkey_colon_termword_list" {
 			data := map[string]string{}
 			for _, arg := range args {
 				kvs := strings.Split(arg, ":")
@@ -37,8 +37,8 @@ var configCmd = &cobra.Command{
 				log.Error(err)
 			}
 			log.Trace("✓ConfigTerm")
-		} else if cfg == "tbswl" || cfg == "to_be_separator_word_list" {
-			if err := ConfigToBeSepWords(args); err != nil {
+		} else if cfg == "swl" || cfg == "to_separator_word_list" {
+			if err := ConfigToSepWords(args); err != nil {
 				log.Error(err)
 			}
 			log.Trace("✓ConfigToBeSeparatorWord") /*✕*/
@@ -60,14 +60,24 @@ var configCmd = &cobra.Command{
 		log.Trace(lst)
 		if lst == "sep" || lst == "separator" {
 			fmt.Println(fdncfg.Separator)
-		} else if lst == "tws" || lst == "termwords" {
+		} else if lst == "twl" || lst == "termkey_colon_termword_list" {
 			kvs := map[string]string{}
 			for _, tw := range fdncfg.TermWords {
-				kvs[tw.OriginalLower] = tw.TargetWord
+				kvs[tw.KeyHash] = tw.OriginalLower + ":" + tw.TargetWord
 			}
-			fmt.Println("TermWords:", kvs)
-		} else if lst == "sws" || lst == "sepwords" {
-			fmt.Println("ToBeSepWords:", fdncfg.ToBeSepWords)
+			fmt.Println("TermWords:")
+			for k, v := range kvs {
+				fmt.Println(k, v)
+			}
+		} else if lst == "swl" || lst == "to_separator_word_list" {
+			sws := map[string]string{}
+			for _, sw := range fdncfg.ToSepWords {
+				sws[sw.KeyHash] = sw.Value
+			}
+			fmt.Println("ToBeSepWords:")
+			for k, v := range sws {
+				fmt.Println(k, v)
+			}
 		}
 	},
 }
@@ -76,11 +86,11 @@ func init() {
 	rootCmd.AddCommand(configCmd)
 
 	configCmd.Flags().StringP("config", "c", "", `Config
-	separator                     sep,
-	termkey_colon_termvalue_list  kcvl,
-	to_be_separator_word_list     tbswl`)
+	separator                   sep,
+	termkey_colon_termword_list twl,
+	to_separator_word_list      swl`)
 	configCmd.Flags().StringP("list", "l", "", `List
-	separator sep,
-	termwords tws
-	sepwords  sws`)
+	separator                   sep,
+	termkey_colon_termword_list twl,
+	to_separator_word_list      swl`)
 }
