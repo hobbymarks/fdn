@@ -1,0 +1,26 @@
+// [START declaration]
+syntax="proto3";
+
+package main;
+import "google/protobuf/timestamp.proto";
+// [END declaration]
+
+// [START go_declaration]
+option go_package = "/pb";
+// [END go_declaration]
+
+// [START message]
+
+message fdnrecord{
+    repeated Record Records=6;
+
+    google.protobuf.Timestamp LastUpdated=15;
+}
+
+message Record{
+    string PreviousName=2;
+    string CurrentName=3;
+
+    google.protobuf.Timestamp LastUpdated=15;
+}
+// [END message]
