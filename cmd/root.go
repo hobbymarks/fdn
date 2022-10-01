@@ -287,7 +287,7 @@ func PrintFDNConfig() error {
 	return nil
 }
 
-func GetConfig() (*pb.Fdnconfig, error) {
+func GetFDNConfig() (*pb.Fdnconfig, error) {
 	fdncfg := pb.Fdnconfig{}
 	if data, err := os.ReadFile(FDNConfigPath); err != nil {
 		log.Error(err)
@@ -304,18 +304,25 @@ func GetConfig() (*pb.Fdnconfig, error) {
 func ReplaceWords(inputName string) string {
 	var mask = func(s string) ([]string, []bool) {
 		var regescape = func(s string) string {
-			return strings.Replace(s, "+", "\\+", -1)
+			s = strings.Replace(s, "+", "\\+", -1)
+			s = strings.Replace(s, "?", "\\?", -1)
+			s = strings.Replace(s, "*", "\\*", -1)
+
+			return s
 		}
 
 		words := []string{}
 		wdmsk := []bool{}
-		fdncfg, err := GetConfig()
+		fdncfg, err := GetFDNConfig()
 		if err != nil {
 			log.Error(err)
 		}
 		pts := []string{}
 		for _, twd := range fdncfg.TermWords {
 			pts = append(pts, regescape(twd.OriginalLower))
+		}
+		for _, wd := range fdncfg.ToBeSepWords {
+			pts = append(pts, regescape(wd))
 		}
 		rp := regexp.MustCompile(strings.Join(pts, "|"))
 		allSliceIndex := rp.FindAllStringIndex(s, -1)
