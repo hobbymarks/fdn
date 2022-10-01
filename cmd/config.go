@@ -33,7 +33,7 @@ var configCmd = &cobra.Command{
 				kvs := strings.Split(arg, ":")
 				data[kvs[0]] = kvs[1]
 			}
-			if err := ConfigTerm(data); err != nil {
+			if err := ConfigTermWords(data); err != nil {
 				log.Error(err)
 			}
 			log.Trace("✓ConfigTerm")

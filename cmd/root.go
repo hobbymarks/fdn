@@ -183,7 +183,7 @@ func DepthFiles(dirPath string, depthLevel int, onlyDirectory bool) ([]string, e
 	return absolutePaths, nil
 }
 
-func ConfigTerm(kvs map[string]string) error {
+func ConfigTermWords(keyValueMap map[string]string) error {
 	if data, err := os.ReadFile(FDNConfigPath); err != nil {
 		log.Error(err)
 		return err
@@ -193,7 +193,7 @@ func ConfigTerm(kvs map[string]string) error {
 			log.Error(err)
 			return err
 		}
-		for key, value := range kvs { //FIXME:check exist
+		for key, value := range keyValueMap { //FIXME:check exist
 			fdncfg.TermWords = append(fdncfg.TermWords, &pb.TermWord{
 				KeyHash:       KeyHash(key),
 				OriginalLower: key,
@@ -270,27 +270,6 @@ func ConfigSeparator(separator string) error {
 				return err
 			}
 		}
-	}
-	return nil
-}
-
-func PrintFDNConfig() error {
-	if data, err := os.ReadFile(FDNConfigPath); err != nil {
-		log.Error(err)
-		return err
-	} else {
-		fdncfg := pb.Fdnconfig{}
-		if err := proto.Unmarshal(data, &fdncfg); err != nil {
-			log.Error(err)
-			return err
-		} //TODO:pretty
-		fmt.Println("Separator:", fdncfg.Separator)
-		fmt.Println("ToBeSepWords:", fdncfg.ToSepWords)
-		kvs := map[string]string{}
-		for _, tw := range fdncfg.TermWords {
-			kvs[tw.OriginalLower] = tw.TargetWord
-		}
-		fmt.Println("TermWords:", kvs)
 	}
 	return nil
 }
