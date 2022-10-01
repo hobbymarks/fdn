@@ -193,11 +193,21 @@ func ConfigTermWords(keyValueMap map[string]string) error {
 			log.Error(err)
 			return err
 		}
-		for key, value := range keyValueMap { //FIXME:check exist
-			fdncfg.TermWords = append(fdncfg.TermWords, &pb.TermWord{
-				KeyHash:       KeyHash(key),
-				OriginalLower: key,
-				TargetWord:    value})
+		ekhs := []string{}
+		for _, tw := range fdncfg.TermWords {
+			ekhs = append(ekhs, tw.KeyHash)
+		}
+		for key, value := range keyValueMap {
+			kh := KeyHash(key)
+			if ArrayContainsElemenet(ekhs, kh) {
+				continue
+			} else {
+				fdncfg.TermWords = append(fdncfg.TermWords, &pb.TermWord{
+					KeyHash:       kh,
+					OriginalLower: key,
+					TargetWord:    value})
+				ekhs = append(ekhs, kh)
+			}
 		}
 		fdncfg.LastUpdated = timestamppb.Now()
 		log.Trace(fdncfg.GetToSepWords())
@@ -224,11 +234,20 @@ func ConfigToSepWords(words []string) error {
 			log.Error(err)
 			return err
 		}
-		//FIXME:check exist
+		ekhs := []string{}
+		for _, sw := range fdncfg.ToSepWords {
+			ekhs = append(ekhs, sw.KeyHash)
+		}
 		for _, wd := range words {
-			fdncfg.ToSepWords = append(fdncfg.ToSepWords, &pb.ToSepWord{
-				KeyHash: KeyHash(wd),
-				Value:   wd})
+			kh := KeyHash(wd)
+			if ArrayContainsElemenet(ekhs, kh) {
+				continue
+			} else {
+				fdncfg.ToSepWords = append(fdncfg.ToSepWords, &pb.ToSepWord{
+					KeyHash: kh,
+					Value:   wd})
+				ekhs = append(ekhs, kh)
+			}
 		}
 		fdncfg.LastUpdated = timestamppb.Now()
 		log.Trace(fdncfg.GetToSepWords())
@@ -344,6 +363,15 @@ func ReplaceWords(inputName string) string {
 func KeyHash(key string) string {
 	data := []byte(key)
 	return fmt.Sprintf("%x", md5.Sum(data))
+}
+
+func ArrayContainsElemenet[T comparable](s []T, e T) bool {
+	for _, v := range s {
+		if v == e {
+			return true
+		}
+	}
+	return false
 }
 
 //TODO:support directory and files
