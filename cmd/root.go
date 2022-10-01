@@ -28,6 +28,7 @@ var inputPaths []string
 var depthLevel int
 
 var FDNConfigPath string
+var FDNRecordPath string
 
 var rootCmd = &cobra.Command{
 	Use:     "fdn",
@@ -62,6 +63,7 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	//Process FDNConfig
 	FDNConfigPath = filepath.Join(homeDir, ".fdn")
 	if _, err := os.Lstat(FDNConfigPath); errors.Is(err, os.ErrNotExist) {
 		if err := os.Mkdir(FDNConfigPath, os.ModePerm); err != nil {
@@ -69,14 +71,18 @@ func init() {
 		}
 	}
 	FDNConfigPath = filepath.Join(FDNConfigPath, "fdncfg")
-	if _, err := os.Stat(FDNConfigPath); err != nil { //if not exist then create
-		giatrds := pb.Fdnconfig{}
-		if data, err := proto.Marshal(&giatrds); err != nil {
-			log.Fatal(err)
-		} else {
-			if err := os.WriteFile(FDNConfigPath, data, 0644); err != nil {
-				log.Fatal(err)
-			}
+	if _, err := os.Lstat(FDNConfigPath); errors.Is(err, os.ErrNotExist) {
+		fdncfg := pb.Fdnconfig{}
+		if err := SaveFDNConfig(&fdncfg); err != nil {
+			log.Error(err)
+		}
+	}
+	//Process FDNRecord
+	FDNRecordPath = filepath.Join(homeDir, ".fdn", "fdnrd")
+	if _, err := os.Lstat(FDNRecordPath); errors.Is(err, os.ErrNotExist) {
+		fdnrd := pb.Fdnrecord{}
+		if err := SaveFDNRecord(&fdnrd); err != nil {
+			log.Error(err)
 		}
 	}
 }
@@ -324,6 +330,19 @@ func SaveFDNConfig(fdncfg *pb.Fdnconfig) error {
 		return err
 	} else {
 		if err := os.WriteFile(FDNConfigPath, data, 0644); err != nil {
+			log.Error(err)
+			return err
+		}
+	}
+	return nil
+}
+
+func SaveFDNRecord(fdnrd *pb.Fdnrecord) error {
+	if data, err := proto.Marshal(fdnrd); err != nil {
+		log.Error(err)
+		return err
+	} else {
+		if err := os.WriteFile(FDNRecordPath, data, 0644); err != nil {
 			log.Error(err)
 			return err
 		}
