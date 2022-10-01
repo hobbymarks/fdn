@@ -351,9 +351,6 @@ func ReplaceWords(inputName string) string {
 		for _, twd := range fdncfg.TermWords {
 			pts = append(pts, regescape(twd.OriginalLower))
 		}
-		for _, wd := range fdncfg.ToSepWords {
-			pts = append(pts, regescape(wd.Value))
-		}
 		rp := regexp.MustCompile(strings.Join(pts, "|"))
 		allSliceIndex := rp.FindAllStringIndex(s, -1)
 		cur := 0
@@ -374,13 +371,26 @@ func ReplaceWords(inputName string) string {
 	}
 
 	words, bools := mask(inputName)
-	fmt.Println(words, bools)
+	if len(words) != len(bools) {
+		log.Fatal("words not equal bools")
+	}
 
-	outName := inputName
+	newWords := []string{}
+	if fdncfg, err := GetFDNConfig(); err != nil {
+		log.Fatal(err)
+	} else {
+		for idx, wd := range words {
+			if !bools[idx] {
+				for _, sw := range fdncfg.ToSepWords {
+					wd = strings.Replace(wd, sw.Value, fdncfg.Separator.Value, -1)
+				}
+			}
+			newWords = append(newWords, wd)
+		}
+	}
 
-	// for _, s := range inputName {
+	outName := strings.Join(newWords, "")
 
-	// }
 	return outName
 }
 
