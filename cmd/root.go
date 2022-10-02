@@ -351,6 +351,7 @@ func SaveFDNRecord(fdnrd *pb.Fdnrecord) error {
 }
 
 func ReplaceWords(inputName string) string {
+	outName := inputName
 	var mask = func(s string) ([]string, []bool) {
 		var regescape = func(s string) string {
 			s = strings.Replace(s, "+", "\\+", -1)
@@ -398,6 +399,7 @@ func ReplaceWords(inputName string) string {
 	if fdncfg, err := GetFDNConfig(); err != nil {
 		log.Fatal(err)
 	} else {
+		rpCNS := regexp.MustCompile("[" + fdncfg.Separator.Value + "]+")
 		for idx, wd := range words {
 			if !bools[idx] {
 				for _, sw := range fdncfg.ToSepWords {
@@ -406,9 +408,10 @@ func ReplaceWords(inputName string) string {
 			}
 			newWords = append(newWords, wd)
 		}
+		outName = strings.Join(newWords, "")
+		//Process continous separator
+		outName = rpCNS.ReplaceAllString(outName, fdncfg.Separator.Value)
 	}
-
-	outName := strings.Join(newWords, "")
 
 	return outName
 }
