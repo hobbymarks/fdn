@@ -26,6 +26,7 @@ var version = "0.0.0"
 var onlyDirectory bool
 var inputPaths []string
 var depthLevel int
+var inplace bool
 
 var FDNConfigPath string
 var FDNRecordPath string
@@ -41,7 +42,22 @@ var rootCmd = &cobra.Command{
 		} else {
 			sort.SliceStable(paths, func(i, j int) bool { return paths[i] > paths[j] })
 			for _, path := range paths {
-				fmt.Println(ReplaceWords(filepath.Base(path)))
+				path = filepath.Clean(path) //remove tailing slash if exist
+				ext := filepath.Ext(path)   //ext empty if path is dir
+				bn := strings.TrimSuffix(filepath.Base(path), ext)
+				if fdned := FNDedFrom(bn); fdned != bn {
+					if inplace {
+						if err := FDNFile(path, filepath.Join(filepath.Dir(path), fdned+ext)); err != nil {
+							log.Error(err)
+						} else {
+							fmt.Println("   ", path)
+							fmt.Println("==>", filepath.Join(filepath.Dir(path), fdned+ext))
+						}
+					} else {
+						fmt.Println("   ", path)
+						fmt.Println("-->", filepath.Join(filepath.Dir(path), fdned+ext))
+					}
+				}
 			}
 		}
 	},
@@ -55,9 +71,10 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().BoolVarP(&onlyDirectory, "directory", "d", false, "if enable,directory only.Default file only")
-	rootCmd.Flags().IntVarP(&depthLevel, "level", "l", 1, "maxdepth level")
-	rootCmd.Flags().StringArrayVarP(&inputPaths, "path", "p", []string{"."}, "input paths")
+	rootCmd.Flags().BoolVarP(&onlyDirectory, "directory", "d", false, "If enable,directory only.Default file only")
+	rootCmd.Flags().IntVarP(&depthLevel, "level", "l", 1, "Maxdepth level")
+	rootCmd.Flags().StringArrayVarP(&inputPaths, "path", "p", []string{"."}, "Input paths")
+	rootCmd.Flags().BoolVarP(&inplace, "inplace", "i", false, "in-place")
 
 	homeDir, err := os.UserHomeDir() //get home dir
 	if err != nil {
@@ -336,6 +353,19 @@ func SaveFDNConfig(fdncfg *pb.Fdnconfig) error {
 	}
 	return nil
 }
+func GetFDNRecord() (*pb.Fdnrecord, error) {
+	fdnrd := pb.Fdnrecord{}
+	if data, err := os.ReadFile(FDNRecordPath); err != nil {
+		log.Error(err)
+		return &fdnrd, err
+	} else {
+		if err := proto.Unmarshal(data, &fdnrd); err != nil {
+			log.Error(err)
+			return &fdnrd, err
+		}
+	}
+	return &fdnrd, nil
+}
 
 func SaveFDNRecord(fdnrd *pb.Fdnrecord) error {
 	if data, err := proto.Marshal(fdnrd); err != nil {
@@ -428,6 +458,34 @@ func ArrayContainsElemenet[T comparable](s []T, e T) bool {
 		}
 	}
 	return false
+}
+
+func FDNFile(currentPath string, toBePath string) error {
+	if fdnrd, err := GetFDNRecord(); err != nil {
+		log.Error(err)
+		return err
+	} else {
+		fdnrd.Records = append(fdnrd.Records, &pb.Record{
+			PreviousName: filepath.Base(currentPath),
+			CurrentName:  filepath.Base(toBePath),
+			LastUpdated:  timestamppb.Now()})
+		if err := SaveFDNRecord(fdnrd); err != nil {
+			log.Error(err)
+			return err
+		} else {
+			if err := os.Rename(currentPath, toBePath); err != nil {
+				log.Error(err)
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func FNDedFrom(input string) string {
+	output := input
+	output = ReplaceWords(input)
+	return output
 }
 
 //TODO:support directory and files
