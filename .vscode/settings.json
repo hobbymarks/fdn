@@ -1,10 +1,31 @@
 {
   "editor.language.brackets": [],
-  "editor.rulers": [79, 80, 100,120],
+  "editor.rulers": [79, 80, 100, 120],
   "editor.fontFamily": "JetBrains Mono",
   "editor.fontSize": 13,
   "editor.fontLigatures": true,
   "editor.bracketPairColorization.enabled": true,
   "editor.matchBrackets": "always",
-  "gopls": { "ui.semanticTokens": true }
+  "gopls": { "ui.semanticTokens": true },
+  "go.buildOnSave": "off",
+  "go.lintOnSave": "workspace",
+  "go.vetOnSave": "workspace",
+  "go.buildTags": "",
+  "go.buildFlags": [],
+  "go.lintTool": "golint",
+  "go.lintFlags": [],
+  "go.vetFlags": [],
+  "go.testOnSave": false,
+  "go.coverOnSave": false,
+  "go.useCodeSnippetsOnFunctionSuggest": true,
+  "editor.formatOnSave": true,
+  "go.formatTool": "default",
+  "go.formatFlags": [],
+  "go.goroot": "",
+  "go.gopath": "",
+  "go.inferGopath": true,
+  "go.gocodeAutoBuild": false,
+  "go.testFlags": [
+      "-v"
+  ],
 }
