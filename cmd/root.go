@@ -1,4 +1,5 @@
 /*
+Package cmd root subcommand is the default
 Copyright © 2022 hobbymarks ihobbymarks@gmail.com
 */
 package cmd
@@ -28,7 +29,10 @@ var inputPaths []string
 var depthLevel int
 var inplace bool
 
+// FDNConfigPath is the config file path
 var FDNConfigPath string
+
+// FDNRecordPath is the record file path
 var FDNRecordPath string
 
 var rootCmd = &cobra.Command{
@@ -63,6 +67,7 @@ var rootCmd = &cobra.Command{
 	},
 }
 
+// Execute is the cmd entry
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
@@ -104,7 +109,7 @@ func init() {
 	}
 }
 
-// Paths form args by flag
+// RetrievedAbsPaths Paths form args by flag
 func RetrievedAbsPaths(inputPaths []string, depthLevel int, onlyDirectory bool) ([]string, error) {
 	var absolutePaths []string
 
@@ -134,7 +139,7 @@ func RetrievedAbsPaths(inputPaths []string, depthLevel int, onlyDirectory bool) 
 	return absolutePaths, nil
 }
 
-// retrieve absolute paths
+// FilteredSubPaths retrieve absolute paths
 func FilteredSubPaths(dirPath string, depthLevel int, OnlyDir bool) ([]string, error) {
 	var absolutePaths []string
 
@@ -164,17 +169,17 @@ func FilteredSubPaths(dirPath string, depthLevel int, OnlyDir bool) ([]string, e
 			return nil, err
 		}
 	} else {
-		if paths, err := DepthFiles(dirPath, depthLevel, OnlyDir); err != nil {
+		paths, err := DepthFiles(dirPath, depthLevel, OnlyDir)
+		if err != nil {
 			log.Error(err)
 			return nil, err
-		} else {
-			absolutePaths = paths
 		}
+		absolutePaths = paths
 	}
 	return absolutePaths, nil
 }
 
-// Depth read dir
+// DepthFiles Depth read dir
 func DepthFiles(dirPath string, depthLevel int, onlyDirectory bool) ([]string, error) {
 	var absolutePaths []string
 
@@ -203,183 +208,194 @@ func DepthFiles(dirPath string, depthLevel int, onlyDirectory bool) ([]string, e
 	return absolutePaths, nil
 }
 
+// ConfigTermWords to config term words
 func ConfigTermWords(keyValueMap map[string]string) error {
-	if fdncfg, err := GetFDNConfig(); err != nil {
+	fdncfg, err := GetFDNConfig()
+	if err != nil {
 		log.Error(err)
 		return err
-	} else {
-		ekhs := []string{}
-		for _, tw := range fdncfg.TermWords {
-			ekhs = append(ekhs, tw.KeyHash)
+	}
+	ekhs := []string{}
+	for _, tw := range fdncfg.TermWords {
+		ekhs = append(ekhs, tw.KeyHash)
+	}
+	for key, value := range keyValueMap {
+		kh := KeyHash(key)
+		if ArrayContainsElemenet(ekhs, kh) {
+			continue
+		} else {
+			fdncfg.TermWords = append(fdncfg.TermWords, &pb.TermWord{
+				KeyHash:       kh,
+				OriginalLower: key,
+				TargetWord:    value})
+			ekhs = append(ekhs, kh)
 		}
-		for key, value := range keyValueMap {
-			kh := KeyHash(key)
-			if ArrayContainsElemenet(ekhs, kh) {
-				continue
-			} else {
-				fdncfg.TermWords = append(fdncfg.TermWords, &pb.TermWord{
-					KeyHash:       kh,
-					OriginalLower: key,
-					TargetWord:    value})
-				ekhs = append(ekhs, kh)
-			}
-		}
-		fdncfg.LastUpdated = timestamppb.Now()
-		log.Trace(fdncfg.GetToSepWords())
-		if err := SaveFDNConfig(fdncfg); err != nil {
-			return err
-		}
+	}
+	fdncfg.LastUpdated = timestamppb.Now()
+	log.Trace(fdncfg.GetToSepWords())
+	if err := SaveFDNConfig(fdncfg); err != nil {
+		return err
 	}
 	return nil
 }
 
+// DeleteTermWords delete term words in config file
 func DeleteTermWords(keys []string) error {
-	if fdncfg, err := GetFDNConfig(); err != nil {
+	fdncfg, err := GetFDNConfig()
+	if err != nil {
 		log.Error(err)
 		return err
-	} else {
-		log.Trace(keys)
-		tws := []*pb.TermWord{}
-		for _, tw := range fdncfg.TermWords {
-			if ArrayContainsElemenet(keys, tw.KeyHash) {
-				log.Trace("-:" + tw.OriginalLower)
-				continue
-			} else {
-				tws = append(tws, tw)
-			}
+	}
+	log.Trace(keys)
+	tws := []*pb.TermWord{}
+	for _, tw := range fdncfg.TermWords {
+		if ArrayContainsElemenet(keys, tw.KeyHash) {
+			log.Trace("-:" + tw.OriginalLower)
+			continue
+		} else {
+			tws = append(tws, tw)
 		}
-		fdncfg.TermWords = tws
-		fdncfg.LastUpdated = timestamppb.Now()
-		if err := SaveFDNConfig(fdncfg); err != nil {
-			return err
-		}
+	}
+	fdncfg.TermWords = tws
+	fdncfg.LastUpdated = timestamppb.Now()
+	if err := SaveFDNConfig(fdncfg); err != nil {
+		return err
 	}
 	return nil
 }
 
+// ConfigToSepWords config tosep words in config file
 func ConfigToSepWords(words []string) error {
-	if fdncfg, err := GetFDNConfig(); err != nil {
+	fdncfg, err := GetFDNConfig()
+	if err != nil {
 		log.Error(err)
 		return err
-	} else {
-		ekhs := []string{}
-		for _, sw := range fdncfg.ToSepWords {
-			ekhs = append(ekhs, sw.KeyHash)
+	}
+	ekhs := []string{}
+	for _, sw := range fdncfg.ToSepWords {
+		ekhs = append(ekhs, sw.KeyHash)
+	}
+	for _, wd := range words {
+		kh := KeyHash(wd)
+		if ArrayContainsElemenet(ekhs, kh) {
+			continue
+		} else {
+			fdncfg.ToSepWords = append(fdncfg.ToSepWords, &pb.ToSepWord{
+				KeyHash: kh,
+				Value:   wd})
+			ekhs = append(ekhs, kh)
 		}
-		for _, wd := range words {
-			kh := KeyHash(wd)
-			if ArrayContainsElemenet(ekhs, kh) {
-				continue
-			} else {
-				fdncfg.ToSepWords = append(fdncfg.ToSepWords, &pb.ToSepWord{
-					KeyHash: kh,
-					Value:   wd})
-				ekhs = append(ekhs, kh)
-			}
-		}
-		fdncfg.LastUpdated = timestamppb.Now()
-		log.Trace(fdncfg.GetToSepWords())
-		if err := SaveFDNConfig(fdncfg); err != nil {
-			return err
-		}
+	}
+	fdncfg.LastUpdated = timestamppb.Now()
+	log.Trace(fdncfg.GetToSepWords())
+	if err := SaveFDNConfig(fdncfg); err != nil {
+		return err
 	}
 	return nil
 }
 
+// DeleteToSepWords delete tosep words in config file
 func DeleteToSepWords(keys []string) error {
-	if fdncfg, err := GetFDNConfig(); err != nil {
+	fdncfg, err := GetFDNConfig()
+	if err != nil {
 		log.Error(err)
 		return err
-	} else {
-		log.Trace(keys)
-		sws := []*pb.ToSepWord{}
-		for _, sw := range fdncfg.ToSepWords {
-			if ArrayContainsElemenet(keys, sw.KeyHash) {
-				log.Trace("-:" + sw.Value)
-				continue
-			} else {
-				sws = append(sws, sw)
-			}
+	}
+	log.Trace(keys)
+	sws := []*pb.ToSepWord{}
+	for _, sw := range fdncfg.ToSepWords {
+		if ArrayContainsElemenet(keys, sw.KeyHash) {
+			log.Trace("-:" + sw.Value)
+			continue
+		} else {
+			sws = append(sws, sw)
 		}
-		fdncfg.ToSepWords = sws
-		fdncfg.LastUpdated = timestamppb.Now()
-		if err := SaveFDNConfig(fdncfg); err != nil {
-			return err
-		}
+	}
+	fdncfg.ToSepWords = sws
+	fdncfg.LastUpdated = timestamppb.Now()
+	if err := SaveFDNConfig(fdncfg); err != nil {
+		return err
 	}
 	return nil
 }
 
+// ConfigSeparator config separator in config file
 func ConfigSeparator(separator string) error {
-	if fdncfg, err := GetFDNConfig(); err != nil {
+	fdncfg, err := GetFDNConfig()
+	if err != nil {
 		log.Error(err)
 		return err
-	} else {
-		fdncfg.Separator = &pb.Separator{
-			KeyHash: KeyHash(separator),
-			Value:   separator}
-		fdncfg.LastUpdated = timestamppb.Now()
-		log.Trace(fdncfg.GetSeparator())
-		if err := SaveFDNConfig(fdncfg); err != nil {
-			return err
-		}
+	}
+	fdncfg.Separator = &pb.Separator{
+		KeyHash: KeyHash(separator),
+		Value:   separator}
+	fdncfg.LastUpdated = timestamppb.Now()
+	log.Trace(fdncfg.GetSeparator())
+	if err := SaveFDNConfig(fdncfg); err != nil {
+		return err
 	}
 	return nil
 }
 
+// GetFDNConfig return fdnconfig pointer and error info
 func GetFDNConfig() (*pb.Fdnconfig, error) {
 	fdncfg := pb.Fdnconfig{}
-	if data, err := os.ReadFile(FDNConfigPath); err != nil {
+	data, err := os.ReadFile(FDNConfigPath)
+	if err != nil {
 		log.Error(err)
 		return &fdncfg, err
-	} else {
-		if err := proto.Unmarshal(data, &fdncfg); err != nil {
-			log.Error(err)
-			return &fdncfg, err
-		}
+	}
+	if err := proto.Unmarshal(data, &fdncfg); err != nil {
+		log.Error(err)
+		return &fdncfg, err
 	}
 	return &fdncfg, nil
 }
 
+// SaveFDNConfig save fdn config to config file
 func SaveFDNConfig(fdncfg *pb.Fdnconfig) error {
-	if data, err := proto.Marshal(fdncfg); err != nil {
+	data, err := proto.Marshal(fdncfg)
+	if err != nil {
 		log.Error(err)
 		return err
-	} else {
-		if err := os.WriteFile(FDNConfigPath, data, 0644); err != nil {
-			log.Error(err)
-			return err
-		}
+	}
+	if err := os.WriteFile(FDNConfigPath, data, 0644); err != nil {
+		log.Error(err)
+		return err
 	}
 	return nil
 }
+
+// GetFDNRecord return fdnrecord and error
 func GetFDNRecord() (*pb.Fdnrecord, error) {
 	fdnrd := pb.Fdnrecord{}
-	if data, err := os.ReadFile(FDNRecordPath); err != nil {
+	data, err := os.ReadFile(FDNRecordPath)
+	if err != nil {
 		log.Error(err)
 		return &fdnrd, err
-	} else {
-		if err := proto.Unmarshal(data, &fdnrd); err != nil {
-			log.Error(err)
-			return &fdnrd, err
-		}
+	}
+	if err := proto.Unmarshal(data, &fdnrd); err != nil {
+		log.Error(err)
+		return &fdnrd, err
 	}
 	return &fdnrd, nil
 }
 
+// SaveFDNRecord save fdn record to fdn record file
 func SaveFDNRecord(fdnrd *pb.Fdnrecord) error {
-	if data, err := proto.Marshal(fdnrd); err != nil {
+	data, err := proto.Marshal(fdnrd)
+	if err != nil {
 		log.Error(err)
 		return err
-	} else {
-		if err := os.WriteFile(FDNRecordPath, data, 0644); err != nil {
-			log.Error(err)
-			return err
-		}
+	}
+	if err := os.WriteFile(FDNRecordPath, data, 0644); err != nil {
+		log.Error(err)
+		return err
 	}
 	return nil
 }
 
+// ReplaceWords process inputName string and return new string
 func ReplaceWords(inputName string) string {
 	outName := inputName
 	var mask = func(s string) ([]string, []bool) {
@@ -446,11 +462,13 @@ func ReplaceWords(inputName string) string {
 	return outName
 }
 
+// KeyHash create hash from key and return string
 func KeyHash(key string) string {
 	data := []byte(key)
 	return fmt.Sprintf("%x", md5.Sum(data))
 }
 
+// ArrayContainsElemenet check element e if exist in array s
 func ArrayContainsElemenet[T comparable](s []T, e T) bool {
 	for _, v := range s {
 		if v == e {
@@ -460,28 +478,30 @@ func ArrayContainsElemenet[T comparable](s []T, e T) bool {
 	return false
 }
 
+// FDNFile fdn a file
 func FDNFile(currentPath string, toBePath string) error {
-	if fdnrd, err := GetFDNRecord(); err != nil {
+	fdnrd, err := GetFDNRecord()
+	if err != nil {
 		log.Error(err)
 		return err
-	} else {
-		fdnrd.Records = append(fdnrd.Records, &pb.Record{
-			PreviousName: filepath.Base(currentPath),
-			CurrentName:  filepath.Base(toBePath),
-			LastUpdated:  timestamppb.Now()})
-		if err := SaveFDNRecord(fdnrd); err != nil {
-			log.Error(err)
-			return err
-		} else {
-			if err := os.Rename(currentPath, toBePath); err != nil {
-				log.Error(err)
-				return err
-			}
-		}
+	}
+	fdnrd.Records = append(fdnrd.Records, &pb.Record{
+		PreviousName: filepath.Base(currentPath),
+		CurrentName:  filepath.Base(toBePath),
+		LastUpdated:  timestamppb.Now()})
+	err = SaveFDNRecord(fdnrd)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	if err := os.Rename(currentPath, toBePath); err != nil {
+		log.Error(err)
+		return err
 	}
 	return nil
 }
 
+// FNDedFrom from input and return
 func FNDedFrom(input string) string {
 	output := input
 	output = ReplaceWords(input)

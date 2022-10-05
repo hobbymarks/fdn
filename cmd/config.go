@@ -1,4 +1,5 @@
 /*
+Package cmd config subcommand
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 */
 package cmd
@@ -7,6 +8,7 @@ import (
 	"fmt"
 	"strings"
 
+	//Only for comment
 	_ "embed"
 
 	log "github.com/sirupsen/logrus"
