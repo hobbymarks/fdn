@@ -19,7 +19,7 @@ message fdnrecord{
 
 message Record{
     string PreviousName=2;
-    string CurrentName=3;
+    string CurrentNameHash=3;
 
     google.protobuf.Timestamp LastUpdated=15;
 }
