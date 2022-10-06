@@ -18,6 +18,7 @@ import (
 	"github.com/hobbymarks/fdn/pb"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -28,6 +29,7 @@ var onlyDirectory bool
 var inputPaths []string
 var depthLevel int
 var inplace bool
+var cfm bool
 
 // FDNConfigPath is the config file path
 var FDNConfigPath string
@@ -41,6 +43,7 @@ var rootCmd = &cobra.Command{
 	Short:   "A Tool For Unify File Names",
 	Long:    ``,
 	Run: func(cmd *cobra.Command, args []string) {
+		PrintTipFlag := false
 		if paths, err := RetrievedAbsPaths(inputPaths, depthLevel, onlyDirectory); err != nil {
 			log.Fatal(err)
 		} else {
@@ -50,18 +53,47 @@ var rootCmd = &cobra.Command{
 				ext := filepath.Ext(path)   //ext empty if path is dir
 				bn := strings.TrimSuffix(filepath.Base(path), ext)
 				if fdned := FNDedFrom(bn); fdned != bn {
+					toPath := filepath.Join(filepath.Dir(path), fdned+ext)
 					if inplace {
-						if err := FDNFile(path, filepath.Join(filepath.Dir(path), fdned+ext)); err != nil {
+						if err := FDNFile(path, toPath); err != nil {
 							log.Error(err)
 						} else {
 							fmt.Println("   ", path)
-							fmt.Println("==>", filepath.Join(filepath.Dir(path), fdned+ext))
+							fmt.Println("==>", toPath)
 						}
 					} else {
 						fmt.Println("   ", path)
-						fmt.Println("-->", filepath.Join(filepath.Dir(path), fdned+ext))
+						if cfm {
+							switch confirm() {
+							case A, All:
+								inplace = true
+								if err := FDNFile(path, toPath); err != nil {
+									log.Error(err)
+								} else {
+									fmt.Println("==>", toPath)
+								}
+							case Y, Yes:
+								if err := FDNFile(path, toPath); err != nil {
+									log.Error(err)
+								} else {
+									fmt.Println("==>", toPath)
+								}
+							case N, No:
+								// PrintTipFlag = true
+								fmt.Println("-->", toPath)
+								continue
+							case Q, Quit:
+								os.Exit(0)
+							}
+						} else {
+							PrintTipFlag = true
+							fmt.Println("-->", toPath)
+						}
 					}
 				}
+			}
+			if PrintTipFlag {
+				noEffectTip()
 			}
 		}
 	},
@@ -79,7 +111,8 @@ func init() {
 	rootCmd.Flags().BoolVarP(&onlyDirectory, "directory", "d", false, "If enable,directory only.Default file only")
 	rootCmd.Flags().IntVarP(&depthLevel, "level", "l", 1, "Maxdepth level")
 	rootCmd.Flags().StringArrayVarP(&inputPaths, "path", "p", []string{"."}, "Input paths")
-	rootCmd.Flags().BoolVarP(&inplace, "inplace", "i", false, "in-place")
+	rootCmd.Flags().BoolVarP(&inplace, "inplace", "i", false, "In-place")
+	rootCmd.Flags().BoolVarP(&cfm, "confirm", "c", false, "Confirm")
 
 	homeDir, err := os.UserHomeDir() //get home dir
 	if err != nil {
@@ -486,9 +519,9 @@ func FDNFile(currentPath string, toBePath string) error {
 		return err
 	}
 	fdnrd.Records = append(fdnrd.Records, &pb.Record{
-		PreviousName: filepath.Base(currentPath),
-		CurrentName:  filepath.Base(toBePath),
-		LastUpdated:  timestamppb.Now()})
+		PreviousName:    filepath.Base(currentPath),
+		CurrentNameHash: KeyHash(filepath.Base(toBePath)),
+		LastUpdated:     timestamppb.Now()})
 	err = SaveFDNRecord(fdnrd)
 	if err != nil {
 		log.Error(err)
@@ -506,6 +539,53 @@ func FNDedFrom(input string) string {
 	output := input
 	output = ReplaceWords(input)
 	return output
+}
+
+func confirm() UserInput {
+	var cmsg string
+
+	fmt.Print("Please confirm (all,yes,no,quit):")
+	fmt.Scan(&cmsg)
+
+	return UserInput(strings.ToLower(cmsg))
+}
+
+// UserInput receive user interactive input
+type UserInput string
+
+const (
+	//All for all
+	All UserInput = "all"
+	//A shorcut all
+	A UserInput = "a"
+	//Yes for Ok only valid for current
+	Yes UserInput = "yes"
+	//Y shortcut for Yes
+	Y UserInput = "y"
+	//No for refuse only valid for current
+	No UserInput = "no"
+	//N shortcut for NO
+	N UserInput = "n"
+	//Quit exit app
+	Quit UserInput = "quit"
+	//Q shortcut for Quit
+	Q UserInput = "q"
+)
+
+func noEffectTip() {
+	var tipsDivider string
+
+	if term.IsTerminal(0) {
+		tw, _, err := term.GetSize(0)
+		if err != nil {
+			log.Error(err)
+			tipsDivider = strings.Repeat("*", 80)
+		} else {
+			tipsDivider = strings.Repeat("*", tw)
+		}
+		fmt.Println(tipsDivider)
+		fmt.Println("--> 'will change to' ==> 'changed to',in order to take effect,add flag '-i' or '-c'")
+	}
 }
 
 //TODO:support directory and files
