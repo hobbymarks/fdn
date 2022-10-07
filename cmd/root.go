@@ -30,6 +30,7 @@ var inputPaths []string
 var depthLevel int
 var inplace bool
 var cfm bool
+var reverse bool
 
 // FDNConfigPath is the config file path
 var FDNConfigPath string
@@ -44,57 +45,78 @@ var rootCmd = &cobra.Command{
 	Long:    ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		PrintTipFlag := false
-		if paths, err := RetrievedAbsPaths(inputPaths, depthLevel, onlyDirectory); err != nil {
+		curNameHashPreNameMap := map[string]string{}
+		if reverse {
+			fdnrd, err := GetFDNRecord()
+			if err != nil {
+				log.Fatal(err)
+			}
+			for _, rd := range fdnrd.Records {
+				curNameHashPreNameMap[rd.CurrentNameHash] = rd.PreviousName
+			}
+		}
+		paths, err := RetrievedAbsPaths(inputPaths, depthLevel, onlyDirectory)
+		if err != nil {
 			log.Fatal(err)
-		} else {
-			sort.SliceStable(paths, func(i, j int) bool { return paths[i] > paths[j] })
-			for _, path := range paths {
-				path = filepath.Clean(path) //remove tailing slash if exist
-				ext := filepath.Ext(path)   //ext empty if path is dir
+		}
+		sort.SliceStable(paths, func(i, j int) bool { return paths[i] > paths[j] })
+		for _, path := range paths {
+			path = filepath.Clean(path) //remove tailing slash if exist
+			toPath := ""
+			if reverse {
+				preName, exist := curNameHashPreNameMap[KeyHash(filepath.Base(path))]
+				if exist {
+					toPath = filepath.Join(filepath.Dir(path), preName)
+				}
+			} else {
+				ext := filepath.Ext(path) //ext empty if path is dir
 				bn := strings.TrimSuffix(filepath.Base(path), ext)
 				if fdned := FNDedFrom(bn); fdned != bn {
-					toPath := filepath.Join(filepath.Dir(path), fdned+ext)
-					if inplace {
-						if err := FDNFile(path, toPath); err != nil {
-							log.Error(err)
-						} else {
-							fmt.Println("   ", path)
-							fmt.Println("==>", toPath)
-						}
-					} else {
-						fmt.Println("   ", path)
-						if cfm {
-							switch confirm() {
-							case A, All:
-								inplace = true
-								if err := FDNFile(path, toPath); err != nil {
-									log.Error(err)
-								} else {
-									fmt.Println("==>", toPath)
-								}
-							case Y, Yes:
-								if err := FDNFile(path, toPath); err != nil {
-									log.Error(err)
-								} else {
-									fmt.Println("==>", toPath)
-								}
-							case N, No:
-								// PrintTipFlag = true
-								fmt.Println("-->", toPath)
-								continue
-							case Q, Quit:
-								os.Exit(0)
-							}
-						} else {
-							PrintTipFlag = true
-							fmt.Println("-->", toPath)
-						}
-					}
+					toPath = filepath.Join(filepath.Dir(path), fdned+ext)
 				}
 			}
-			if PrintTipFlag {
-				noEffectTip()
+			if toPath == "" {
+				continue
 			}
+			if inplace {
+				if err := FDNFile(path, toPath, reverse); err != nil {
+					log.Error(err)
+				} else {
+					fmt.Println("   ", path)
+					fmt.Println("==>", toPath)
+				}
+			} else {
+				fmt.Println("   ", path)
+				if cfm {
+					switch confirm() {
+					case A, All:
+						inplace = true
+						if err := FDNFile(path, toPath, reverse); err != nil {
+							log.Error(err)
+						} else {
+							fmt.Println("==>", toPath)
+						}
+					case Y, Yes:
+						if err := FDNFile(path, toPath, reverse); err != nil {
+							log.Error(err)
+						} else {
+							fmt.Println("==>", toPath)
+						}
+					case N, No:
+						// PrintTipFlag = true
+						fmt.Println("-->", toPath)
+						continue
+					case Q, Quit:
+						os.Exit(0)
+					}
+				} else {
+					PrintTipFlag = true
+					fmt.Println("-->", toPath)
+				}
+			}
+		}
+		if PrintTipFlag {
+			noEffectTip()
 		}
 	},
 }
@@ -113,6 +135,7 @@ func init() {
 	rootCmd.Flags().StringArrayVarP(&inputPaths, "path", "p", []string{"."}, "Input paths")
 	rootCmd.Flags().BoolVarP(&inplace, "inplace", "i", false, "In-place")
 	rootCmd.Flags().BoolVarP(&cfm, "confirm", "c", false, "Confirm")
+	rootCmd.Flags().BoolVarP(&reverse, "reverse", "r", false, "Reverse")
 
 	homeDir, err := os.UserHomeDir() //get home dir
 	if err != nil {
@@ -512,20 +535,22 @@ func ArrayContainsElemenet[T comparable](s []T, e T) bool {
 }
 
 // FDNFile fdn a file
-func FDNFile(currentPath string, toBePath string) error {
-	fdnrd, err := GetFDNRecord()
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-	fdnrd.Records = append(fdnrd.Records, &pb.Record{
-		PreviousName:    filepath.Base(currentPath),
-		CurrentNameHash: KeyHash(filepath.Base(toBePath)),
-		LastUpdated:     timestamppb.Now()})
-	err = SaveFDNRecord(fdnrd)
-	if err != nil {
-		log.Error(err)
-		return err
+func FDNFile(currentPath string, toBePath string, reserve bool) error {
+	if !reserve {
+		fdnrd, err := GetFDNRecord()
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		fdnrd.Records = append(fdnrd.Records, &pb.Record{
+			PreviousName:    filepath.Base(currentPath),
+			CurrentNameHash: KeyHash(filepath.Base(toBePath)),
+			LastUpdated:     timestamppb.Now()})
+		err = SaveFDNRecord(fdnrd)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
 	}
 	if err := os.Rename(currentPath, toBePath); err != nil {
 		log.Error(err)
