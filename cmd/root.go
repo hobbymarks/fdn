@@ -17,6 +17,7 @@ import (
 	"strings"
 
 	"github.com/hobbymarks/fdn/pb"
+	"github.com/hobbymarks/go-difflib/difflib"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
@@ -647,6 +648,27 @@ func OutputResult(origin string, processed string, inplace bool, fullpath bool) 
 		fmt.Println("==>", processed)
 	} else {
 		fmt.Println("-->", processed)
+	}
+	a := []string{}
+	b := []string{}
+	for _, c := range []rune(origin) {
+		a = append(a, string(c))
+	}
+	for _, c := range []rune(processed) {
+		b = append(b, string(c))
+	}
+	seqm := difflib.NewMatcher(a, b)
+	for _, opc := range seqm.GetOpCodes() {
+		switch opc.Tag {
+		case 'r':
+			fmt.Println("R:", a[opc.I1:opc.I2], b[opc.J1:opc.J2])
+		case 'd':
+			fmt.Println("D:", a[opc.I1:opc.I2])
+		case 'i':
+			fmt.Println("I:", a[opc.I1:opc.I2], b[opc.J1:opc.J2])
+		case 'e':
+			fmt.Println("E:", a[opc.I1:opc.I2], b[opc.J1:opc.J2])
+		}
 	}
 }
 
