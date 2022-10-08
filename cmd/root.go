@@ -32,6 +32,7 @@ var depthLevel int
 var inplace bool
 var cfm bool
 var reverse bool
+var fullpath bool
 
 //go:embed fdncfg
 var defaultFDNCFGBytes []byte
@@ -86,7 +87,7 @@ var rootCmd = &cobra.Command{
 				if err := FDNFile(path, toPath, reverse); err != nil {
 					log.Error(err)
 				} else {
-					OutputResult(path, toPath, inplace)
+					OutputResult(path, toPath, inplace, fullpath)
 				}
 			} else {
 				if cfm {
@@ -96,23 +97,23 @@ var rootCmd = &cobra.Command{
 						if err := FDNFile(path, toPath, reverse); err != nil {
 							log.Error(err)
 						} else {
-							OutputResult(path, toPath, true)
+							OutputResult(path, toPath, true, fullpath)
 						}
 					case Y, Yes:
 						if err := FDNFile(path, toPath, reverse); err != nil {
 							log.Error(err)
 						} else {
-							OutputResult(path, toPath, true)
+							OutputResult(path, toPath, true, fullpath)
 						}
 					case N, No:
-						OutputResult(path, toPath, false)
+						OutputResult(path, toPath, false, fullpath)
 						continue
 					case Q, Quit:
 						os.Exit(0)
 					}
 				} else {
 					PrintTipFlag = true
-					OutputResult(path, toPath, false)
+					OutputResult(path, toPath, false, fullpath)
 				}
 			}
 		}
@@ -137,6 +138,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&inplace, "inplace", "i", false, "In-place")
 	rootCmd.Flags().BoolVarP(&cfm, "confirm", "c", false, "Confirm")
 	rootCmd.Flags().BoolVarP(&reverse, "reverse", "r", false, "Reverse")
+	rootCmd.Flags().BoolVarP(&fullpath, "fullpath", "f", false, "FullPath")
 
 	homeDir, err := os.UserHomeDir() //get home dir
 	if err != nil {
@@ -635,7 +637,11 @@ func noEffectTip() {
 }
 
 // OutputResult fdn processed result
-func OutputResult(origin string, processed string, inplace bool) {
+func OutputResult(origin string, processed string, inplace bool, fullpath bool) {
+	if !fullpath {
+		origin = filepath.Base(origin)
+		processed = filepath.Base(processed)
+	}
 	fmt.Println("   ", origin)
 	if inplace {
 		fmt.Println("==>", processed)
