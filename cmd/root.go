@@ -508,19 +508,35 @@ func ReplaceWords(inputName string) string {
 	if fdncfg, err := GetFDNConfig(); err != nil {
 		log.Fatal(err)
 	} else {
-		rpCNS := regexp.MustCompile("[" + fdncfg.Separator.Value + "]+")
+		sep := fdncfg.Separator.Value
+		rpCNS := regexp.MustCompile("[" + sep + "]+")
 		for idx, wd := range words {
 			if !bools[idx] {
 				for _, sw := range fdncfg.ToSepWords {
-					wd = strings.Replace(wd, sw.Value, fdncfg.Separator.Value, -1)
+					wd = strings.Replace(wd, sw.Value, sep, -1)
 				}
 			}
 			newWords = append(newWords, wd)
 		}
 		outName = strings.Join(newWords, "")
 		//Process continous separator
-		outName = rpCNS.ReplaceAllString(outName, fdncfg.Separator.Value)
+		outName = rpCNS.ReplaceAllString(outName, sep)
 	}
+
+	return outName
+}
+
+// ProcessHeadTail process head and tail of input string
+func ProcessHeadTail(inputName string) string {
+	outName := inputName
+	fdncfg, err := GetFDNConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+	sep := fdncfg.Separator.Value
+	rpHTSeps := regexp.MustCompile("^" + sep + "+" + "|" + sep + "+" + "$")
+	//Process Head and Tail Sepatrators
+	outName = rpHTSeps.ReplaceAllString(outName, "")
 
 	return outName
 }
@@ -570,6 +586,7 @@ func FDNFile(currentPath string, toBePath string, reserve bool) error {
 func FNDedFrom(input string) string {
 	output := input
 	output = ReplaceWords(input)
+	output = ProcessHeadTail(output)
 	return output
 }
 
