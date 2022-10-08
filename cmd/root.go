@@ -6,6 +6,7 @@ package cmd
 
 import (
 	"crypto/md5"
+	_ "embed"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -31,6 +32,9 @@ var depthLevel int
 var inplace bool
 var cfm bool
 var reverse bool
+
+//go:embed fdncfg
+var defaultFDNCFGBytes []byte
 
 // FDNConfigPath is the config file path
 var FDNConfigPath string
@@ -151,6 +155,9 @@ func init() {
 	FDNConfigPath = filepath.Join(FDNConfigPath, "fdncfg")
 	if _, err := os.Lstat(FDNConfigPath); errors.Is(err, os.ErrNotExist) {
 		fdncfg := pb.Fdnconfig{}
+		if err := proto.Unmarshal(defaultFDNCFGBytes, &fdncfg); err != nil {
+			log.Error(err)
+		}
 		if err := SaveFDNConfig(&fdncfg); err != nil {
 			log.Error(err)
 		}
