@@ -10,6 +10,7 @@ require (
 require golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8 // indirect
 
 require (
+	github.com/hobbymarks/go-difflib v0.0.0-20181226105442-5d4384ee4fb2
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/pflag v1.0.5 // indirect
