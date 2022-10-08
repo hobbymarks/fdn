@@ -86,11 +86,9 @@ var rootCmd = &cobra.Command{
 				if err := FDNFile(path, toPath, reverse); err != nil {
 					log.Error(err)
 				} else {
-					fmt.Println("   ", path)
-					fmt.Println("==>", toPath)
+					OutputResult(path, toPath, inplace)
 				}
 			} else {
-				fmt.Println("   ", path)
 				if cfm {
 					switch confirm() {
 					case A, All:
@@ -98,24 +96,23 @@ var rootCmd = &cobra.Command{
 						if err := FDNFile(path, toPath, reverse); err != nil {
 							log.Error(err)
 						} else {
-							fmt.Println("==>", toPath)
+							OutputResult(path, toPath, true)
 						}
 					case Y, Yes:
 						if err := FDNFile(path, toPath, reverse); err != nil {
 							log.Error(err)
 						} else {
-							fmt.Println("==>", toPath)
+							OutputResult(path, toPath, true)
 						}
 					case N, No:
-						// PrintTipFlag = true
-						fmt.Println("-->", toPath)
+						OutputResult(path, toPath, false)
 						continue
 					case Q, Quit:
 						os.Exit(0)
 					}
 				} else {
 					PrintTipFlag = true
-					fmt.Println("-->", toPath)
+					OutputResult(path, toPath, false)
 				}
 			}
 		}
@@ -634,6 +631,16 @@ func noEffectTip() {
 		}
 		fmt.Println(tipsDivider)
 		fmt.Println("--> 'will change to' ==> 'changed to',in order to take effect,add flag '-i' or '-c'")
+	}
+}
+
+// OutputResult fdn processed result
+func OutputResult(origin string, processed string, inplace bool) {
+	fmt.Println("   ", origin)
+	if inplace {
+		fmt.Println("==>", processed)
+	} else {
+		fmt.Println("-->", processed)
 	}
 }
 
