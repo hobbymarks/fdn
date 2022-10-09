@@ -22,6 +22,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
+
+	// "golang.org/x/text/width"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -35,6 +37,9 @@ var inplace bool
 var cfm bool
 var reverse bool
 var fullpath bool
+var plainStyle bool
+
+// var pretty bool
 
 //go:embed fdncfg
 var defaultFDNCFGBytes []byte
@@ -141,6 +146,8 @@ func init() {
 	rootCmd.Flags().BoolVarP(&cfm, "confirm", "c", false, "Confirm")
 	rootCmd.Flags().BoolVarP(&reverse, "reverse", "r", false, "Reverse")
 	rootCmd.Flags().BoolVarP(&fullpath, "fullpath", "f", false, "FullPath")
+	rootCmd.Flags().BoolVarP(&plainStyle, "plainstyle", "s", false, "PlainStyle Output")
+	// rootCmd.Flags().BoolVarP(&pretty, "pretty", "e", false, "Pretty Display")
 
 	homeDir, err := os.UserHomeDir() //get home dir
 	if err != nil {
@@ -644,42 +651,87 @@ func OutputResult(origin string, processed string, inplace bool, fullpath bool) 
 		origin = filepath.Base(origin)
 		processed = filepath.Base(processed)
 	}
-
-	a := []string{}
-	b := []string{}
-	for _, c := range []rune(origin) {
-		a = append(a, string(c))
-	}
-	for _, c := range []rune(processed) {
-		b = append(b, string(c))
-	}
-	seqm := difflib.NewMatcher(a, b)
-	red := color.New(color.FgRed).SprintFunc()
-	green := color.New(color.FgGreen).SprintFunc()
-	richOrigin := ""
-	richProcessed := ""
-	for _, opc := range seqm.GetOpCodes() {
-		switch opc.Tag {
-		case 'r':
-			richOrigin += red(strings.Join(a[opc.I1:opc.I2], ""))
-			richProcessed += green(strings.Join(b[opc.J1:opc.J2], ""))
-		case 'd':
-			richOrigin += red(strings.Join(a[opc.I1:opc.I2], ""))
-		case 'i':
-			richOrigin += strings.Join(a[opc.I1:opc.I2], "") //empty string
-			richProcessed += green(strings.Join(b[opc.J1:opc.J2], ""))
-		case 'e':
-			richOrigin += strings.Join(a[opc.I1:opc.I2], "")
-			richProcessed += strings.Join(b[opc.J1:opc.J2], "")
+	if plainStyle {
+		fmt.Println("   ", origin)
+		if inplace {
+			fmt.Println("==>", processed)
+		} else {
+			fmt.Println("-->", processed)
+		}
+	} else {
+		origin = strings.Replace(origin, " ", "▯", -1) //for display space
+		processed = strings.Replace(processed, " ", "▯", -1)
+		a := []string{}
+		b := []string{}
+		for _, c := range []rune(origin) {
+			a = append(a, string(c))
+		}
+		for _, c := range []rune(processed) {
+			b = append(b, string(c))
+		}
+		seqm := difflib.NewMatcher(a, b)
+		red := color.New(color.FgRed).SprintFunc()
+		green := color.New(color.FgGreen).SprintFunc()
+		richOrigin := ""
+		richProcessed := ""
+		for _, opc := range seqm.GetOpCodes() {
+			switch opc.Tag {
+			case 'r':
+				as := strings.Join(a[opc.I1:opc.I2], "")
+				bs := strings.Join(b[opc.J1:opc.J2], "")
+				// if pretty {
+				// 	if SWidth(as)+opc.I1 > SWidth(bs)+opc.J1 {
+				// 		richOrigin += red(as)
+				// 		richProcessed += green(bs) + strings.Repeat(" ", SWidth(as)+opc.I1-SWidth(bs)-opc.J1)
+				// 	} else if SWidth(as)+opc.I1 < SWidth(bs)+opc.J1 {
+				// 		richOrigin += red(as) + strings.Repeat(" ", SWidth(bs)+opc.J1-SWidth(as)-opc.I1)
+				// 		richProcessed += green(bs)
+				// 	} else {
+				// 		richOrigin += red(as)
+				// 		richProcessed += green(bs)
+				// 	}
+				// } else {
+				richOrigin += red(as)
+				richProcessed += green(bs)
+				// }
+			case 'd':
+				richOrigin += red(strings.Join(a[opc.I1:opc.I2], ""))
+			case 'i':
+				as := strings.Join(a[opc.I1:opc.I2], "") //empty string
+				bs := strings.Join(b[opc.J1:opc.J2], "")
+				richOrigin += as
+				richProcessed += green(bs)
+			case 'e':
+				as := strings.Join(a[opc.I1:opc.I2], "")
+				bs := strings.Join(b[opc.J1:opc.J2], "")
+				richOrigin += as
+				richProcessed += bs
+			}
+		}
+		fmt.Println("   ", richOrigin) //display space
+		if inplace {
+			fmt.Println("==>", richProcessed)
+		} else {
+			fmt.Println("-->", richProcessed)
 		}
 	}
-	fmt.Println("   ", strings.Replace(richOrigin, " ", "▯", -1))
-	if inplace {
-		fmt.Println("==>", richProcessed)
-	} else {
-		fmt.Println("-->", richProcessed)
-	}
 }
+
+// SWidth get string width
+// func SWidth(s string) int {
+// 	size := 0
+// 	for _, runeValue := range s {
+// 		p := width.LookupRune(runeValue)
+// 		if p.Kind() == width.EastAsianWide {
+// 			size += 2
+// 			continue
+// 		} else if p.Kind() == width.EastAsianNarrow {
+// 			size += 1
+// 			continue
+// 		}
+// 	}
+// 	return size
+// }
 
 //TODO:support directory and files
 //TODO:dry run result buffered for next step
