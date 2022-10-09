@@ -10,11 +10,13 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"math"
 	"os"
 	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
+	"unicode"
 
 	"github.com/fatih/color"
 	"github.com/hobbymarks/fdn/pb"
@@ -548,6 +550,27 @@ func ProcessHeadTail(inputName string) string {
 	return outName
 }
 
+// ASCHead add ascii head if not startwith ascii
+func ASCHead(inputName string) string {
+	outName := inputName
+	sa := []rune(outName)
+	ascH := ""
+	var proxCS = func(c rune) string {
+		if c > 'Z' {
+			return fmt.Sprintf("%c", int(c)-int(math.Ceil(float64(c-'Z')/26)*26))
+		} else if c < 'A' {
+			return fmt.Sprintf("%c", int(c)+int(math.Ceil(float64('A'-c)/26)*26))
+		} else {
+			return fmt.Sprintf("%c", int(c))
+		}
+	}
+	if !((unicode.IsDigit(sa[0])) || (unicode.IsLower(sa[0])) || (unicode.IsUpper(sa[0]))) {
+		ascH = proxCS(sa[0]) + proxCS(sa[1]) + proxCS(sa[2])
+	}
+
+	return ascH + outName
+}
+
 // KeyHash create hash from key and return string
 func KeyHash(key string) string {
 	data := []byte(key)
@@ -594,6 +617,7 @@ func FNDedFrom(input string) string {
 	output := input
 	output = ReplaceWords(input)
 	output = ProcessHeadTail(output)
+	output = ASCHead(output)
 	return output
 }
 
