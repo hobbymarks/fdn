@@ -16,6 +16,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/hobbymarks/fdn/pb"
 	"github.com/hobbymarks/go-difflib/difflib"
 	log "github.com/sirupsen/logrus"
@@ -643,12 +644,7 @@ func OutputResult(origin string, processed string, inplace bool, fullpath bool) 
 		origin = filepath.Base(origin)
 		processed = filepath.Base(processed)
 	}
-	fmt.Println("   ", origin)
-	if inplace {
-		fmt.Println("==>", processed)
-	} else {
-		fmt.Println("-->", processed)
-	}
+
 	a := []string{}
 	b := []string{}
 	for _, c := range []rune(origin) {
@@ -658,17 +654,30 @@ func OutputResult(origin string, processed string, inplace bool, fullpath bool) 
 		b = append(b, string(c))
 	}
 	seqm := difflib.NewMatcher(a, b)
+	red := color.New(color.FgRed).SprintFunc()
+	green := color.New(color.FgGreen).SprintFunc()
+	richOrigin := ""
+	richProcessed := ""
 	for _, opc := range seqm.GetOpCodes() {
 		switch opc.Tag {
 		case 'r':
-			fmt.Println("R:", a[opc.I1:opc.I2], b[opc.J1:opc.J2])
+			richOrigin += red(strings.Join(a[opc.I1:opc.I2], ""))
+			richProcessed += green(strings.Join(b[opc.J1:opc.J2], ""))
 		case 'd':
-			fmt.Println("D:", a[opc.I1:opc.I2])
+			richOrigin += red(strings.Join(a[opc.I1:opc.I2], ""))
 		case 'i':
-			fmt.Println("I:", a[opc.I1:opc.I2], b[opc.J1:opc.J2])
+			richOrigin += strings.Join(a[opc.I1:opc.I2], "") //empty string
+			richProcessed += green(strings.Join(b[opc.J1:opc.J2], ""))
 		case 'e':
-			fmt.Println("E:", a[opc.I1:opc.I2], b[opc.J1:opc.J2])
+			richOrigin += strings.Join(a[opc.I1:opc.I2], "")
+			richProcessed += strings.Join(b[opc.J1:opc.J2], "")
 		}
+	}
+	fmt.Println("   ", strings.Replace(richOrigin, " ", "▯", -1))
+	if inplace {
+		fmt.Println("==>", richProcessed)
+	} else {
+		fmt.Println("-->", richProcessed)
 	}
 }
 
