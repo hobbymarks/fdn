@@ -564,10 +564,17 @@ func ASCHead(inputName string) string {
 			return fmt.Sprintf("%c", int(c))
 		}
 	}
-	if !((unicode.IsDigit(sa[0])) || (unicode.IsLower(sa[0])) || (unicode.IsUpper(sa[0]))) {
-		ascH = proxCS(sa[0]) + proxCS(sa[1]) + proxCS(sa[2])
+	if len(sa) >= 1 {
+		if !((unicode.IsDigit(sa[0])) || (unicode.IsLower(sa[0])) || (unicode.IsUpper(sa[0]))) {
+			uL := 3
+			if len(sa) < 3 {
+				uL = len(sa)
+			}
+			for i := 0; i < uL; i++ {
+				ascH += proxCS(sa[i])
+			}
+		}
 	}
-
 	return ascH + outName
 }
 
@@ -755,6 +762,30 @@ func OutputResult(origin string, processed string, inplace bool, fullpath bool) 
 		}
 	}
 }
+
+// IsHidden check file is hidden
+// func IsHidden(abspath string) (bool, error) {
+// 	abspath = filepath.Clean(abspath)
+// 	if runtime.GOOS != "windows" {
+// 		bn := filepath.Base(abspath)
+// 		if bn[0:1] == "." {
+// 			return true, nil
+// 		} else {
+// 			return false, nil
+// 		}
+// 	} else {
+// 		ptr, err := syscall.UTF16PtrFromString(`\\?\` + abspath)
+// 		if err != nil {
+// 			return false, err
+// 		}
+// 		attr, err := syscall.GetFileAttributes(ptr)
+// 		if err != nil {
+// 			return false, err
+// 		}
+// 		return attr&syscall.FILE_ATTRIBUTE_HIDDEN != 0, nil
+// 	}
+// 	return false, nil
+// }
 
 //TODO:remove nosense word
 //TODO:support directory and files
