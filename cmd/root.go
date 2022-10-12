@@ -72,6 +72,7 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+		paths = RemoveHidden(paths)
 		sort.SliceStable(paths, func(i, j int) bool { return paths[i] > paths[j] })
 		for _, path := range paths {
 			path = filepath.Clean(path) //remove tailing slash if exist
@@ -209,6 +210,23 @@ func RetrievedAbsPaths(inputPaths []string, depthLevel int, onlyDirectory bool) 
 		}
 	}
 	return absolutePaths, nil
+}
+
+// RemoveHidden remove all hidden files
+func RemoveHidden(abspaths []string) []string {
+	results := []string{}
+	for _, apath := range abspaths {
+		hidden, err := IsHidden(apath)
+		if err != nil {
+			log.Error(err)
+		} else {
+			if !hidden {
+				results = append(results, apath)
+			}
+		}
+		log.Trace("IsHidden:", hidden, apath)
+	}
+	return results
 }
 
 // FilteredSubPaths retrieve absolute paths
@@ -762,30 +780,6 @@ func OutputResult(origin string, processed string, inplace bool, fullpath bool) 
 		}
 	}
 }
-
-// IsHidden check file is hidden
-// func IsHidden(abspath string) (bool, error) {
-// 	abspath = filepath.Clean(abspath)
-// 	if runtime.GOOS != "windows" {
-// 		bn := filepath.Base(abspath)
-// 		if bn[0:1] == "." {
-// 			return true, nil
-// 		} else {
-// 			return false, nil
-// 		}
-// 	} else {
-// 		ptr, err := syscall.UTF16PtrFromString(`\\?\` + abspath)
-// 		if err != nil {
-// 			return false, err
-// 		}
-// 		attr, err := syscall.GetFileAttributes(ptr)
-// 		if err != nil {
-// 			return false, err
-// 		}
-// 		return attr&syscall.FILE_ATTRIBUTE_HIDDEN != 0, nil
-// 	}
-// 	return false, nil
-// }
 
 //TODO:remove nosense word
 //TODO:support directory and files
