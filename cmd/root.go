@@ -41,6 +41,7 @@ var fullpath bool
 var plainStyle bool
 
 var pretty bool
+var overwrite bool
 
 //go:embed fdncfg
 var defaultFDNCFGBytes []byte
@@ -93,27 +94,15 @@ var rootCmd = &cobra.Command{
 				continue
 			}
 			if inplace {
-				if err := FDNFile(path, toPath, reverse); err != nil {
-					log.Error(err)
-				} else {
-					OutputResult(path, toPath, inplace, fullpath)
-				}
+				CheckDoFDN(path, toPath, reverse, overwrite)
 			} else {
 				if cfm {
 					switch confirm() {
 					case A, All:
 						inplace = true
-						if err := FDNFile(path, toPath, reverse); err != nil {
-							log.Error(err)
-						} else {
-							OutputResult(path, toPath, true, fullpath)
-						}
+						CheckDoFDN(path, toPath, reverse, overwrite)
 					case Y, Yes:
-						if err := FDNFile(path, toPath, reverse); err != nil {
-							log.Error(err)
-						} else {
-							OutputResult(path, toPath, true, fullpath)
-						}
+						CheckDoFDN(path, toPath, reverse, overwrite)
 					case N, No:
 						OutputResult(path, toPath, false, fullpath)
 						continue
@@ -150,6 +139,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&fullpath, "fullpath", "f", false, "FullPath")
 	rootCmd.Flags().BoolVarP(&plainStyle, "plainstyle", "s", false, "PlainStyle Output")
 	rootCmd.Flags().BoolVarP(&pretty, "pretty", "e", false, "Pretty Display")
+	rootCmd.Flags().BoolVarP(&overwrite, "overwrite", "o", false, "Overwrite")
 
 	homeDir, err := os.UserHomeDir() //get home dir
 	if err != nil {
@@ -637,6 +627,22 @@ func FDNFile(currentPath string, toBePath string, reserve bool) error {
 	return nil
 }
 
+// CheckDoFDN check and do fdn
+func CheckDoFDN(currentPath string, toBePath string, reserve bool, overwrite bool) error {
+	if PathExist(toBePath) && !overwrite {
+		fmt.Println("[EXIST]Skip:", toBePath)
+		fmt.Println("You can add 'overwrite' or 'o' flag to force do")
+	} else {
+		if err := FDNFile(currentPath, toBePath, reverse); err != nil {
+			log.Error(err)
+			return err
+		} else {
+			OutputResult(currentPath, toBePath, true, fullpath)
+		}
+	}
+	return nil
+}
+
 // FNDedFrom from input and return
 func FNDedFrom(input string) string {
 	output := input
@@ -690,6 +696,20 @@ func noEffectTip() {
 		}
 		fmt.Println(tipsDivider)
 		fmt.Println("--> 'will change to' ==> 'changed to',in order to take effect,add flag '-i' or '-c'")
+	}
+}
+
+// PathExist check path exist
+func PathExist(path string) bool {
+	if _, err := os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			return false
+		} else {
+			log.Error(err)
+			return false
+		}
+	} else {
+		return true
 	}
 }
 
