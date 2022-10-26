@@ -516,9 +516,9 @@ func ReplaceWords(inputName string) string {
 		return words, wdmsk
 	}
 
-	words, bools := mask(inputName)
-	if len(words) != len(bools) {
-		log.Fatal("words not equal bools")
+	words, wordMasks := mask(inputName)
+	if len(words) != len(wordMasks) {
+		log.Fatal("words not equal wordMasks")
 	}
 
 	newWords := []string{}
@@ -528,8 +528,8 @@ func ReplaceWords(inputName string) string {
 		sep := fdncfg.Separator.Value
 		rpCNS := regexp.MustCompile("[" + sep + "]+")
 		for idx, wd := range words {
-			if !bools[idx] {
-				for _, sw := range fdncfg.ToSepWords {
+			if !wordMasks[idx] {
+				for _, sw := range fdncfg.ToSepWords { //replaced by separator
 					wd = strings.Replace(wd, sw.Value, sep, -1)
 				}
 			}
