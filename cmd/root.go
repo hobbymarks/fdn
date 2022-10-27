@@ -527,6 +527,10 @@ func ReplaceWords(inputName string) string {
 	} else {
 		sep := fdncfg.Separator.Value
 		rpCNS := regexp.MustCompile("[" + sep + "]+")
+		termWordMap := make(map[string]string)
+		for _, twd := range fdncfg.TermWords {
+			termWordMap[twd.OriginalLower] = twd.TargetWord
+		}
 		for idx, wd := range words {
 			if !wordMasks[idx] {
 				for _, sw := range fdncfg.ToSepWords { //replaced by separator
@@ -538,6 +542,16 @@ func ReplaceWords(inputName string) string {
 		outName = strings.Join(newWords, "")
 		//Process continous separator
 		outName = rpCNS.ReplaceAllString(outName, sep)
+		//
+		newWords = []string{}
+		words := strings.Split(outName, sep)
+		for _, wd := range words {
+			if v, exist := termWordMap[wd]; exist {
+				wd = v
+			}
+			newWords = append(newWords, wd)
+		}
+		outName = strings.Join(newWords, sep)
 	}
 
 	return outName
