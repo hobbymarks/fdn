@@ -6,6 +6,9 @@
   "editor.fontLigatures": true,
   "editor.bracketPairColorization.enabled": true,
   "editor.matchBrackets": "always",
+  "terminal.integrated.fontFamily": "JetBrains Mono",
+  "terminal.integrated.cursorStyle": "line",
+  "terminal.integrated.cursorBlinking": true,
   "gopls": { "ui.semanticTokens": true },
   "go.buildOnSave": "off",
   "go.lintOnSave": "workspace",
@@ -25,7 +28,5 @@
   "go.gopath": "",
   "go.inferGopath": false,
   "go.gocodeAutoBuild": false,
-  "go.testFlags": [
-      "-v"
-  ],
+  "go.testFlags": ["-v"]
 }
