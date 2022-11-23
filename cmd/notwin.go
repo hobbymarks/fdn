@@ -15,7 +15,6 @@ func IsHidden(abspath string) (bool, error) {
 
 	if bn[0:1] == "." {
 		return true, nil
-	} else {
-		return false, nil
 	}
+	return false, nil
 }
