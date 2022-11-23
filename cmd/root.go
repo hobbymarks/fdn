@@ -815,6 +815,7 @@ func OutputResult(origin string, processed string, inplace bool, fullpath bool) 
 	}
 }
 
+//TODO:add dry run for config
 //TODO:remove nosense word
 //TODO:support directory and files
 //TODO:dry run result buffered for next step
