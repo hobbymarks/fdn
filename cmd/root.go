@@ -819,3 +819,4 @@ func OutputResult(origin string, processed string, inplace bool, fullpath bool) 
 //TODO:remove nosense word
 //TODO:support directory and files
 //TODO:dry run result buffered for next step
+//TODO:support add prefix or postfix by private order
