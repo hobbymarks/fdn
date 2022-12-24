@@ -1,8 +1,7 @@
 /*
 Package cmd root subcommand is the default
 Copyright © 2022 hobbymarks ihobbymarks@gmail.com
-*/
-package cmd
+*/package cmd
 
 import (
 	"crypto/md5"
@@ -74,7 +73,10 @@ var rootCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 		paths = RemoveHidden(paths)
-		sort.SliceStable(paths, func(i, j int) bool { return paths[i] > paths[j] })
+		sort.SliceStable(
+			paths,
+			func(i, j int) bool { return paths[i] > paths[j] },
+		)
 		for _, path := range paths {
 			path = filepath.Clean(path) //remove tailing slash if exist
 			toPath := ""
@@ -130,14 +132,17 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().BoolVarP(&onlyDirectory, "directory", "d", false, "If enable,directory only.Default file only")
+	rootCmd.Flags().
+		BoolVarP(&onlyDirectory, "directory", "d", false, "If enable,directory only.Default file only")
 	rootCmd.Flags().IntVarP(&depthLevel, "level", "l", 1, "Maxdepth level")
-	rootCmd.Flags().StringArrayVarP(&inputPaths, "path", "p", []string{"."}, "Input paths")
+	rootCmd.Flags().
+		StringArrayVarP(&inputPaths, "path", "p", []string{"."}, "Input paths")
 	rootCmd.Flags().BoolVarP(&inplace, "inplace", "i", false, "In-place")
 	rootCmd.Flags().BoolVarP(&cfm, "confirm", "c", false, "Confirm")
 	rootCmd.Flags().BoolVarP(&reverse, "reverse", "r", false, "Reverse")
 	rootCmd.Flags().BoolVarP(&fullpath, "fullpath", "f", false, "FullPath")
-	rootCmd.Flags().BoolVarP(&plainStyle, "plainstyle", "s", false, "PlainStyle Output")
+	rootCmd.Flags().
+		BoolVarP(&plainStyle, "plainstyle", "s", false, "PlainStyle Output")
 	rootCmd.Flags().BoolVarP(&pretty, "pretty", "e", false, "Pretty Display")
 	rootCmd.Flags().BoolVarP(&overwrite, "overwrite", "o", false, "Overwrite")
 
@@ -173,7 +178,11 @@ func init() {
 }
 
 // RetrievedAbsPaths Paths form args by flag
-func RetrievedAbsPaths(inputPaths []string, depthLevel int, onlyDirectory bool) ([]string, error) {
+func RetrievedAbsPaths(
+	inputPaths []string,
+	depthLevel int,
+	onlyDirectory bool,
+) ([]string, error) {
 	var absolutePaths []string
 
 	for _, path := range inputPaths {
@@ -220,30 +229,38 @@ func RemoveHidden(abspaths []string) []string {
 }
 
 // FilteredSubPaths retrieve absolute paths
-func FilteredSubPaths(dirPath string, depthLevel int, OnlyDir bool) ([]string, error) {
+func FilteredSubPaths(
+	dirPath string,
+	depthLevel int,
+	OnlyDir bool,
+) ([]string, error) {
 	var absolutePaths []string
 
 	dirPath = filepath.Clean(dirPath)
 	log.Trace(dirPath)
 	if depthLevel == -1 {
-		err := filepath.WalkDir(dirPath, func(path string, info fs.DirEntry, err error) error {
-			if err != nil {
-				log.Trace(err)
-				return err
-			}
-			if (OnlyDir && info.IsDir()) || (!OnlyDir && info.Type().IsRegular()) {
-				log.Trace("isDir:", path)
-				if absPath, err := filepath.Abs(filepath.Join(dirPath, path)); err != nil {
-					log.Error(err)
-				} else {
-					absolutePaths = append(absolutePaths, absPath)
+		err := filepath.WalkDir(
+			dirPath,
+			func(path string, info fs.DirEntry, err error) error {
+				if err != nil {
+					log.Trace(err)
+					return err
 				}
-				return nil
-			}
-			log.Trace("skipped:", path)
+				if (OnlyDir && info.IsDir()) ||
+					(!OnlyDir && info.Type().IsRegular()) {
+					log.Trace("isDir:", path)
+					if absPath, err := filepath.Abs(filepath.Join(dirPath, path)); err != nil {
+						log.Error(err)
+					} else {
+						absolutePaths = append(absolutePaths, absPath)
+					}
+					return nil
+				}
+				log.Trace("skipped:", path)
 
-			return nil
-		})
+				return nil
+			},
+		)
 		if err != nil {
 			log.Error(err)
 			return nil, err
@@ -260,7 +277,11 @@ func FilteredSubPaths(dirPath string, depthLevel int, OnlyDir bool) ([]string, e
 }
 
 // DepthFiles Depth read dir
-func DepthFiles(dirPath string, depthLevel int, onlyDirectory bool) ([]string, error) {
+func DepthFiles(
+	dirPath string,
+	depthLevel int,
+	onlyDirectory bool,
+) ([]string, error) {
 	var absolutePaths []string
 
 	log.Debug(depthLevel)
@@ -579,7 +600,10 @@ func ASCHead(inputName string) string {
 	ascH := ""
 	var proxCS = func(c rune) string {
 		if c > 'Z' {
-			return fmt.Sprintf("%c", int(c)-int(math.Ceil(float64(c-'Z')/26)*26))
+			return fmt.Sprintf(
+				"%c",
+				int(c)-int(math.Ceil(float64(c-'Z')/26)*26),
+			)
 		} else if c < 'A' {
 			return fmt.Sprintf("%c", int(c)+int(math.Ceil(float64('A'-c)/26)*26))
 		} else {
@@ -642,7 +666,12 @@ func FDNFile(currentPath string, toBePath string, reserve bool) error {
 }
 
 // CheckDoFDN check and do fdn
-func CheckDoFDN(currentPath string, toBePath string, reserve bool, overwrite bool) error {
+func CheckDoFDN(
+	currentPath string,
+	toBePath string,
+	reserve bool,
+	overwrite bool,
+) error {
 	if PathExist(toBePath) && !overwrite {
 		fmt.Println("[EXIST]Skip:", toBePath)
 		fmt.Println("You can add 'overwrite' or 'o' flag to force do")
@@ -709,7 +738,9 @@ func noEffectTip() {
 			tipsDivider = strings.Repeat("*", tw)
 		}
 		fmt.Println(tipsDivider)
-		fmt.Println("--> 'will change to' ==> 'changed to',in order to take effect,add flag '-i' or '-c'")
+		fmt.Println(
+			"--> 'will to' ==> 'to',add flag '-i' or '-c' to take effect",
+		)
 	}
 }
 
@@ -728,7 +759,12 @@ func PathExist(path string) bool {
 }
 
 // OutputResult fdn processed result
-func OutputResult(origin string, processed string, inplace bool, fullpath bool) {
+func OutputResult(
+	origin string,
+	processed string,
+	inplace bool,
+	fullpath bool,
+) {
 	if !fullpath {
 		origin = filepath.Base(origin)
 		processed = filepath.Base(processed)
