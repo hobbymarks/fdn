@@ -851,6 +851,7 @@ func OutputResult(
 	}
 }
 
+//TODO:support temp words
 //TODO:add dry run for config
 //TODO:remove nosense word
 //TODO:support directory and files
