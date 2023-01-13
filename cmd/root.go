@@ -19,6 +19,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/hobbymarks/fdn/pb"
+	"github.com/hobbymarks/fdn/utils"
 	"github.com/hobbymarks/go-difflib/difflib"
 	"github.com/mattn/go-runewidth"
 	log "github.com/sirupsen/logrus"
@@ -146,18 +147,9 @@ func init() {
 	rootCmd.Flags().BoolVarP(&pretty, "pretty", "e", false, "Pretty Display")
 	rootCmd.Flags().BoolVarP(&overwrite, "overwrite", "o", false, "Overwrite")
 
-	homeDir, err := os.UserHomeDir() //get home dir
-	if err != nil {
-		log.Fatal(err)
-	}
 	//Process FDNConfig
-	FDNConfigPath = filepath.Join(homeDir, ".fdn")
-	if _, err := os.Lstat(FDNConfigPath); errors.Is(err, os.ErrNotExist) {
-		if err := os.Mkdir(FDNConfigPath, os.ModePerm); err != nil {
-			log.Fatal(err)
-		}
-	}
-	FDNConfigPath = filepath.Join(FDNConfigPath, "fdncfg")
+	fdnDir := utils.FDNDir()
+	FDNConfigPath = filepath.Join(fdnDir, "fdncfg")
 	if _, err := os.Lstat(FDNConfigPath); errors.Is(err, os.ErrNotExist) {
 		fdncfg := pb.Fdnconfig{}
 		if err := proto.Unmarshal(defaultFDNCFGBytes, &fdncfg); err != nil {
@@ -168,7 +160,7 @@ func init() {
 		}
 	}
 	//Process FDNRecord
-	FDNRecordPath = filepath.Join(homeDir, ".fdn", "fdnrd")
+	FDNRecordPath = filepath.Join(fdnDir, "fdnrd")
 	if _, err := os.Lstat(FDNRecordPath); errors.Is(err, os.ErrNotExist) {
 		fdnrd := pb.Fdnrecord{}
 		if err := SaveFDNRecord(&fdnrd); err != nil {
@@ -672,7 +664,7 @@ func CheckDoFDN(
 	reserve bool,
 	overwrite bool,
 ) error {
-	if PathExist(toBePath) && !overwrite {
+	if utils.PathExist(toBePath) && !overwrite {
 		fmt.Println("[EXIST]Skip:", toBePath)
 		fmt.Println("You can add 'overwrite' or 'o' flag to force do")
 	} else {
@@ -741,18 +733,6 @@ func noEffectTip() {
 			"--> 'will to' ==> 'to',add flag '-i' or '-c' to take effect",
 		)
 	}
-}
-
-// PathExist check path exist
-func PathExist(path string) bool {
-	if _, err := os.Stat(path); err != nil {
-		if os.IsNotExist(err) {
-			return false
-		}
-		log.Error(err)
-		return false
-	}
-	return true
 }
 
 // OutputResult fdn processed result
