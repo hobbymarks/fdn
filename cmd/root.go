@@ -133,7 +133,7 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().
-		BoolVarP(&onlyDirectory, "directory", "d", false, "If enable,directory only.Default file only")
+		BoolVarP(&onlyDirectory, "directory", "d", false, "If enable,directory only.Default file")
 	rootCmd.Flags().IntVarP(&depthLevel, "level", "l", 1, "Maxdepth level")
 	rootCmd.Flags().
 		StringArrayVarP(&inputPaths, "path", "p", []string{"."}, "Input paths")
@@ -679,9 +679,8 @@ func CheckDoFDN(
 		if err := FDNFile(currentPath, toBePath, reverse); err != nil {
 			log.Error(err)
 			return err
-		} else {
-			OutputResult(currentPath, toBePath, true, fullpath)
 		}
+		OutputResult(currentPath, toBePath, true, fullpath)
 	}
 	return nil
 }
@@ -749,13 +748,11 @@ func PathExist(path string) bool {
 	if _, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
 			return false
-		} else {
-			log.Error(err)
-			return false
 		}
-	} else {
-		return true
+		log.Error(err)
+		return false
 	}
+	return true
 }
 
 // OutputResult fdn processed result
