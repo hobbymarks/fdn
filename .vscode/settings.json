@@ -1,6 +1,6 @@
 {
   "editor.language.brackets": [],
-  "editor.rulers": [79, 80, 100, 120],
+  "editor.rulers": [79, 80, 90, 100],
   "editor.fontFamily": "JetBrains Mono",
   "editor.fontSize": 13,
   "editor.fontLigatures": true,
@@ -29,7 +29,7 @@
   "go.gopath": "",
   "go.inferGopath": false,
   "go.gocodeAutoBuild": false,
-  "go.testFlags": ["-v"],
+  "go.testFlags": ["-v", "-count=1"],
   "emeraldwalk.runonsave": {
     "commands": [
       {
