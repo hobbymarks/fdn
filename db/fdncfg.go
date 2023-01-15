@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/glebarez/sqlite"
 	"github.com/hobbymarks/fdn/utils"
 	"gorm.io/gorm"
 )
@@ -29,23 +28,13 @@ type Separator struct {
 	Value   string
 }
 
-// OpenDB ...
-func OpenDB(path string) *gorm.DB {
-	db, err := gorm.Open(sqlite.Open(path), &gorm.Config{})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return db
-}
-
 // ConnectCFGDB connect config database
 func ConnectCFGDB(path ...string) *gorm.DB {
 	var dbPath string
 
 	// len(paths)!=0
 	if len(path) != 0 && utils.PathExist(path[0]) {
-		db := OpenDB(path[0])
+		db := utils.OpenDB(path[0])
 		return db
 	}
 	// len(paths)==0
@@ -60,7 +49,7 @@ func ConnectCFGDB(path ...string) *gorm.DB {
 		dbPath = path[0]
 	}
 	// open db and init
-	db := OpenDB(dbPath)
+	db := utils.OpenDB(dbPath)
 	err := db.AutoMigrate(&TermWord{}, &ToSepWord{}, &Separator{})
 	if err != nil {
 		log.Fatal(err)
