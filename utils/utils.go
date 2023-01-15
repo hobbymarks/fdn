@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"crypto/md5"
+	"fmt"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -8,6 +10,12 @@ import (
 
 	log "github.com/sirupsen/logrus"
 )
+
+// KeyHash create hash from key and return string
+func KeyHash(key string) string {
+	data := []byte(key)
+	return fmt.Sprintf("%x", md5.Sum(data))
+}
 
 // RandStr return rand string with length is n
 func RandStr(n int) string {
