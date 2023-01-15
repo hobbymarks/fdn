@@ -4,7 +4,6 @@ Copyright © 2022 hobbymarks ihobbymarks@gmail.com
 */package cmd
 
 import (
-	"crypto/md5"
 	_ "embed"
 	"errors"
 	"fmt"
@@ -18,6 +17,7 @@ import (
 	"unicode"
 
 	"github.com/fatih/color"
+	"github.com/hobbymarks/fdn/db"
 	"github.com/hobbymarks/fdn/pb"
 	"github.com/hobbymarks/fdn/utils"
 	"github.com/hobbymarks/go-difflib/difflib"
@@ -82,7 +82,7 @@ var rootCmd = &cobra.Command{
 			path = filepath.Clean(path) //remove tailing slash if exist
 			toPath := ""
 			if reverse {
-				preName, exist := curNameHashPreNameMap[KeyHash(filepath.Base(path))]
+				preName, exist := curNameHashPreNameMap[utils.KeyHash(filepath.Base(path))]
 				if exist {
 					toPath = filepath.Join(filepath.Dir(path), preName)
 				}
@@ -313,7 +313,7 @@ func ConfigTermWords(keyValueMap map[string]string) error {
 		ekhs = append(ekhs, tw.KeyHash)
 	}
 	for key, value := range keyValueMap {
-		kh := KeyHash(key)
+		kh := utils.KeyHash(key)
 		if ArrayContainsElemenet(ekhs, kh) {
 			continue
 		} else {
@@ -328,6 +328,21 @@ func ConfigTermWords(keyValueMap map[string]string) error {
 	log.Trace(fdncfg.GetToSepWords())
 	if err := SaveFDNConfig(fdncfg); err != nil {
 		return err
+	}
+	return nil
+}
+
+// ConfigTermWordsDB to config term words
+func ConfigTermWordsDB(keyValueMap map[string]string) error {
+	_db := db.ConnectCFGDB()
+	for key, value := range keyValueMap {
+		_key := strings.ToLower(key)
+		termWord := db.TermWord{
+			KeyHash:       utils.KeyHash(_key),
+			OriginalLower: _key,
+			Value:         value,
+		}
+		_db.Create(&termWord)
 	}
 	return nil
 }
@@ -357,6 +372,16 @@ func DeleteTermWords(keys []string) error {
 	return nil
 }
 
+// DeleteTermWordsDB delete term words in config file
+func DeleteTermWordsDB(keys []string) error {
+	_db := db.ConnectCFGDB()
+	for _, key := range keys {
+		_key := utils.KeyHash(key)
+		_db.Delete(&db.TermWord{}, _key)
+	}
+	return nil
+}
+
 // ConfigToSepWords config tosep words in config file
 func ConfigToSepWords(words []string) error {
 	fdncfg, err := GetFDNConfig()
@@ -369,7 +394,7 @@ func ConfigToSepWords(words []string) error {
 		ekhs = append(ekhs, sw.KeyHash)
 	}
 	for _, wd := range words {
-		kh := KeyHash(wd)
+		kh := utils.KeyHash(wd)
 		if ArrayContainsElemenet(ekhs, kh) {
 			continue
 		} else {
@@ -383,6 +408,17 @@ func ConfigToSepWords(words []string) error {
 	log.Trace(fdncfg.GetToSepWords())
 	if err := SaveFDNConfig(fdncfg); err != nil {
 		return err
+	}
+	return nil
+}
+
+// ConfigToSepWordsDB config tosep words in config file
+func ConfigToSepWordsDB(words []string) error {
+	_db := db.ConnectCFGDB()
+	for _, key := range words {
+		_key := utils.KeyHash(key)
+		toSepWord := db.ToSepWord{KeyHash: _key, Value: key}
+		_db.Create(&toSepWord)
 	}
 	return nil
 }
@@ -412,6 +448,16 @@ func DeleteToSepWords(keys []string) error {
 	return nil
 }
 
+// DeleteToSepWordsDB delete tosep words in config file
+func DeleteToSepWordsDB(keys []string) error {
+	_db := db.ConnectCFGDB()
+	for _, key := range keys {
+		_key := utils.KeyHash(key)
+		_db.Delete(&db.ToSepWord{}, _key)
+	}
+	return nil
+}
+
 // ConfigSeparator config separator in config file
 func ConfigSeparator(separator string) error {
 	fdncfg, err := GetFDNConfig()
@@ -420,13 +466,21 @@ func ConfigSeparator(separator string) error {
 		return err
 	}
 	fdncfg.Separator = &pb.Separator{
-		KeyHash: KeyHash(separator),
+		KeyHash: utils.KeyHash(separator),
 		Value:   separator}
 	fdncfg.LastUpdated = timestamppb.Now()
 	log.Trace(fdncfg.GetSeparator())
 	if err := SaveFDNConfig(fdncfg); err != nil {
 		return err
 	}
+	return nil
+}
+
+// ConfigSeparatorDB config separator in config file
+func ConfigSeparatorDB(separator string) error {
+	_db := db.ConnectCFGDB()
+	_sep := db.Separator{KeyHash: utils.KeyHash(separator), Value: separator}
+	_db.Create(&_sep)
 	return nil
 }
 
@@ -617,10 +671,10 @@ func ASCHead(inputName string) string {
 }
 
 // KeyHash create hash from key and return string
-func KeyHash(key string) string {
-	data := []byte(key)
-	return fmt.Sprintf("%x", md5.Sum(data))
-}
+// func KeyHash(key string) string {
+// 	data := []byte(key)
+// 	return fmt.Sprintf("%x", md5.Sum(data))
+// }
 
 // ArrayContainsElemenet check element e if exist in array s
 func ArrayContainsElemenet[T comparable](s []T, e T) bool {
@@ -642,7 +696,7 @@ func FDNFile(currentPath string, toBePath string, reserve bool) error {
 		}
 		fdnrd.Records = append(fdnrd.Records, &pb.Record{
 			PreviousName:    filepath.Base(currentPath),
-			CurrentNameHash: KeyHash(filepath.Base(toBePath)),
+			CurrentNameHash: utils.KeyHash(filepath.Base(toBePath)),
 			LastUpdated:     timestamppb.Now()})
 		err = SaveFDNRecord(fdnrd)
 		if err != nil {
