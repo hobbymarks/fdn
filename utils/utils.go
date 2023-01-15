@@ -8,8 +8,20 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/glebarez/sqlite"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
+
+// OpenDB only open the db
+func OpenDB(path string) *gorm.DB {
+	db, err := gorm.Open(sqlite.Open(path), &gorm.Config{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return db
+}
 
 // KeyHash create hash from key and return string
 func KeyHash(key string) string {
@@ -46,7 +58,7 @@ func DatabaseDir() string {
 	if err != nil {
 		path, err := os.Executable()
 		if err != nil {
-			log.Fatal("Get DatabaseDir Failed:%s", err)
+			log.Fatalf("Get DatabaseDir Failed:%s", err)
 		}
 		return path
 	}

@@ -624,6 +624,88 @@ func ReplaceWords(inputName string) string {
 	return outName
 }
 
+// ReplaceWordsDB process inputName string and return new string
+func ReplaceWordsDB(inputName string) string {
+	outName := inputName
+	var mask = func(s string) ([]string, []bool) {
+		var regescape = func(s string) string {
+			s = strings.Replace(s, "+", "\\+", -1)
+			s = strings.Replace(s, "?", "\\?", -1)
+			s = strings.Replace(s, "*", "\\*", -1)
+
+			return s
+		}
+
+		words := []string{}
+		wdmsk := []bool{}
+		fdncfg, err := GetFDNConfig()
+		if err != nil {
+			log.Error(err)
+		}
+		pts := []string{}
+		for _, twd := range fdncfg.TermWords {
+			pts = append(pts, regescape(twd.OriginalLower))
+		}
+		rp := regexp.MustCompile(strings.Join(pts, "|"))
+		allSliceIndex := rp.FindAllStringIndex(s, -1)
+		cur := 0
+		for _, slice := range allSliceIndex {
+			if slice[0] > cur {
+				words = append(words, s[cur:slice[0]])
+				wdmsk = append(wdmsk, false)
+			}
+			words = append(words, s[slice[0]:slice[1]])
+			wdmsk = append(wdmsk, true)
+			cur = slice[1]
+		}
+		if cur < len(s) {
+			words = append(words, s[cur:])
+			wdmsk = append(wdmsk, false)
+		}
+		return words, wdmsk
+	}
+
+	words, wordMasks := mask(inputName)
+	if len(words) != len(wordMasks) {
+		log.Fatal("words not equal wordMasks")
+	}
+
+	newWords := []string{}
+	if fdncfg, err := GetFDNConfig(); err != nil {
+		log.Fatal(err)
+	} else {
+		sep := fdncfg.Separator.Value
+		rpCNS := regexp.MustCompile("[" + sep + "]+")
+		termWordMap := make(map[string]string)
+		for _, twd := range fdncfg.TermWords {
+			termWordMap[twd.OriginalLower] = twd.TargetWord
+		}
+		for idx, wd := range words {
+			if !wordMasks[idx] {
+				for _, sw := range fdncfg.ToSepWords { //replaced by separator
+					wd = strings.Replace(wd, sw.Value, sep, -1)
+				}
+			}
+			newWords = append(newWords, wd)
+		}
+		outName = strings.Join(newWords, "")
+		//Process continous separator
+		outName = rpCNS.ReplaceAllString(outName, sep)
+		//
+		newWords = []string{}
+		words := strings.Split(outName, sep)
+		for _, wd := range words {
+			if v, exist := termWordMap[wd]; exist {
+				wd = v
+			}
+			newWords = append(newWords, wd)
+		}
+		outName = strings.Join(newWords, sep)
+	}
+
+	return outName
+}
+
 // ProcessHeadTail process head and tail of input string
 func ProcessHeadTail(inputName string) string {
 	outName := inputName
