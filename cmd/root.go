@@ -693,6 +693,7 @@ func OutputResult(
 	}
 }
 
+//TODO:doc - multi args how to
 //TODO:support temp words
 //TODO:add dry run for config
 //TODO:remove nosense word
