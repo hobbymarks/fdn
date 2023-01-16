@@ -11,7 +11,8 @@ import (
 
 // Record a filename changed record
 type Record struct {
-	PreviousName    string
+	gorm.Model
+	PreviousName    string `gorm:"unique"`
 	CurrentNameHash string
 }
 

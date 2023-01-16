@@ -11,20 +11,23 @@ import (
 
 // TermWord Term Word
 type TermWord struct {
-	KeyHash       string
+	gorm.Model
+	KeyHash       string `gorm:"unique"`
 	OriginalLower string
 	TargetWord    string
 }
 
 // ToSepWord will be change to separator
 type ToSepWord struct {
-	KeyHash string
+	gorm.Model
+	KeyHash string `gorm:"unique"`
 	Value   string
 }
 
 // Separator separator
 type Separator struct {
-	KeyHash string
+	gorm.Model
+	KeyHash string `gorm:"unique"`
 	Value   string
 }
 
