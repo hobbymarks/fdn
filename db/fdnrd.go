@@ -21,8 +21,9 @@ func ConnectRDDB(path ...string) *gorm.DB {
 
 	// len(paths)!=0
 	if len(path) != 0 && utils.PathExist(path[0]) {
-		db := utils.OpenDB(path[0])
-		return db
+		// db := utils.OpenDB(path[0])
+		dbPath = path[0]
+		// return db
 	}
 	// len(paths)==0
 	if len(path) == 0 {
