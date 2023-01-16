@@ -255,6 +255,13 @@ func FilteredSubPaths(
 		}
 		absolutePaths = paths
 	}
+	if onlyDir {
+		if absPath, err := filepath.Abs(dirPath); err != nil {
+			log.Error(err)
+		} else {
+			absolutePaths = append(absolutePaths, absPath)
+		}
+	}
 	return absolutePaths, nil
 }
 
