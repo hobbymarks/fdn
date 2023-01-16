@@ -11,8 +11,8 @@ import (
 
 // Record a filename changed record
 type Record struct {
-	CurrentNameHash string
 	PreviousName    string
+	CurrentNameHash string
 }
 
 // ConnectRDDB connect config database
