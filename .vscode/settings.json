@@ -1,4 +1,9 @@
 {
+  "workbench.tree.indent": 20,
+  "workbench.colorCustomizations": {
+    "editorIndentGuide.activeBackground": "#ff0000",
+    "editorIndentGuide.background": "#ff00ff"
+  },
   "editor.language.brackets": [],
   "editor.rulers": [79, 80, 90, 100],
   "editor.fontFamily": "JetBrains Mono",
