@@ -48,7 +48,10 @@ func TestConnectRDDB_AParam_Exist(t *testing.T) {
 }
 
 func TestConnectRDDB_AParam_NotExist(t *testing.T) {
-	dp := filepath.Join(utils.RandStr(32), "rd"+utils.RandStr(9)+".db")
+	dp := filepath.Join(
+		utils.RandEnAlph(32),
+		"rd"+utils.RandEnAlph(9)+".db",
+	)
 	dpDir := filepath.Dir(dp)
 	if utils.PathExist(dpDir) {
 		t.Errorf("please remove directory %s", dpDir)

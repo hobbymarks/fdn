@@ -29,8 +29,30 @@ func KeyHash(key string) string {
 	return fmt.Sprintf("%x", md5.Sum(data))
 }
 
-// RandStr return rand string with length is n
-func RandStr(n int) string {
+// RandEnAlphDigitShiftDigit return rand string with length is n
+func RandEnAlphDigitShiftDigit(n int) string {
+	rand.Seed(time.Now().UnixMicro())
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()")
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+
+// RandEnAlphDigit return rand string with length is n
+func RandEnAlphDigit(n int) string {
+	rand.Seed(time.Now().UnixMicro())
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+
+// RandEnAlph return rand string with length is n
+func RandEnAlph(n int) string {
 	rand.Seed(time.Now().UnixMicro())
 	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	b := make([]rune, n)

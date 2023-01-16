@@ -32,7 +32,7 @@ var onlyDirectory bool
 var inputPaths []string
 var depthLevel int
 var inplace bool
-var cfm bool
+var confirm bool
 var reverse bool
 var fullpath bool
 var plainStyle bool
@@ -96,8 +96,8 @@ var rootCmd = &cobra.Command{
 			if inplace {
 				CheckDoFDN(path, toPath, reverse, overwrite)
 			} else {
-				if cfm {
-					switch confirm() {
+				if confirm {
+					switch GetConfirm() {
 					case A, All:
 						inplace = true
 						CheckDoFDN(path, toPath, reverse, overwrite)
@@ -136,7 +136,7 @@ func init() {
 	rootCmd.Flags().
 		StringArrayVarP(&inputPaths, "path", "p", []string{"."}, "Input paths")
 	rootCmd.Flags().BoolVarP(&inplace, "inplace", "i", false, "In-place")
-	rootCmd.Flags().BoolVarP(&cfm, "confirm", "c", false, "Confirm")
+	rootCmd.Flags().BoolVarP(&confirm, "confirm", "c", false, "Confirm")
 	rootCmd.Flags().BoolVarP(&reverse, "reverse", "r", false, "Reverse")
 	rootCmd.Flags().BoolVarP(&fullpath, "fullpath", "f", false, "FullPath")
 	rootCmd.Flags().
@@ -159,11 +159,11 @@ func init() {
 	}
 }
 
-// RetrievedAbsPaths Paths form args by flag
+// RetrievedAbsPaths Paths from args by flag
 func RetrievedAbsPaths(
 	inputPaths []string,
 	depthLevel int,
-	onlyDirectory bool,
+	onlyDir bool,
 ) ([]string, error) {
 	var absolutePaths []string
 
@@ -173,13 +173,13 @@ func RetrievedAbsPaths(
 			continue
 		} else {
 			if fileInfo.IsDir() {
-				paths, err := FilteredSubPaths(path, depthLevel, onlyDirectory)
+				paths, err := FilteredSubPaths(path, depthLevel, onlyDir)
 				if err != nil {
 					log.Error(err)
 				} else {
 					absolutePaths = append(absolutePaths, paths...)
 				}
-			} else if !onlyDirectory && fileInfo.Mode().IsRegular() {
+			} else if !onlyDir && fileInfo.Mode().IsRegular() {
 				if absPath, err := filepath.Abs(path); err != nil {
 					log.Error(err)
 				} else {
@@ -214,7 +214,7 @@ func RemoveHidden(abspaths []string) []string {
 func FilteredSubPaths(
 	dirPath string,
 	depthLevel int,
-	OnlyDir bool,
+	onlyDir bool,
 ) ([]string, error) {
 	var absolutePaths []string
 
@@ -228,8 +228,8 @@ func FilteredSubPaths(
 					log.Trace(err)
 					return err
 				}
-				if (OnlyDir && info.IsDir()) ||
-					(!OnlyDir && info.Type().IsRegular()) {
+				if (onlyDir && info.IsDir()) ||
+					(!onlyDir && info.Type().IsRegular()) {
 					log.Trace("isDir:", path)
 					if absPath, err := filepath.Abs(filepath.Join(dirPath, path)); err != nil {
 						log.Error(err)
@@ -248,7 +248,7 @@ func FilteredSubPaths(
 			return nil, err
 		}
 	} else {
-		paths, err := DepthFiles(dirPath, depthLevel, OnlyDir)
+		paths, err := DepthFiles(dirPath, depthLevel, onlyDir)
 		if err != nil {
 			log.Error(err)
 			return nil, err
@@ -262,7 +262,7 @@ func FilteredSubPaths(
 func DepthFiles(
 	dirPath string,
 	depthLevel int,
-	onlyDirectory bool,
+	onlyDir bool,
 ) ([]string, error) {
 	var absolutePaths []string
 
@@ -276,11 +276,11 @@ func DepthFiles(
 		if absPath, err := filepath.Abs(filepath.Join(dirPath, file.Name())); err != nil {
 			log.Error(err)
 		} else {
-			if (onlyDirectory && file.IsDir()) || (!onlyDirectory && file.Type().IsRegular()) {
+			if (onlyDir && file.IsDir()) || (!onlyDir && file.Type().IsRegular()) {
 				absolutePaths = append(absolutePaths, absPath)
 			}
 			if depthLevel > 1 && file.Type().IsDir() {
-				if files, err := DepthFiles(absPath, depthLevel-1, onlyDirectory); err != nil {
+				if files, err := DepthFiles(absPath, depthLevel-1, onlyDir); err != nil {
 					log.Error(err)
 				} else {
 					absolutePaths = append(absolutePaths, files...)
@@ -551,7 +551,8 @@ func FNDedFrom(input string) string {
 	return output
 }
 
-func confirm() UserInput {
+// GetConfirm get user input confirmation
+func GetConfirm() UserInput {
 	var cmsg string
 
 	fmt.Print("Please confirm (all,yes,no,quit):")
