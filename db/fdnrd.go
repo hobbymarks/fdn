@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// Record a filename changed record
 type Record struct {
 	CurrentNameHash string
 	PreviousName    string
