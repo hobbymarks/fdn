@@ -84,7 +84,7 @@ var rootCmd = &cobra.Command{
 					toPath = filepath.Join(filepath.Dir(path), preName)
 				}
 			} else {
-				ext := filepath.Ext(path) //ext empty if path is dir
+				ext := utils.Ext(path) //ext empty if path is dir
 				bn := strings.TrimSuffix(filepath.Base(path), ext)
 				if fdned := FNDedFrom(bn); fdned != bn {
 					toPath = filepath.Join(filepath.Dir(path), fdned+ext)
