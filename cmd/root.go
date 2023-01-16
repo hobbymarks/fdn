@@ -4,7 +4,7 @@ Copyright © 2022 hobbymarks ihobbymarks@gmail.com
 */package cmd
 
 import (
-	_ "embed"
+	"embed"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -18,15 +18,12 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/hobbymarks/fdn/db"
-	"github.com/hobbymarks/fdn/pb"
 	"github.com/hobbymarks/fdn/utils"
 	"github.com/hobbymarks/go-difflib/difflib"
 	"github.com/mattn/go-runewidth"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
-	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 var version = "0.0.0"
@@ -43,8 +40,8 @@ var plainStyle bool
 var pretty bool
 var overwrite bool
 
-//go:embed fdncfg
-var defaultFDNCFGBytes []byte
+//go:embed cfg.db
+var defaultCFG embed.FS
 
 // FDNConfigPath is the config file path
 var FDNConfigPath string
@@ -61,11 +58,11 @@ var rootCmd = &cobra.Command{
 		PrintTipFlag := false
 		curNameHashPreNameMap := map[string]string{}
 		if reverse {
-			fdnrd, err := GetFDNRecord()
-			if err != nil {
-				log.Fatal(err)
-			}
-			for _, rd := range fdnrd.Records {
+			var rds []db.Record
+			_db := db.ConnectRDDB()
+			_db.Find(&rds)
+
+			for _, rd := range rds {
 				curNameHashPreNameMap[rd.CurrentNameHash] = rd.PreviousName
 			}
 		}
@@ -149,22 +146,15 @@ func init() {
 
 	//Process FDNConfig
 	fdnDir := utils.FDNDir()
-	FDNConfigPath = filepath.Join(fdnDir, "fdncfg")
+	FDNConfigPath = filepath.Join(fdnDir, "cfg.db")
 	if _, err := os.Lstat(FDNConfigPath); errors.Is(err, os.ErrNotExist) {
-		fdncfg := pb.Fdnconfig{}
-		if err := proto.Unmarshal(defaultFDNCFGBytes, &fdncfg); err != nil {
-			log.Error(err)
+		contents, err := defaultCFG.ReadFile("cfg.db")
+		if err != nil {
+			log.Errorf("read default config error:%s", err)
 		}
-		if err := SaveFDNConfig(&fdncfg); err != nil {
-			log.Error(err)
-		}
-	}
-	//Process FDNRecord
-	FDNRecordPath = filepath.Join(fdnDir, "fdnrd")
-	if _, err := os.Lstat(FDNRecordPath); errors.Is(err, os.ErrNotExist) {
-		fdnrd := pb.Fdnrecord{}
-		if err := SaveFDNRecord(&fdnrd); err != nil {
-			log.Error(err)
+		err = os.WriteFile(FDNConfigPath, contents, 0644)
+		if err != nil {
+			log.Errorf("copy default config error:%s", err)
 		}
 	}
 }
@@ -303,44 +293,13 @@ func DepthFiles(
 
 // ConfigTermWords to config term words
 func ConfigTermWords(keyValueMap map[string]string) error {
-	fdncfg, err := GetFDNConfig()
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-	ekhs := []string{}
-	for _, tw := range fdncfg.TermWords {
-		ekhs = append(ekhs, tw.KeyHash)
-	}
-	for key, value := range keyValueMap {
-		kh := utils.KeyHash(key)
-		if ArrayContainsElemenet(ekhs, kh) {
-			continue
-		} else {
-			fdncfg.TermWords = append(fdncfg.TermWords, &pb.TermWord{
-				KeyHash:       kh,
-				OriginalLower: key,
-				TargetWord:    value})
-			ekhs = append(ekhs, kh)
-		}
-	}
-	fdncfg.LastUpdated = timestamppb.Now()
-	log.Trace(fdncfg.GetToSepWords())
-	if err := SaveFDNConfig(fdncfg); err != nil {
-		return err
-	}
-	return nil
-}
-
-// ConfigTermWordsDB to config term words
-func ConfigTermWordsDB(keyValueMap map[string]string) error {
 	_db := db.ConnectCFGDB()
 	for key, value := range keyValueMap {
 		_key := strings.ToLower(key)
 		termWord := db.TermWord{
 			KeyHash:       utils.KeyHash(_key),
 			OriginalLower: _key,
-			Value:         value,
+			TargetWord:    value,
 		}
 		_db.Create(&termWord)
 	}
@@ -349,31 +308,6 @@ func ConfigTermWordsDB(keyValueMap map[string]string) error {
 
 // DeleteTermWords delete term words in config file
 func DeleteTermWords(keys []string) error {
-	fdncfg, err := GetFDNConfig()
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-	log.Trace(keys)
-	tws := []*pb.TermWord{}
-	for _, tw := range fdncfg.TermWords {
-		if ArrayContainsElemenet(keys, tw.KeyHash) {
-			log.Trace("-:" + tw.OriginalLower)
-			continue
-		} else {
-			tws = append(tws, tw)
-		}
-	}
-	fdncfg.TermWords = tws
-	fdncfg.LastUpdated = timestamppb.Now()
-	if err := SaveFDNConfig(fdncfg); err != nil {
-		return err
-	}
-	return nil
-}
-
-// DeleteTermWordsDB delete term words in config file
-func DeleteTermWordsDB(keys []string) error {
 	_db := db.ConnectCFGDB()
 	for _, key := range keys {
 		_key := utils.KeyHash(key)
@@ -384,36 +318,6 @@ func DeleteTermWordsDB(keys []string) error {
 
 // ConfigToSepWords config tosep words in config file
 func ConfigToSepWords(words []string) error {
-	fdncfg, err := GetFDNConfig()
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-	ekhs := []string{}
-	for _, sw := range fdncfg.ToSepWords {
-		ekhs = append(ekhs, sw.KeyHash)
-	}
-	for _, wd := range words {
-		kh := utils.KeyHash(wd)
-		if ArrayContainsElemenet(ekhs, kh) {
-			continue
-		} else {
-			fdncfg.ToSepWords = append(fdncfg.ToSepWords, &pb.ToSepWord{
-				KeyHash: kh,
-				Value:   wd})
-			ekhs = append(ekhs, kh)
-		}
-	}
-	fdncfg.LastUpdated = timestamppb.Now()
-	log.Trace(fdncfg.GetToSepWords())
-	if err := SaveFDNConfig(fdncfg); err != nil {
-		return err
-	}
-	return nil
-}
-
-// ConfigToSepWordsDB config tosep words in config file
-func ConfigToSepWordsDB(words []string) error {
 	_db := db.ConnectCFGDB()
 	for _, key := range words {
 		_key := utils.KeyHash(key)
@@ -425,31 +329,6 @@ func ConfigToSepWordsDB(words []string) error {
 
 // DeleteToSepWords delete tosep words in config file
 func DeleteToSepWords(keys []string) error {
-	fdncfg, err := GetFDNConfig()
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-	log.Trace(keys)
-	sws := []*pb.ToSepWord{}
-	for _, sw := range fdncfg.ToSepWords {
-		if ArrayContainsElemenet(keys, sw.KeyHash) {
-			log.Trace("-:" + sw.Value)
-			continue
-		} else {
-			sws = append(sws, sw)
-		}
-	}
-	fdncfg.ToSepWords = sws
-	fdncfg.LastUpdated = timestamppb.Now()
-	if err := SaveFDNConfig(fdncfg); err != nil {
-		return err
-	}
-	return nil
-}
-
-// DeleteToSepWordsDB delete tosep words in config file
-func DeleteToSepWordsDB(keys []string) error {
 	_db := db.ConnectCFGDB()
 	for _, key := range keys {
 		_key := utils.KeyHash(key)
@@ -460,85 +339,9 @@ func DeleteToSepWordsDB(keys []string) error {
 
 // ConfigSeparator config separator in config file
 func ConfigSeparator(separator string) error {
-	fdncfg, err := GetFDNConfig()
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-	fdncfg.Separator = &pb.Separator{
-		KeyHash: utils.KeyHash(separator),
-		Value:   separator}
-	fdncfg.LastUpdated = timestamppb.Now()
-	log.Trace(fdncfg.GetSeparator())
-	if err := SaveFDNConfig(fdncfg); err != nil {
-		return err
-	}
-	return nil
-}
-
-// ConfigSeparatorDB config separator in config file
-func ConfigSeparatorDB(separator string) error {
 	_db := db.ConnectCFGDB()
 	_sep := db.Separator{KeyHash: utils.KeyHash(separator), Value: separator}
 	_db.Create(&_sep)
-	return nil
-}
-
-// GetFDNConfig return fdnconfig pointer and error info
-func GetFDNConfig() (*pb.Fdnconfig, error) {
-	fdncfg := pb.Fdnconfig{}
-	data, err := os.ReadFile(FDNConfigPath)
-	if err != nil {
-		log.Error(err)
-		return &fdncfg, err
-	}
-	if err := proto.Unmarshal(data, &fdncfg); err != nil {
-		log.Error(err)
-		return &fdncfg, err
-	}
-	return &fdncfg, nil
-}
-
-// SaveFDNConfig save fdn config to config file
-func SaveFDNConfig(fdncfg *pb.Fdnconfig) error {
-	data, err := proto.Marshal(fdncfg)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-	if err := os.WriteFile(FDNConfigPath, data, 0644); err != nil {
-		log.Error(err)
-		return err
-	}
-	return nil
-}
-
-// GetFDNRecord return fdnrecord and error
-func GetFDNRecord() (*pb.Fdnrecord, error) {
-	fdnrd := pb.Fdnrecord{}
-	data, err := os.ReadFile(FDNRecordPath)
-	if err != nil {
-		log.Error(err)
-		return &fdnrd, err
-	}
-	if err := proto.Unmarshal(data, &fdnrd); err != nil {
-		log.Error(err)
-		return &fdnrd, err
-	}
-	return &fdnrd, nil
-}
-
-// SaveFDNRecord save fdn record to fdn record file
-func SaveFDNRecord(fdnrd *pb.Fdnrecord) error {
-	data, err := proto.Marshal(fdnrd)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-	if err := os.WriteFile(FDNRecordPath, data, 0644); err != nil {
-		log.Error(err)
-		return err
-	}
 	return nil
 }
 
@@ -556,12 +359,15 @@ func ReplaceWords(inputName string) string {
 
 		words := []string{}
 		wdmsk := []bool{}
-		fdncfg, err := GetFDNConfig()
-		if err != nil {
-			log.Error(err)
+		var termWords []db.TermWord
+		_db := db.ConnectRDDB()
+		rlt := _db.Find(&termWords)
+		if rlt.Error != nil {
+			log.Fatalf("retrive TermWord error %s", rlt.Error)
 		}
+
 		pts := []string{}
-		for _, twd := range fdncfg.TermWords {
+		for _, twd := range termWords {
 			pts = append(pts, regescape(twd.OriginalLower))
 		}
 		rp := regexp.MustCompile(strings.Join(pts, "|"))
@@ -589,119 +395,52 @@ func ReplaceWords(inputName string) string {
 	}
 
 	newWords := []string{}
-	if fdncfg, err := GetFDNConfig(); err != nil {
-		log.Fatal(err)
-	} else {
-		sep := fdncfg.Separator.Value
-		rpCNS := regexp.MustCompile("[" + sep + "]+")
-		termWordMap := make(map[string]string)
-		for _, twd := range fdncfg.TermWords {
-			termWordMap[twd.OriginalLower] = twd.TargetWord
-		}
-		for idx, wd := range words {
-			if !wordMasks[idx] {
-				for _, sw := range fdncfg.ToSepWords { //replaced by separator
-					wd = strings.Replace(wd, sw.Value, sep, -1)
-				}
-			}
-			newWords = append(newWords, wd)
-		}
-		outName = strings.Join(newWords, "")
-		//Process continous separator
-		outName = rpCNS.ReplaceAllString(outName, sep)
-		//
-		newWords = []string{}
-		words := strings.Split(outName, sep)
-		for _, wd := range words {
-			if v, exist := termWordMap[wd]; exist {
-				wd = v
-			}
-			newWords = append(newWords, wd)
-		}
-		outName = strings.Join(newWords, sep)
+
+	var sep db.Separator
+	var termWords []db.TermWord
+	var toSepWords []db.ToSepWord
+	_db := db.ConnectRDDB()
+	rlt := _db.First(&sep)
+	if rlt.Error != nil {
+		log.Fatalf("retrieve Separator error %s", rlt.Error)
+	}
+	_sep := sep.Value
+	rlt = _db.Find(&termWords)
+	if rlt.Error != nil {
+		log.Fatalf("retrieve TermWord error %s", rlt.Error)
+	}
+	rlt = _db.Find(&toSepWords)
+	if rlt.Error != nil {
+		log.Fatalf("retrieve ToSepWord error %s", rlt.Error)
 	}
 
-	return outName
-}
-
-// ReplaceWordsDB process inputName string and return new string
-func ReplaceWordsDB(inputName string) string {
-	outName := inputName
-	var mask = func(s string) ([]string, []bool) {
-		var regescape = func(s string) string {
-			s = strings.Replace(s, "+", "\\+", -1)
-			s = strings.Replace(s, "?", "\\?", -1)
-			s = strings.Replace(s, "*", "\\*", -1)
-
-			return s
-		}
-
-		words := []string{}
-		wdmsk := []bool{}
-		fdncfg, err := GetFDNConfig()
-		if err != nil {
-			log.Error(err)
-		}
-		pts := []string{}
-		for _, twd := range fdncfg.TermWords {
-			pts = append(pts, regescape(twd.OriginalLower))
-		}
-		rp := regexp.MustCompile(strings.Join(pts, "|"))
-		allSliceIndex := rp.FindAllStringIndex(s, -1)
-		cur := 0
-		for _, slice := range allSliceIndex {
-			if slice[0] > cur {
-				words = append(words, s[cur:slice[0]])
-				wdmsk = append(wdmsk, false)
-			}
-			words = append(words, s[slice[0]:slice[1]])
-			wdmsk = append(wdmsk, true)
-			cur = slice[1]
-		}
-		if cur < len(s) {
-			words = append(words, s[cur:])
-			wdmsk = append(wdmsk, false)
-		}
-		return words, wdmsk
+	rpCNS := regexp.MustCompile("[" + _sep + "]+")
+	termWordMap := make(map[string]string)
+	for _, twd := range termWords {
+		termWordMap[twd.OriginalLower] = twd.TargetWord
 	}
-
-	words, wordMasks := mask(inputName)
-	if len(words) != len(wordMasks) {
-		log.Fatal("words not equal wordMasks")
-	}
-
-	newWords := []string{}
-	if fdncfg, err := GetFDNConfig(); err != nil {
-		log.Fatal(err)
-	} else {
-		sep := fdncfg.Separator.Value
-		rpCNS := regexp.MustCompile("[" + sep + "]+")
-		termWordMap := make(map[string]string)
-		for _, twd := range fdncfg.TermWords {
-			termWordMap[twd.OriginalLower] = twd.TargetWord
-		}
-		for idx, wd := range words {
-			if !wordMasks[idx] {
-				for _, sw := range fdncfg.ToSepWords { //replaced by separator
-					wd = strings.Replace(wd, sw.Value, sep, -1)
-				}
+	for idx, wd := range words {
+		if !wordMasks[idx] {
+			for _, sw := range toSepWords { //replaced by separator
+				wd = strings.Replace(wd, sw.Value, _sep, -1)
 			}
-			newWords = append(newWords, wd)
 		}
-		outName = strings.Join(newWords, "")
-		//Process continous separator
-		outName = rpCNS.ReplaceAllString(outName, sep)
-		//
-		newWords = []string{}
-		words := strings.Split(outName, sep)
-		for _, wd := range words {
-			if v, exist := termWordMap[wd]; exist {
-				wd = v
-			}
-			newWords = append(newWords, wd)
-		}
-		outName = strings.Join(newWords, sep)
+		newWords = append(newWords, wd)
 	}
+	outName = strings.Join(newWords, "")
+	//Process continous separator
+	outName = rpCNS.ReplaceAllString(outName, _sep)
+	//
+	newWords = []string{}
+
+	for _, wd := range strings.Split(outName, _sep) {
+		if v, exist := termWordMap[wd]; exist {
+			wd = v
+		}
+		newWords = append(newWords, wd)
+	}
+	outName = strings.Join(newWords, _sep)
+	// }
 
 	return outName
 }
@@ -709,12 +448,16 @@ func ReplaceWordsDB(inputName string) string {
 // ProcessHeadTail process head and tail of input string
 func ProcessHeadTail(inputName string) string {
 	outName := inputName
-	fdncfg, err := GetFDNConfig()
-	if err != nil {
-		log.Fatal(err)
+
+	var sep db.Separator
+	_db := db.ConnectRDDB()
+	rlt := _db.First(&sep)
+	if rlt.Error != nil {
+		log.Fatalf("retrieve Separator error %s", rlt.Error)
 	}
-	sep := fdncfg.Separator.Value
-	rpHTSeps := regexp.MustCompile("^" + sep + "+" + "|" + sep + "+" + "$")
+	_sep := sep.Value
+
+	rpHTSeps := regexp.MustCompile("^" + _sep + "+" + "|" + _sep + "+" + "$")
 	//Process Head and Tail Sepatrators
 	outName = rpHTSeps.ReplaceAllString(outName, "")
 
@@ -752,12 +495,6 @@ func ASCHead(inputName string) string {
 	return ascH + outName
 }
 
-// KeyHash create hash from key and return string
-// func KeyHash(key string) string {
-// 	data := []byte(key)
-// 	return fmt.Sprintf("%x", md5.Sum(data))
-// }
-
 // ArrayContainsElemenet check element e if exist in array s
 func ArrayContainsElemenet[T comparable](s []T, e T) bool {
 	for _, v := range s {
@@ -771,20 +508,12 @@ func ArrayContainsElemenet[T comparable](s []T, e T) bool {
 // FDNFile fdn a file
 func FDNFile(currentPath string, toBePath string, reserve bool) error {
 	if !reserve {
-		fdnrd, err := GetFDNRecord()
-		if err != nil {
-			log.Error(err)
-			return err
-		}
-		fdnrd.Records = append(fdnrd.Records, &pb.Record{
+		rd := db.Record{
 			PreviousName:    filepath.Base(currentPath),
 			CurrentNameHash: utils.KeyHash(filepath.Base(toBePath)),
-			LastUpdated:     timestamppb.Now()})
-		err = SaveFDNRecord(fdnrd)
-		if err != nil {
-			log.Error(err)
-			return err
 		}
+		_db := db.ConnectRDDB()
+		_db.Create(&rd)
 	}
 	if err := os.Rename(currentPath, toBePath); err != nil {
 		log.Error(err)

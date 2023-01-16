@@ -13,7 +13,7 @@ import (
 type TermWord struct {
 	KeyHash       string
 	OriginalLower string
-	Value         string
+	TargetWord    string
 }
 
 // ToSepWord will be change to separator
