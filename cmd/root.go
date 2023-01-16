@@ -360,7 +360,7 @@ func ReplaceWords(inputName string) string {
 		words := []string{}
 		wdmsk := []bool{}
 		var termWords []db.TermWord
-		_db := db.ConnectRDDB()
+		_db := db.ConnectCFGDB()
 		rlt := _db.Find(&termWords)
 		if rlt.Error != nil {
 			log.Fatalf("retrive TermWord error %s", rlt.Error)
@@ -399,7 +399,7 @@ func ReplaceWords(inputName string) string {
 	var sep db.Separator
 	var termWords []db.TermWord
 	var toSepWords []db.ToSepWord
-	_db := db.ConnectRDDB()
+	_db := db.ConnectCFGDB()
 	rlt := _db.First(&sep)
 	if rlt.Error != nil {
 		log.Fatalf("retrieve Separator error %s", rlt.Error)
@@ -450,7 +450,7 @@ func ProcessHeadTail(inputName string) string {
 	outName := inputName
 
 	var sep db.Separator
-	_db := db.ConnectRDDB()
+	_db := db.ConnectCFGDB()
 	rlt := _db.First(&sep)
 	if rlt.Error != nil {
 		log.Fatalf("retrieve Separator error %s", rlt.Error)

@@ -57,7 +57,7 @@ var configCmd = &cobra.Command{
 		var sep db.Separator
 		var termWords []db.TermWord
 		var toSepWords []db.ToSepWord
-		_db := db.ConnectRDDB()
+		_db := db.ConnectCFGDB()
 		rlt := _db.First(&sep)
 		if rlt.Error != nil {
 			log.Fatalf("retrieve Separator error %s", rlt.Error)
