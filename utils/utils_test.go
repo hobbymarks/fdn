@@ -22,3 +22,38 @@ func TestOpenDB_LegalPath(t *testing.T) {
 	}
 	os.Remove(dp)
 }
+
+func TestPathMaker(t *testing.T) {
+	_f := PathMaker("f")
+	if !PathExist(_f) {
+		t.Errorf("'f' error:%s", _f)
+	} else {
+		t.Logf("%s", _f)
+		os.RemoveAll(_f)
+	}
+	_d := PathMaker("d")
+	if !PathExist(_d) {
+		t.Errorf("'d' error:%s", _d)
+	} else {
+		t.Logf("%s", _d)
+		os.RemoveAll(_d)
+	}
+}
+
+func TestExt(t *testing.T) {
+	_f := PathMaker("f")
+	if _ext := Ext(_f); _ext == "" {
+		t.Errorf("ext '%s' error:%s", _f, _ext)
+	} else {
+		t.Logf("file '%s' ext:%s", _f, _ext)
+		os.RemoveAll(_f)
+	}
+
+	_d := PathMaker("d")
+	if _ext := Ext(_d); _ext != "" {
+		t.Errorf("ext '%s' error:%s", _d, _ext)
+	} else {
+		t.Logf("dir '%s' ext:%s", _d, _ext)
+		os.RemoveAll(_d)
+	}
+}

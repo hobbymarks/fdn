@@ -103,3 +103,43 @@ func FDNDir() string {
 	}
 	return fdnDir
 }
+
+// PathMaker make path with random string
+func PathMaker(_type string) string {
+	var path string
+
+	// defer os.RemoveAll(filepath.Dir(_f.Name()))
+
+	if _type == "f" {
+		_f, err := os.CreateTemp("", "fdn"+RandEnAlphDigit(18)+".*")
+		if err != nil {
+			log.Fatal(err)
+		}
+		path = _f.Name()
+	}
+	if _type == "d" {
+		_f, err := os.MkdirTemp("", "fdn"+RandEnAlphDigit(32))
+		if err != nil {
+			log.Fatal(err)
+		}
+		path = _f
+	}
+	return path
+}
+
+// Ext retrieve path extension if directory or error return empty string
+func Ext(path string) string {
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		log.Error(err)
+		return ""
+	}
+	if fileInfo.IsDir() {
+		return ""
+	} else if fileInfo.Mode().IsRegular() {
+		return filepath.Ext(path)
+	} else {
+		log.Trace("skipped:", path)
+		return ""
+	}
+}
