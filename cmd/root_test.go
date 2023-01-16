@@ -1,29 +1,8 @@
 package cmd
 
 import (
-	"os"
 	"testing"
-
-	log "github.com/sirupsen/logrus"
 )
-
-func pathMaker(_type string) string {
-	var f *os.File
-	if _type == "d" {
-
-	}
-	if _type == "f" {
-		_f, err := os.CreateTemp("", "rd*.db")
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer os.Remove(_f.Name())
-
-		f = _f
-
-	}
-	return f.Name()
-}
 
 func TestRetrievedAbsPaths(t *testing.T) {
 	rlt, err := RetrievedAbsPaths(
