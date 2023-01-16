@@ -9,15 +9,10 @@ import (
 	"os"
 	"strings"
 
-	//Only for comment
-	_ "embed"
-
+	"github.com/hobbymarks/fdn/db"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
-
-//go:embed fdncfg
-var configData []byte
 
 // configCmd represents the config command
 var configCmd = &cobra.Command{
@@ -58,16 +53,31 @@ var configCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		fdncfg, err := GetFDNConfig()
-		if err != nil {
-			log.Fatal(err)
+
+		var sep db.Separator
+		var termWords []db.TermWord
+		var toSepWords []db.ToSepWord
+		_db := db.ConnectRDDB()
+		rlt := _db.First(&sep)
+		if rlt.Error != nil {
+			log.Fatalf("retrieve Separator error %s", rlt.Error)
 		}
+
+		rlt = _db.Find(&termWords)
+		if rlt.Error != nil {
+			log.Fatalf("retrieve TermWord error %s", rlt.Error)
+		}
+		rlt = _db.Find(&toSepWords)
+		if rlt.Error != nil {
+			log.Fatalf("retrieve ToSepWord error %s", rlt.Error)
+		}
+
 		log.Trace(lst)
 		if lst == "sep" || lst == "separator" {
-			fmt.Println(fdncfg.Separator)
+			fmt.Println(sep)
 		} else if lst == "twl" || lst == "termkey_colon_termword_list" {
 			kvs := map[string]string{}
-			for _, tw := range fdncfg.TermWords {
+			for _, tw := range termWords {
 				kvs[tw.KeyHash] = tw.OriginalLower + ":" + tw.TargetWord
 			}
 			fmt.Println("TermWords:")
@@ -76,7 +86,7 @@ var configCmd = &cobra.Command{
 			}
 		} else if lst == "swl" || lst == "to_separator_word_list" {
 			sws := map[string]string{}
-			for _, sw := range fdncfg.ToSepWords {
+			for _, sw := range toSepWords {
 				sws[sw.KeyHash] = sw.Value
 			}
 			fmt.Println("ToBeSepWords:")
