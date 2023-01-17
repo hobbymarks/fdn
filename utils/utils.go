@@ -1,4 +1,7 @@
-package utils
+/*
+Package utils
+Copyright © 2022 hobbymarks ihobbymarks@gmail.com
+*/package utils
 
 import (
 	"crypto/aes"
