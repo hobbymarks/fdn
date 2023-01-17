@@ -57,3 +57,17 @@ func TestExt(t *testing.T) {
 		os.RemoveAll(_d)
 	}
 }
+
+func TestEncryDecry(t *testing.T) {
+	key := ".......|.......|.......|.......|.......|.......|"
+	plainText := ".... simple plain ...."
+
+	_encry := Encrypt(key, plainText)
+	_decry := Decrypt(key, _encry)
+
+	if _decry != plainText {
+		t.Errorf("%s not equal %s", _decry, plainText)
+	} else {
+		t.Logf("\ndecrypted==>%s\nplaintext==>%s", _decry, plainText)
+	}
+}
