@@ -367,13 +367,13 @@ find.*
 
 ::
 
-   $ fdfind -HIi html -X fdn
+   $ fdfind -HIi html -x fdn -p {}
       $0▯▯测试用文件.html
    -->$0_测试用文件.html
    ********************************************************************
    In order to take effect,add option '-i' or '-c'
 
-   $ fdfind -HIi html -X fdn {} -pf
+   $ fdfind -HIi html -x fdn -pf {}
       tgt_root/$0▯▯测试用文件.html
    -->tgt_root/$0 _测试用文件.html
    ********************************************************************
