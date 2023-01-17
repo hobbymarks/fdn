@@ -1,3 +1,7 @@
+/*
+Package db fdn cfg test
+Copyright © 2022 hobbymarks ihobbymarks@gmail.com
+*/
 package db
 
 import (

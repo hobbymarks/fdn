@@ -1,3 +1,7 @@
+/*
+Package cmd root test
+Copyright © 2022 hobbymarks ihobbymarks@gmail.com
+*/
 package cmd
 
 import (
