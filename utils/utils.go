@@ -1,7 +1,11 @@
 package utils
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
 	"crypto/md5"
+	"crypto/sha256"
+	"encoding/base64"
 	"fmt"
 	"math/rand"
 	"os"
@@ -27,6 +31,14 @@ func OpenDB(path string) *gorm.DB {
 func KeyHash(key string) string {
 	data := []byte(key)
 	return fmt.Sprintf("%x", md5.Sum(data))
+}
+
+// HashTo32B hash input to 32 bytes and return
+func HashTo32B(key string) []byte {
+	h := sha256.New()
+	h.Write([]byte(key))
+	bs := h.Sum(nil)
+	return bs
 }
 
 // RandEnAlphDigitShiftDigit return rand string with length is n
@@ -142,4 +154,63 @@ func Ext(path string) string {
 		log.Trace("skipped:", path)
 		return ""
 	}
+}
+
+var iv = []byte{
+	97,
+	70,
+	68,
+	78,
+	105,
+	110,
+	116,
+	101,
+	114,
+	110,
+	97,
+	108,
+	117,
+	115,
+	101,
+	100,
+} /*aFDNinternalused*/
+
+// EncodeBase64 encode bytes with base64 to string
+func EncodeBase64(b []byte) string {
+	return base64.StdEncoding.EncodeToString(b)
+}
+
+// DecodeBase64 decode string with base64 to bytes
+func DecodeBase64(s string) []byte {
+	data, err := base64.StdEncoding.DecodeString(s)
+	if err != nil {
+		panic(err)
+	}
+	return data
+}
+
+// Encrypt encrypt text with key return string
+func Encrypt(key, text string) string {
+	block, err := aes.NewCipher(HashTo32B(key))
+	if err != nil {
+		panic(err)
+	}
+	plaintext := []byte(text)
+	cfb := cipher.NewCFBEncrypter(block, iv)
+	ciphertext := make([]byte, len(plaintext))
+	cfb.XORKeyStream(ciphertext, plaintext)
+	return EncodeBase64(ciphertext)
+}
+
+// Decrypt decrypt text with key return string
+func Decrypt(key, text string) string {
+	block, err := aes.NewCipher(HashTo32B(key))
+	if err != nil {
+		panic(err)
+	}
+	ciphertext := DecodeBase64(text)
+	cfb := cipher.NewCFBDecrypter(block, iv)
+	plaintext := make([]byte, len(ciphertext))
+	cfb.XORKeyStream(plaintext, ciphertext)
+	return string(plaintext)
 }
