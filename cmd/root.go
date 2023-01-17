@@ -52,18 +52,18 @@ var FDNRecordPath string
 var rootCmd = &cobra.Command{
 	Use:     "fdn",
 	Version: version,
-	Short:   "A Tool For Unify File Names",
+	Short:   "A Tool For Unify File Name",
 	Long:    ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		PrintTipFlag := false
-		curNameHashEncryPreNameMap := map[string]string{}
+		curHashEncryptedPre := map[string]string{}
 		if reverse {
 			var rds []db.Record
 			_db := db.ConnectRDDB()
 			_db.Find(&rds)
 
 			for _, rd := range rds {
-				curNameHashEncryPreNameMap[rd.CurrentNameHash] = rd.EncryptedPreName
+				curHashEncryptedPre[rd.HashedCurrentName] = rd.EncryptedPreviousName
 			}
 		}
 		paths, err := RetrievedAbsPaths(inputPaths, depthLevel, onlyDirectory)
@@ -80,9 +80,9 @@ var rootCmd = &cobra.Command{
 			toPath := ""
 			if reverse {
 				curName := filepath.Base(path)
-				encryPreName, exist := curNameHashEncryPreNameMap[utils.KeyHash(curName)]
+				encryptedPre, exist := curHashEncryptedPre[utils.KeyHash(curName)]
 				if exist {
-					preName := utils.Decrypt(curName, encryPreName)
+					preName := utils.Decrypt(curName, encryptedPre)
 					toPath = filepath.Join(filepath.Dir(path), preName)
 				}
 			} else {
@@ -133,7 +133,8 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().
-		BoolVarP(&onlyDirectory, "directory", "d", false, "If enable,directory only.Default file")
+		BoolVarP(&onlyDirectory, "directory", "d", false,
+			"If enable,directory only.Default regular file only")
 	rootCmd.Flags().IntVarP(&depthLevel, "level", "l", 1, "Maxdepth level")
 	rootCmd.Flags().
 		StringArrayVarP(&inputPaths, "path", "p", []string{"."}, "Input paths")
@@ -233,7 +234,8 @@ func FilteredSubPaths(
 				if (onlyDir && info.IsDir()) ||
 					(!onlyDir && info.Type().IsRegular()) {
 					log.Trace("isDir:", path)
-					if absPath, err := filepath.Abs(filepath.Join(dirPath, path)); err != nil {
+					absPath, err := filepath.Abs(filepath.Join(dirPath, path))
+					if err != nil {
 						log.Error(err)
 					} else {
 						absolutePaths = append(absolutePaths, absPath)
@@ -282,14 +284,16 @@ func DepthFiles(
 		return nil, err
 	}
 	for _, file := range files {
-		if absPath, err := filepath.Abs(filepath.Join(dirPath, file.Name())); err != nil {
+		absPath, err := filepath.Abs(filepath.Join(dirPath, file.Name()))
+		if err != nil {
 			log.Error(err)
 		} else {
 			if (onlyDir && file.IsDir()) || (!onlyDir && file.Type().IsRegular()) {
 				absolutePaths = append(absolutePaths, absPath)
 			}
 			if depthLevel > 1 && file.Type().IsDir() {
-				if files, err := DepthFiles(absPath, depthLevel-1, onlyDir); err != nil {
+				files, err := DepthFiles(absPath, depthLevel-1, onlyDir)
+				if err != nil {
 					log.Error(err)
 				} else {
 					absolutePaths = append(absolutePaths, files...)
@@ -519,11 +523,11 @@ func FDNFile(currentPath string, toBePath string, reserve bool) error {
 	if !reserve {
 		toName := filepath.Base(toBePath)
 		rd := db.Record{
-			EncryptedPreName: utils.Encrypt(
+			EncryptedPreviousName: utils.Encrypt(
 				toName,
 				filepath.Base(currentPath),
 			),
-			CurrentNameHash: utils.KeyHash(filepath.Base(toBePath)),
+			HashedCurrentName: utils.KeyHash(filepath.Base(toBePath)),
 		}
 		_db := db.ConnectRDDB()
 		_db.Create(&rd)

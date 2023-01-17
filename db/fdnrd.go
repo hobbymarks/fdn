@@ -12,8 +12,8 @@ import (
 // Record a filename changed record
 type Record struct {
 	gorm.Model
-	EncryptedPreName string `gorm:"unique"`
-	CurrentNameHash  string
+	EncryptedPreviousName string `gorm:"unique"`
+	HashedCurrentName     string
 }
 
 // ConnectRDDB connect config database
@@ -22,9 +22,7 @@ func ConnectRDDB(path ...string) *gorm.DB {
 
 	// len(paths)!=0
 	if len(path) != 0 && utils.PathExist(path[0]) {
-		// db := utils.OpenDB(path[0])
 		dbPath = path[0]
-		// return db
 	}
 	// len(paths)==0
 	if len(path) == 0 {
