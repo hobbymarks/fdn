@@ -317,6 +317,7 @@ func ConfigTermWords(keyValueMap map[string]string) error {
 			TargetWord:    value,
 		}
 		_db.Create(&termWord)
+		//FIXME:check if exist then ...
 	}
 	return nil
 }
@@ -340,6 +341,7 @@ func ConfigToSepWords(words []string) error {
 		_key := utils.KeyHash(key)
 		toSepWord := db.ToSepWord{KeyHash: _key, Value: key}
 		_db.Create(&toSepWord)
+		//FIXME:check if exist then ...
 	}
 	return nil
 }
@@ -361,6 +363,7 @@ func ConfigSeparator(separator string) error {
 	defer utils.DBClose(_db)
 	_sep := db.Separator{KeyHash: utils.KeyHash(separator), Value: separator}
 	_db.Create(&_sep)
+	//FIXME:check if exist then ...
 	return nil
 }
 
@@ -541,6 +544,7 @@ func FDNFile(currentPath string, toBePath string, reserve bool) error {
 		_db := db.ConnectRDDB()
 		defer utils.DBClose(_db)
 		_db.Create(&rd)
+		//FIXME:check if exist then ...
 	}
 	if err := os.Rename(currentPath, toBePath); err != nil {
 		log.Error(err)
