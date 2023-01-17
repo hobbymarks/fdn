@@ -56,14 +56,14 @@ var rootCmd = &cobra.Command{
 	Long:    ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		PrintTipFlag := false
-		curNameHashPreNameMap := map[string]string{}
+		curNameHashEncryPreNameMap := map[string]string{}
 		if reverse {
 			var rds []db.Record
 			_db := db.ConnectRDDB()
 			_db.Find(&rds)
 
 			for _, rd := range rds {
-				curNameHashPreNameMap[rd.CurrentNameHash] = rd.PreviousName
+				curNameHashEncryPreNameMap[rd.CurrentNameHash] = rd.EncryptedPreName
 			}
 		}
 		paths, err := RetrievedAbsPaths(inputPaths, depthLevel, onlyDirectory)
@@ -79,8 +79,10 @@ var rootCmd = &cobra.Command{
 			path = filepath.Clean(path) //remove tailing slash if exist
 			toPath := ""
 			if reverse {
-				preName, exist := curNameHashPreNameMap[utils.KeyHash(filepath.Base(path))]
+				curName := filepath.Base(path)
+				encryPreName, exist := curNameHashEncryPreNameMap[utils.KeyHash(curName)]
 				if exist {
+					preName := utils.Decrypt(curName, encryPreName)
 					toPath = filepath.Join(filepath.Dir(path), preName)
 				}
 			} else {
@@ -515,8 +517,12 @@ func ArrayContainsElemenet[T comparable](s []T, e T) bool {
 // FDNFile fdn a file
 func FDNFile(currentPath string, toBePath string, reserve bool) error {
 	if !reserve {
+		toName := filepath.Base(toBePath)
 		rd := db.Record{
-			PreviousName:    filepath.Base(currentPath),
+			EncryptedPreName: utils.Encrypt(
+				toName,
+				filepath.Base(currentPath),
+			),
 			CurrentNameHash: utils.KeyHash(filepath.Base(toBePath)),
 		}
 		_db := db.ConnectRDDB()

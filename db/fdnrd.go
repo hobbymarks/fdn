@@ -12,8 +12,8 @@ import (
 // Record a filename changed record
 type Record struct {
 	gorm.Model
-	PreviousName    string `gorm:"unique"`
-	CurrentNameHash string
+	EncryptedPreName string `gorm:"unique"`
+	CurrentNameHash  string
 }
 
 // ConnectRDDB connect config database
