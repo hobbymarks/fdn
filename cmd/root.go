@@ -60,6 +60,7 @@ var rootCmd = &cobra.Command{
 		if reverse {
 			var rds []db.Record
 			_db := db.ConnectRDDB()
+			defer utils.DBClose(_db)
 			_db.Find(&rds)
 
 			for _, rd := range rds {
@@ -307,6 +308,7 @@ func DepthFiles(
 // ConfigTermWords to config term words
 func ConfigTermWords(keyValueMap map[string]string) error {
 	_db := db.ConnectCFGDB()
+	defer utils.DBClose(_db)
 	for key, value := range keyValueMap {
 		_key := strings.ToLower(key)
 		termWord := db.TermWord{
@@ -322,6 +324,7 @@ func ConfigTermWords(keyValueMap map[string]string) error {
 // DeleteTermWords delete term words in config file
 func DeleteTermWords(keys []string) error {
 	_db := db.ConnectCFGDB()
+	defer utils.DBClose(_db)
 	for _, key := range keys {
 		_key := utils.KeyHash(key)
 		_db.Delete(&db.TermWord{}, _key)
@@ -332,6 +335,7 @@ func DeleteTermWords(keys []string) error {
 // ConfigToSepWords config tosep words in config file
 func ConfigToSepWords(words []string) error {
 	_db := db.ConnectCFGDB()
+	defer utils.DBClose(_db)
 	for _, key := range words {
 		_key := utils.KeyHash(key)
 		toSepWord := db.ToSepWord{KeyHash: _key, Value: key}
@@ -343,6 +347,7 @@ func ConfigToSepWords(words []string) error {
 // DeleteToSepWords delete tosep words in config file
 func DeleteToSepWords(keys []string) error {
 	_db := db.ConnectCFGDB()
+	defer utils.DBClose(_db)
 	for _, key := range keys {
 		_key := utils.KeyHash(key)
 		_db.Delete(&db.ToSepWord{}, _key)
@@ -353,6 +358,7 @@ func DeleteToSepWords(keys []string) error {
 // ConfigSeparator config separator in config file
 func ConfigSeparator(separator string) error {
 	_db := db.ConnectCFGDB()
+	defer utils.DBClose(_db)
 	_sep := db.Separator{KeyHash: utils.KeyHash(separator), Value: separator}
 	_db.Create(&_sep)
 	return nil
@@ -374,6 +380,7 @@ func ReplaceWords(inputName string) string {
 		wdmsk := []bool{}
 		var termWords []db.TermWord
 		_db := db.ConnectCFGDB()
+		defer utils.DBClose(_db)
 		rlt := _db.Find(&termWords)
 		if rlt.Error != nil {
 			log.Fatalf("retrive TermWord error %s", rlt.Error)
@@ -413,6 +420,7 @@ func ReplaceWords(inputName string) string {
 	var termWords []db.TermWord
 	var toSepWords []db.ToSepWord
 	_db := db.ConnectCFGDB()
+	defer utils.DBClose(_db)
 	rlt := _db.First(&sep)
 	if rlt.Error != nil {
 		log.Fatalf("retrieve Separator error %s", rlt.Error)
@@ -464,6 +472,7 @@ func ProcessHeadTail(inputName string) string {
 
 	var sep db.Separator
 	_db := db.ConnectCFGDB()
+	defer utils.DBClose(_db)
 	rlt := _db.First(&sep)
 	if rlt.Error != nil {
 		log.Fatalf("retrieve Separator error %s", rlt.Error)
@@ -530,6 +539,7 @@ func FDNFile(currentPath string, toBePath string, reserve bool) error {
 			HashedCurrentName: utils.KeyHash(filepath.Base(toBePath)),
 		}
 		_db := db.ConnectRDDB()
+		defer utils.DBClose(_db)
 		_db.Create(&rd)
 	}
 	if err := os.Rename(currentPath, toBePath); err != nil {

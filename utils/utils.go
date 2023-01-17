@@ -214,3 +214,15 @@ func Decrypt(key, text string) string {
 	cfb.XORKeyStream(plaintext, ciphertext)
 	return string(plaintext)
 }
+
+// DBClose close the gorm.DB via sqlDB
+func DBClose(db *gorm.DB) {
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = sqlDB.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+}
