@@ -1,4 +1,5 @@
 /*
+Package main
 Copyright © 2022 hobbymarks ihobbymarks@gmail.com
 */
 package main
