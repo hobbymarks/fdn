@@ -42,42 +42,32 @@ To install fdn via
 
 Usage/参数
 ----------
-
-Options:
-
 ::
 
-    Usage: fdn [OPTIONS] [PATH]...
-    
-      Files in PATH will be changed file names unified.
-    
-    Options:
-      -d, --max-depth INTEGER     Set travel directory tree with max
-                                  depth.  [default: 1]
-      -t, --file-type [file|dir]  Set type.If 'file',operations are only
-                                  valid for file,If 'dir',operations are
-                                  only valid for directory.  [default:
-                                  file]
-      -i, --in-place              Changes file name in place.  [default:
-                                  False]
-      -c, --confirm               Need confirmation before change to
-                                  take effect.  [default: False]
-      -l, --is-link               Follow the real path of a link.
-                                  [default: False]
-      -f, --full-path             Show full path of file.Relative to the
-                                  input path.  [default: False]
-      -a, --absolute-path         Show absolute path of file.  [default:
-                                  False]
-      -r, --roll-back             To roll back changed file names.
-                                  [default: False]
-      -o, --overwrite             Overwrite exist files.  [default:
-                                  False]
-      -p, --pretty                Try to pretty output.  [default:
-                                  False]
-      -e, --enhanced-display      Enhanced display output.  [default:
-                                  False]
-      --version                   Show the version and exit.
-      -h, --help                  Show this message and exit.
+Usage:
+ | fdn [flags]
+ | fdn [command]
+
+Available Commands:
+ | completion  Generate the autocompletion script for the specified shell
+ | config      config fdn
+ | help        Help about any command
+
+Flags:
+ | -c, --confirm            Confirm
+ | -d, --directory          If enable,directory only.Default regular file only
+ | -f, --fullpath           FullPath
+ | -h, --help               help for fdn
+ | -i, --inplace            In-place
+ | -l, --level int          Maxdepth level (default 1)
+ | -o, --overwrite          Overwrite
+ | -p, --path stringArray   Input paths (default [.])
+ | -s, --plainstyle         PlainStyle Output
+ | -e, --pretty             Pretty Display
+ | -r, --reverse            Reverse
+ | -v, --version            version for fdn
+
+Use "fdn [command] --help" for more information about a command.
 
 
 **ATTENTION!**
