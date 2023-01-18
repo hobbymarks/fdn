@@ -824,6 +824,7 @@ func OutputResult(
 
 //TODO:doc - multi args how to
 //TODO:support temp words
+//TODO:add option for permanently delete record when count is 0 or soft delete
 //TODO:add dry run for config
 //TODO:remove nosense word
 //TODO:support directory and files
