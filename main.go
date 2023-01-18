@@ -9,8 +9,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Debug debug flag
+var Debug bool = true
+
 func main() {
-	log.SetReportCaller(true)
+	if Debug {
+		log.SetReportCaller(true)
+	} else {
+		log.SetReportCaller(false)
+	}
 	// log.SetLevel(log.TraceLevel)
 
 	cmd.Execute()
