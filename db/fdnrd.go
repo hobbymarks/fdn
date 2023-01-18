@@ -18,6 +18,7 @@ type Record struct {
 	gorm.Model
 	EncryptedPreviousName string `gorm:"unique"`
 	HashedCurrentName     string
+	Count                 int64 `gorm:"default:1"`
 }
 
 // ConnectRDDB connect config database
@@ -39,11 +40,11 @@ func ConnectRDDB(path ...string) *gorm.DB {
 		}
 		dbPath = path[0]
 	}
-	// open db and init
-	db := utils.OpenDB(dbPath)
-	err := db.AutoMigrate(&Record{})
+	// open _db and init
+	_db := utils.OpenDB(dbPath)
+	err := _db.AutoMigrate(&Record{})
 	if err != nil {
 		log.Fatal(err)
 	}
-	return db
+	return _db
 }

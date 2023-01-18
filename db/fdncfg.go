@@ -54,11 +54,11 @@ func ConnectCFGDB(path ...string) *gorm.DB {
 		}
 		dbPath = path[0]
 	}
-	// open db and init
-	db := utils.OpenDB(dbPath)
-	err := db.AutoMigrate(&TermWord{}, &ToSepWord{}, &Separator{})
+	// open _db and init
+	_db := utils.OpenDB(dbPath)
+	err := _db.AutoMigrate(&TermWord{}, &ToSepWord{}, &Separator{})
 	if err != nil {
 		log.Fatal(err)
 	}
-	return db
+	return _db
 }
