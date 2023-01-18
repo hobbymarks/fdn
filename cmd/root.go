@@ -654,7 +654,7 @@ func DeleteRecord(_db *gorm.DB, _rd db.Record) {
 func CheckDoFDN(
 	currentPath string,
 	toBePath string,
-	reserve bool, //FIXME:spell mistake
+	reverse bool,
 	overwrite bool,
 ) error {
 	if utils.PathExist(toBePath) && !overwrite {
