@@ -18,16 +18,22 @@ import (
 	"github.com/glebarez/sqlite"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 // OpenDB only open the db
 func OpenDB(path string) *gorm.DB {
-	db, err := gorm.Open(sqlite.Open(path), &gorm.Config{})
+	_db, err := gorm.Open(
+		sqlite.Open(path),
+		&gorm.Config{
+			Logger: logger.Default.LogMode(logger.Silent),
+		}, //TODO:set by env flag more better
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return db
+	return _db
 }
 
 // KeyHash create hash from key and return string

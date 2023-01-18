@@ -19,11 +19,12 @@ import (
 	"github.com/fatih/color"
 	"github.com/hobbymarks/fdn/db"
 	"github.com/hobbymarks/fdn/utils"
-	"github.com/hobbymarks/go-difflib/difflib"
+	"github.com/hobbymarks/go-difflib/difflib" //TODO:should better
 	"github.com/mattn/go-runewidth"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
+	"gorm.io/gorm"
 )
 
 var version = "0.0.0"
@@ -56,7 +57,7 @@ var rootCmd = &cobra.Command{
 	Long:    ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		PrintTipFlag := false
-		curHashEncryptedPre := map[string]string{}
+		curHashEncryPre := map[string]string{}
 		if reverse {
 			var rds []db.Record
 			_db := db.ConnectRDDB()
@@ -64,7 +65,7 @@ var rootCmd = &cobra.Command{
 			_db.Find(&rds)
 
 			for _, rd := range rds {
-				curHashEncryptedPre[rd.HashedCurrentName] = rd.EncryptedPreviousName
+				curHashEncryPre[rd.HashedCurrentName] = rd.EncryptedPreviousName
 			}
 		}
 		paths, err := RetrievedAbsPaths(inputPaths, depthLevel, onlyDirectory)
@@ -81,7 +82,7 @@ var rootCmd = &cobra.Command{
 			toPath := ""
 			if reverse {
 				curName := filepath.Base(path)
-				encryptedPre, exist := curHashEncryptedPre[utils.KeyHash(curName)]
+				encryptedPre, exist := curHashEncryPre[utils.KeyHash(curName)]
 				if exist {
 					preName := utils.Decrypt(curName, encryptedPre)
 					toPath = filepath.Join(filepath.Dir(path), preName)
@@ -311,13 +312,23 @@ func ConfigTermWords(keyValueMap map[string]string) error {
 	defer utils.DBClose(_db)
 	for key, value := range keyValueMap {
 		_key := strings.ToLower(key)
-		termWord := db.TermWord{
+		_termWord := db.TermWord{
 			KeyHash:       utils.KeyHash(_key),
 			OriginalLower: _key,
 			TargetWord:    value,
 		}
-		_db.Create(&termWord)
-		//FIXME:check if exist then ...
+		var _cnt int64 = 0
+		_db.Model(&db.TermWord{}).
+			Where("key_hash = ?", _termWord.KeyHash).
+			Count(&_cnt)
+		if _cnt == 0 {
+			_rlt := _db.Create(&_termWord)
+			if _rlt.Error != nil {
+				log.Error(_rlt.Error)
+			}
+		} else {
+			log.Warningf("skipped:%s", _termWord.OriginalLower)
+		}
 	}
 	return nil
 }
@@ -328,7 +339,10 @@ func DeleteTermWords(keys []string) error {
 	defer utils.DBClose(_db)
 	for _, key := range keys {
 		_key := utils.KeyHash(key)
-		_db.Delete(&db.TermWord{}, _key)
+		_rlt := _db.Unscoped().Delete(&db.TermWord{}, _key)
+		if _rlt.Error != nil {
+			log.Error(_rlt.Error)
+		}
 	}
 	return nil
 }
@@ -339,9 +353,19 @@ func ConfigToSepWords(words []string) error {
 	defer utils.DBClose(_db)
 	for _, key := range words {
 		_key := utils.KeyHash(key)
-		toSepWord := db.ToSepWord{KeyHash: _key, Value: key}
-		_db.Create(&toSepWord)
-		//FIXME:check if exist then ...
+		_toSepWord := db.ToSepWord{KeyHash: _key, Value: key}
+		var _cnt int64 = 0
+		_db.Model(&db.ToSepWord{}).
+			Where("key_hash = ?", _toSepWord.KeyHash).
+			Count(&_cnt)
+		if _cnt == 0 {
+			_rlt := _db.Create(&_toSepWord)
+			if _rlt.Error != nil {
+				log.Error(_rlt.Error)
+			}
+		} else {
+			log.Warningf("skipped:%s", _toSepWord.Value)
+		}
 	}
 	return nil
 }
@@ -352,7 +376,10 @@ func DeleteToSepWords(keys []string) error {
 	defer utils.DBClose(_db)
 	for _, key := range keys {
 		_key := utils.KeyHash(key)
-		_db.Delete(&db.ToSepWord{}, _key)
+		_rlt := _db.Unscoped().Delete(&db.ToSepWord{}, _key)
+		if _rlt.Error != nil {
+			log.Error(_rlt.Error)
+		}
 	}
 	return nil
 }
@@ -362,8 +389,18 @@ func ConfigSeparator(separator string) error {
 	_db := db.ConnectCFGDB()
 	defer utils.DBClose(_db)
 	_sep := db.Separator{KeyHash: utils.KeyHash(separator), Value: separator}
-	_db.Create(&_sep)
-	//FIXME:check if exist then ...
+	var _cnt int64 = 0
+	_db.Model(&db.Separator{}).
+		Where("key_hash = ?", _sep.KeyHash).
+		Count(&_cnt)
+	if _cnt == 0 {
+		_rlt := _db.Create(&_sep)
+		if _rlt.Error != nil {
+			log.Error(_rlt.Error)
+		}
+	} else {
+		log.Warningf("skipped:%s", _sep.Value)
+	}
 	return nil
 }
 
@@ -532,20 +569,25 @@ func ArrayContainsElemenet[T comparable](s []T, e T) bool {
 
 // FDNFile fdn a file
 func FDNFile(currentPath string, toBePath string, reserve bool) error {
+	_to := filepath.Base(toBePath)
+	_cur := filepath.Base(currentPath)
+
+	_db := db.ConnectRDDB()
+	defer utils.DBClose(_db)
 	if !reserve {
-		toName := filepath.Base(toBePath)
-		rd := db.Record{
-			EncryptedPreviousName: utils.Encrypt(
-				toName,
-				filepath.Base(currentPath),
-			),
-			HashedCurrentName: utils.KeyHash(filepath.Base(toBePath)),
+		_rd := db.Record{
+			EncryptedPreviousName: utils.Encrypt(_to, _cur),
+			HashedCurrentName:     utils.KeyHash(_to),
 		}
-		_db := db.ConnectRDDB()
-		defer utils.DBClose(_db)
-		_db.Create(&rd)
-		//FIXME:check if exist then ...
+		AddRecord(_db, _rd)
+	} else {
+		_rd := db.Record{
+			EncryptedPreviousName: utils.Encrypt(_cur, _to),
+			HashedCurrentName:     utils.KeyHash(_cur),
+		}
+		DeleteRecord(_db, _rd)
 	}
+	//FIXME:update db record and rename should make sure atomic
 	if err := os.Rename(currentPath, toBePath); err != nil {
 		log.Error(err)
 		return err
@@ -553,11 +595,66 @@ func FDNFile(currentPath string, toBePath string, reserve bool) error {
 	return nil
 }
 
+// AddRecord add a record in db
+func AddRecord(_db *gorm.DB, _rd db.Record) {
+	var rd db.Record
+	rlt := _db.First(
+		&rd,
+		"encrypted_previous_name = ? AND hashed_current_name = ?",
+		_rd.EncryptedPreviousName,
+		_rd.HashedCurrentName,
+	)
+	if rlt.Error != nil {
+		if errors.Is(rlt.Error, gorm.ErrRecordNotFound) {
+			_rlt := _db.Create(&_rd)
+			if _rlt.Error != nil {
+				log.Error(_rlt.Error)
+			}
+		} else {
+			log.Fatal(rlt.Error)
+		}
+	} else {
+		rd.Count++
+		_rlt := _db.Save(&rd)
+		if _rlt.Error != nil {
+			log.Error(_rlt.Error)
+		}
+	}
+}
+
+// DeleteRecord delete a record in db
+func DeleteRecord(_db *gorm.DB, _rd db.Record) {
+	var rd db.Record
+	rlt := _db.First(
+		&rd,
+		"encrypted_previous_name = ? AND hashed_current_name = ?",
+		_rd.EncryptedPreviousName,
+		_rd.HashedCurrentName,
+	)
+	if rlt.Error != nil {
+		log.Fatal(rlt.Error)
+	} else {
+		rd.Count--
+		if rd.Count != 0 {
+			_rlt := _db.Save(&rd)
+			if _rlt.Error != nil {
+				log.Error(_rlt.Error)
+			}
+		} else {
+			rd.Count++
+			_rlt := _db.Unscoped().Delete(&rd) //Delete permanently
+			if _rlt.Error != nil {
+				log.Error(_rlt.Error)
+			}
+		}
+	}
+}
+
 // CheckDoFDN check and do fdn
 func CheckDoFDN(
 	currentPath string,
 	toBePath string,
-	reserve bool,
+	reserve bool, //FIXME:spell mistake
 	overwrite bool,
 ) error {
 	if utils.PathExist(toBePath) && !overwrite {
@@ -574,7 +671,7 @@ func CheckDoFDN(
 }
 
 // FNDedFrom from input and return
-func FNDedFrom(input string) string {
+func FNDedFrom(input string) string { //TODO:optimize name
 	output := input
 	output = ReplaceWords(input)
 	output = ProcessHeadTail(output)
