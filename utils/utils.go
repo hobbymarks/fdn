@@ -95,8 +95,10 @@ func PathExist(path string) bool {
 	return true
 }
 
-// DatabaseDir get database directory
-func DatabaseDir() string {
+// DBBaseDir get database base directory path
+// default return home directory,return program executed path if return home
+// directory path failed
+func DBBaseDir() string {
 	homeDir, err := os.UserHomeDir() //get home dir
 	if err != nil {
 		path, err := os.Executable()
@@ -108,10 +110,10 @@ func DatabaseDir() string {
 	return homeDir
 }
 
-// FDNDir get fdn data directory
+// FDNDir get fdn data directory path
 func FDNDir() string {
-	dbDir := DatabaseDir()
-	fdnDir := filepath.Join(dbDir, ".fdn")
+	dbBaseDir := DBBaseDir()
+	fdnDir := filepath.Join(dbBaseDir, ".fdn")
 	_, err := os.Lstat(fdnDir)
 	if err != nil {
 		if os.IsNotExist(err) {
