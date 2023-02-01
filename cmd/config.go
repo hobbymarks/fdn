@@ -1,16 +1,15 @@
 /*
 Package cmd config subcommand
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-*/
-package cmd
+*/package cmd
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
 	"github.com/hobbymarks/fdn/db"
 	"github.com/hobbymarks/fdn/utils"
+	"github.com/jedib0t/go-pretty/v6/table"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -76,25 +75,19 @@ var configCmd = &cobra.Command{
 
 		log.Trace(lst)
 		if lst == "sep" || lst == "separator" {
-			fmt.Println(sep)
+			_KVPrint("Separator", map[string]string{sep.KeyHash: sep.Value})
 		} else if lst == "twl" || lst == "termkey_colon_termword_list" {
 			kvs := map[string]string{}
 			for _, tw := range termWords {
 				kvs[tw.KeyHash] = tw.OriginalLower + ":" + tw.TargetWord
 			}
-			fmt.Println("TermWords:")
-			for k, v := range kvs {
-				fmt.Println(k, v)
-			}
+			_KVPrint("TermWords", kvs)
 		} else if lst == "swl" || lst == "to_separator_word_list" {
 			sws := map[string]string{}
 			for _, sw := range toSepWords {
 				sws[sw.KeyHash] = sw.Value
 			}
-			fmt.Println("ToBeSepWords:")
-			for k, v := range sws {
-				fmt.Println(k, v)
-			}
+			_KVPrint("ToBeSepWords", sws)
 		}
 
 		//Process Delete Flag
@@ -134,4 +127,18 @@ func init() {
 	configCmd.Flags().StringP("delete", "d", "", `Delete Config Data
 	termkey_colon_termword_list twl,
 	to_separator_word_list      swl`)
+}
+
+func _KVPrint(title string, kvs map[string]string) {
+	t := table.NewWriter()
+	t.SetAutoIndex(true)
+	t.SetOutputMirror(os.Stdout)
+	t.SetTitle(title)
+	t.AppendHeader(table.Row{"KeyID", "Value"})
+	for k, v := range kvs {
+		t.AppendRow(table.Row{k, v})
+	}
+	t.AppendSeparator()
+	t.SetStyle(table.StyleLight)
+	t.Render()
 }
