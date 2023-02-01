@@ -3,6 +3,7 @@ module github.com/hobbymarks/fdn
 go 1.19
 
 require (
+	github.com/jedib0t/go-pretty/v6 v6.4.4
 	github.com/spf13/cobra v1.6.1
 	gorm.io/gorm v1.24.3
 )
