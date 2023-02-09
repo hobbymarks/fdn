@@ -351,9 +351,9 @@ func DeleteTermWords(keys []string) error {
 func ConfigToSepWords(words []string) error {
 	_db := db.ConnectCFGDB()
 	defer utils.DBClose(_db)
-	for _, key := range words {
-		_key := utils.KeyHash(key)
-		_toSepWord := db.ToSepWord{KeyHash: _key, Value: key}
+	for _, word := range words {
+		_key := utils.KeyHash(word)
+		_toSepWord := db.ToSepWord{KeyHash: _key, Value: word}
 		var _cnt int64 = 0
 		_db.Model(&db.ToSepWord{}).
 			Where("key_hash = ?", _toSepWord.KeyHash).
@@ -657,7 +657,8 @@ func CheckDoFDN(
 	reverse bool,
 	overwrite bool,
 ) error {
-	if utils.PathExist(toBePath) && !overwrite {
+	if utils.PathExist(toBePath) &&
+		!overwrite { //TODO:add hash check if different then rename
 		fmt.Println("[EXIST]Skip:", toBePath)
 		fmt.Println("You can add 'overwrite' or 'o' flag to force do")
 	} else {
