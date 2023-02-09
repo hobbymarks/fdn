@@ -139,6 +139,6 @@ func _KVPrint(title string, kvs map[string]string) {
 		t.AppendRow(table.Row{k, v})
 	}
 	t.AppendSeparator()
-	t.SetStyle(table.StyleLight)
+	// t.SetStyle(table.StyleLight)
 	t.Render()
 }
