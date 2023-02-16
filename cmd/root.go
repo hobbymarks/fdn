@@ -657,10 +657,32 @@ func CheckDoFDN(
 	reverse bool,
 	overwrite bool,
 ) error {
-	if utils.PathExist(toBePath) &&
-		!overwrite { //TODO:add hash check if different then rename
-		fmt.Println("[EXIST]Skip:", toBePath)
-		fmt.Println("You can add 'overwrite' or 'o' flag to force do")
+	if utils.PathExist(toBePath) {
+		if overwrite {
+			if err := FDNFile(currentPath, toBePath, reverse); err != nil {
+				log.Error(err)
+				return err
+			}
+			OutputResult(currentPath, toBePath, true, fullpath)
+		} else {
+			same, err := utils.IsSameFile(currentPath, toBePath)
+			if err != nil {
+				fmt.Println("[ERROR]Skip:", toBePath)
+				fmt.Println("You can add 'overwrite' or 'o' flag to force do")
+			} else {
+				if same {
+					if err := FDNFile(currentPath, toBePath, reverse); err != nil {
+						log.Error(err)
+						return err
+					}
+					OutputResult(currentPath, toBePath, true, fullpath)
+				} else {
+					fmt.Println("[EXIST]Skip:", toBePath)
+					fmt.Println("You can add 'overwrite' or 'o' flag to force do")
+				}
+			}
+		}
+
 	} else {
 		if err := FDNFile(currentPath, toBePath, reverse); err != nil {
 			log.Error(err)
