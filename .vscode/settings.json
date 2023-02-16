@@ -7,7 +7,7 @@
   "editor.language.brackets": [],
   "editor.rulers": [79, 80, 90, 100],
   "editor.fontFamily": "Fira Mono for Powerline",
-  "editor.fontSize": 14,
+  "editor.fontSize": 13,
   "editor.fontLigatures": true,
   "editor.bracketPairColorization.enabled": true,
   "editor.matchBrackets": "always",

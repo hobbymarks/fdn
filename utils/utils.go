@@ -9,10 +9,13 @@ import (
 	"crypto/md5"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
+	"io"
 	"math/rand"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/glebarez/sqlite"
@@ -236,4 +239,40 @@ func DBClose(db *gorm.DB) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+// FileMD5 return file content md5 checksum
+func FileMD5(filePath string) (string, error) {
+	var md5s string
+
+	file, err := os.Open(filePath)
+	if err != nil {
+		return md5s, err
+	}
+	defer file.Close()
+
+	hash := md5.New()
+	if _, err := io.Copy(hash, file); err != nil {
+		return md5s, err
+	}
+	hashInBytes := hash.Sum(nil)[:16]
+	md5s = hex.EncodeToString(hashInBytes)
+
+	return md5s, nil
+}
+
+// IsSameFile if same true others return false
+func IsSameFile(firstPath string, secondPath string) (bool, error) {
+	fHash, err := FileMD5(firstPath)
+	if err != nil {
+		return false, err
+	}
+	sHash, err := FileMD5(secondPath)
+	if err != nil {
+		return false, err
+	}
+	if strings.Compare(fHash, sHash) == 0 {
+		return true, nil
+	}
+	return false, nil
 }
