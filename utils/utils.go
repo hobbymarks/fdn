@@ -261,8 +261,8 @@ func FileMD5(filePath string) (string, error) {
 	return md5s, nil
 }
 
-// IsSameFile if same true others return false
-func IsSameFile(firstPath string, secondPath string) (bool, error) {
+// SameFiles if same true others return false
+func SameFiles(firstPath string, secondPath string) (bool, error) {
 	//TODO:multi files comparation
 	fHash, err := FileMD5(firstPath)
 	if err != nil {
