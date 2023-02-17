@@ -19,7 +19,9 @@ import (
 	"github.com/fatih/color"
 	"github.com/hobbymarks/fdn/db"
 	"github.com/hobbymarks/fdn/utils"
-	"github.com/hobbymarks/go-difflib/difflib" //TODO:should better
+
+	//TODO:should better
+	"github.com/hobbymarks/go-difflib/difflib"
 	"github.com/mattn/go-runewidth"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -78,7 +80,8 @@ var rootCmd = &cobra.Command{
 			func(i, j int) bool { return paths[i] > paths[j] },
 		)
 		for _, path := range paths {
-			path = filepath.Clean(path) //remove tailing slash if exist
+			path = filepath.Clean(path)
+			//remove tailing slash if exist
 			toPath := ""
 			if reverse {
 				curName := filepath.Base(path)
@@ -88,7 +91,8 @@ var rootCmd = &cobra.Command{
 					toPath = filepath.Join(filepath.Dir(path), preName)
 				}
 			} else {
-				ext := utils.Ext(path) //ext empty if path is dir
+				ext := utils.Ext(path)
+				//ext empty if path is dir
 				bn := strings.TrimSuffix(filepath.Base(path), ext)
 				if fdned := FNDedFrom(bn); fdned != bn {
 					toPath = filepath.Join(filepath.Dir(path), fdned+ext)
@@ -482,7 +486,8 @@ func ReplaceWords(inputName string) string {
 	}
 	for idx, wd := range words {
 		if !wordMasks[idx] {
-			for _, sw := range toSepWords { //replaced by separator
+			for _, sw := range toSepWords {
+				//replaced by separator
 				wd = strings.Replace(wd, sw.Value, _sep, -1)
 			}
 		}
@@ -642,7 +647,8 @@ func DeleteRecord(_db *gorm.DB, _rd db.Record) {
 			}
 		} else {
 			rd.Count++
-			_rlt := _db.Unscoped().Delete(&rd) //Delete permanently
+			_rlt := _db.Unscoped().Delete(&rd)
+			//Delete permanently
 			if _rlt.Error != nil {
 				log.Error(_rlt.Error)
 			}
@@ -691,7 +697,8 @@ func CheckDoFDN(
 }
 
 // FNDedFrom from input and return
-func FNDedFrom(input string) string { //TODO:optimize name
+func FNDedFrom(input string) string {
+	//TODO:optimize name
 	output := input
 	output = ReplaceWords(input)
 	output = ProcessHeadTail(output)
@@ -768,7 +775,8 @@ func OutputResult(
 			fmt.Println("-->", processed)
 		}
 	} else {
-		origin = strings.Replace(origin, " ", "▯", -1) //for display space
+		origin = strings.Replace(origin, " ", "▯", -1)
+		//for display space
 		processed = strings.Replace(processed, " ", "▯", -1)
 		a := []string{}
 		b := []string{}
@@ -783,7 +791,8 @@ func OutputResult(
 		green := color.New(color.FgGreen).SprintFunc()
 		richOrigin := ""
 		richProcessed := ""
-		sw := runewidth.StringWidth //shortcut
+		sw := runewidth.StringWidth
+		//shortcut
 		for _, opc := range seqm.GetOpCodes() {
 			switch opc.Tag {
 			case 'r':
@@ -815,7 +824,8 @@ func OutputResult(
 					richOrigin += red(as)
 				}
 			case 'i':
-				as := strings.Join(a[opc.I1:opc.I2], "") //empty string
+				as := strings.Join(a[opc.I1:opc.I2], "")
+				//empty string
 				bs := strings.Join(b[opc.J1:opc.J2], "")
 				log.Trace("I:" + as + bs)
 				if pretty {
@@ -833,7 +843,8 @@ func OutputResult(
 				richProcessed += bs
 			}
 		}
-		fmt.Println("   ", richOrigin) //display space
+		fmt.Println("   ", richOrigin)
+		//display space
 		if inplace {
 			fmt.Println("==>", richProcessed)
 		} else {

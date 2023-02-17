@@ -30,7 +30,8 @@ func OpenDB(path string) *gorm.DB {
 		sqlite.Open(path),
 		&gorm.Config{
 			Logger: logger.Default.LogMode(logger.Silent),
-		}, //TODO:set by env flag more better
+		},
+		//TODO:set by env flag more better
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -102,7 +103,8 @@ func PathExist(path string) bool {
 // default return home directory,return program executed path if return home
 // directory path failed
 func DBBaseDir() string {
-	homeDir, err := os.UserHomeDir() //get home dir
+	homeDir, err := os.UserHomeDir()
+	//get home dir
 	if err != nil {
 		path, err := os.Executable()
 		if err != nil {
@@ -261,8 +263,12 @@ func FileMD5(filePath string) (string, error) {
 	return md5s, nil
 }
 
-// SameFiles if same true others return false
-func SameFiles(firstPath string, secondPath string) (bool, error) {
+// SameFiles if same return true,nil others return false,X
+func SameFiles(
+	firstPath string,
+	secondPath string,
+	morePaths ...string,
+) (bool, error) {
 	//TODO:multi files comparation
 	fHash, err := FileMD5(firstPath)
 	if err != nil {
@@ -272,8 +278,27 @@ func SameFiles(firstPath string, secondPath string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if strings.Compare(fHash, sHash) == 0 {
+	if len(morePaths) == 0 {
+		//No more paths
+		if strings.Compare(fHash, sHash) == 0 {
+			return true, nil
+		}
+		return false, nil
+	} else {
+		// At least three paths(firstPath,secondPath,at least a path in
+		// morePaths)
+		if strings.Compare(fHash, sHash) != 0 {
+			return false, nil
+		}
+		for _, path := range morePaths {
+			aHash, err := FileMD5(path)
+			if err != nil {
+				return false, err
+			}
+			if strings.Compare(sHash, aHash) != 0 {
+				return false, nil
+			}
+		}
 		return true, nil
 	}
-	return false, nil
 }
