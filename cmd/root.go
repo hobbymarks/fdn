@@ -665,7 +665,7 @@ func CheckDoFDN(
 			}
 			OutputResult(currentPath, toBePath, true, fullpath)
 		} else {
-			same, err := utils.IsSameFile(currentPath, toBePath)
+			same, err := utils.SameFiles(currentPath, toBePath)
 			if err != nil {
 				fmt.Println("[ERROR]Skip:", currentPath)
 			} else {
