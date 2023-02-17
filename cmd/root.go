@@ -667,8 +667,7 @@ func CheckDoFDN(
 		} else {
 			same, err := utils.IsSameFile(currentPath, toBePath)
 			if err != nil {
-				fmt.Println("[ERROR]Skip:", toBePath)
-				fmt.Println("You can add 'overwrite' or 'o' flag to force do")
+				fmt.Println("[ERROR]Skip:", currentPath)
 			} else {
 				if same {
 					if err := FDNFile(currentPath, toBePath, reverse); err != nil {
@@ -677,12 +676,10 @@ func CheckDoFDN(
 					}
 					OutputResult(currentPath, toBePath, true, fullpath)
 				} else {
-					fmt.Println("[EXIST]Skip:", toBePath)
-					fmt.Println("You can add 'overwrite' or 'o' flag to force do")
+					fmt.Println("[EXIST]Skip:", currentPath)
 				}
 			}
 		}
-
 	} else {
 		if err := FDNFile(currentPath, toBePath, reverse); err != nil {
 			log.Error(err)
