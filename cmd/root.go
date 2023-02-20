@@ -331,7 +331,7 @@ func ConfigTermWords(keyValueMap map[string]string) error {
 				log.Error(_rlt.Error)
 			}
 		} else {
-			log.Warningf("skipped:%s", _termWord.OriginalLower)
+			log.Debugf("skipped:%s", _termWord.OriginalLower)
 		}
 	}
 	return nil
@@ -368,7 +368,7 @@ func ConfigToSepWords(words []string) error {
 				log.Error(_rlt.Error)
 			}
 		} else {
-			log.Warningf("skipped:%s", _toSepWord.Value)
+			log.Debugf("skipped:%s", _toSepWord.Value)
 		}
 	}
 	return nil
@@ -403,7 +403,7 @@ func ConfigSeparator(separator string) error {
 			log.Error(_rlt.Error)
 		}
 	} else {
-		log.Warningf("skipped:%s", _sep.Value)
+		log.Debugf("skipped:%s", _sep.Value)
 	}
 	return nil
 }
