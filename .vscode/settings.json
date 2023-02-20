@@ -12,7 +12,7 @@
   "editor.bracketPairColorization.enabled": true,
   "editor.matchBrackets": "always",
   "terminal.integrated.fontFamily": "Fira Mono for Powerline",
-  "terminal.integrated.fontSize": 14,
+  "terminal.integrated.fontSize": 13,
   "terminal.integrated.cursorStyle": "line",
   "terminal.integrated.cursorBlinking": true,
   "gopls": { "ui.semanticTokens": true },
