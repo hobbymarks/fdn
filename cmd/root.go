@@ -177,7 +177,8 @@ func RetrievedAbsPaths(
 	var absolutePaths []string
 
 	for _, path := range inputPaths {
-		if fileInfo, err := os.Stat(path); err != nil {
+		fileInfo, err := os.Stat(path)
+		if err != nil {
 			log.Error(err)
 			continue
 		} else {
@@ -189,7 +190,8 @@ func RetrievedAbsPaths(
 					absolutePaths = append(absolutePaths, paths...)
 				}
 			} else if !onlyDir && fileInfo.Mode().IsRegular() {
-				if absPath, err := filepath.Abs(path); err != nil {
+				absPath, err := filepath.Abs(path)
+				if err != nil {
 					log.Error(err)
 				} else {
 					absolutePaths = append(absolutePaths, absPath)
@@ -266,7 +268,8 @@ func FilteredSubPaths(
 		absolutePaths = paths
 	}
 	if onlyDir {
-		if absPath, err := filepath.Abs(dirPath); err != nil {
+		absPath, err := filepath.Abs(dirPath)
+		if err != nil {
 			log.Error(err)
 		} else {
 			absolutePaths = append(absolutePaths, absPath)
@@ -294,7 +297,8 @@ func DepthFiles(
 		if err != nil {
 			log.Error(err)
 		} else {
-			if (onlyDir && file.IsDir()) || (!onlyDir && file.Type().IsRegular()) {
+			if (onlyDir && file.IsDir()) ||
+				(!onlyDir && file.Type().IsRegular()) {
 				absolutePaths = append(absolutePaths, absPath)
 			}
 			if depthLevel > 1 && file.Type().IsDir() {
@@ -549,7 +553,9 @@ func ASCHead(inputName string) string {
 		}
 	}
 	if len(sa) >= 1 {
-		if !((unicode.IsDigit(sa[0])) || (unicode.IsLower(sa[0])) || (unicode.IsUpper(sa[0]))) {
+		if !((unicode.IsDigit(sa[0])) ||
+			(unicode.IsLower(sa[0])) ||
+			(unicode.IsUpper(sa[0]))) {
 			uL := 3
 			if len(sa) < 3 {
 				uL = len(sa)
@@ -665,7 +671,8 @@ func CheckDoFDN(
 ) error {
 	if utils.PathExist(toBePath) {
 		if overwrite {
-			if err := FDNFile(currentPath, toBePath, reverse); err != nil {
+			err := FDNFile(currentPath, toBePath, reverse)
+			if err != nil {
 				log.Error(err)
 				return err
 			}
@@ -676,7 +683,8 @@ func CheckDoFDN(
 				fmt.Println("[ERROR]Skip:", currentPath)
 			} else {
 				if same {
-					if err := FDNFile(currentPath, toBePath, reverse); err != nil {
+					err := FDNFile(currentPath, toBePath, reverse)
+					if err != nil {
 						log.Error(err)
 						return err
 					}
@@ -687,7 +695,8 @@ func CheckDoFDN(
 			}
 		}
 	} else {
-		if err := FDNFile(currentPath, toBePath, reverse); err != nil {
+		err := FDNFile(currentPath, toBePath, reverse)
+		if err != nil {
 			log.Error(err)
 			return err
 		}
