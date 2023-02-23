@@ -39,9 +39,10 @@ var confirm bool
 var reverse bool
 var fullpath bool
 var plainStyle bool
-
 var pretty bool
 var overwrite bool
+
+var verbose bool
 
 //go:embed cfg.db
 var defaultCFG embed.FS
@@ -58,6 +59,16 @@ var rootCmd = &cobra.Command{
 	Short:   "A Tool For Unify File Name",
 	Long:    ``,
 	Run: func(cmd *cobra.Command, args []string) {
+		if verbose {
+			debugFormatter := new(log.TextFormatter)
+			debugFormatter.TimestampFormat = "15:04:05.000"
+			debugFormatter.FullTimestamp = true
+			log.SetFormatter(debugFormatter)
+			log.SetLevel(log.InfoLevel)
+		} else {
+			log.SetLevel(log.WarnLevel)
+		}
+		log.Info("rootCmd executing ...")
 		PrintTipFlag := false
 		curHashEncryPre := map[string]string{}
 		if reverse {
@@ -70,7 +81,9 @@ var rootCmd = &cobra.Command{
 				curHashEncryPre[rd.HashedCurrentName] = rd.EncryptedPreviousName
 			}
 		}
+		log.Infof("search paths...")
 		paths, err := RetrievedAbsPaths(inputPaths, depthLevel, onlyDirectory)
+		log.Infof("search paths!")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -79,7 +92,9 @@ var rootCmd = &cobra.Command{
 			paths,
 			func(i, j int) bool { return paths[i] > paths[j] },
 		)
+		log.Info("loopthrough process path...")
 		for _, path := range paths {
+			log.Infof("process...:%s", path)
 			path = filepath.Clean(path)
 			//remove tailing slash if exist
 			toPath := ""
@@ -99,6 +114,7 @@ var rootCmd = &cobra.Command{
 				}
 			}
 			if toPath == "" {
+				log.Infof("process cont!:%s", path)
 				continue
 			}
 			if inplace {
@@ -122,7 +138,9 @@ var rootCmd = &cobra.Command{
 					OutputResult(path, toPath, false, fullpath)
 				}
 			}
+			log.Infof("process!:%s", path)
 		}
+		log.Info("loopthrough process path!")
 		if PrintTipFlag {
 			noEffectTip()
 		}
@@ -152,6 +170,9 @@ func init() {
 		BoolVarP(&plainStyle, "plainstyle", "s", false, "PlainStyle Output")
 	rootCmd.Flags().BoolVarP(&pretty, "pretty", "e", false, "Pretty Display")
 	rootCmd.Flags().BoolVarP(&overwrite, "overwrite", "o", false, "Overwrite")
+
+	rootCmd.Flags().
+		BoolVarP(&verbose, "verbose", "V", false, "Print more verbose information")
 
 	//Process FDNConfig
 	fdnDir := utils.FDNDir()
@@ -862,6 +883,7 @@ func OutputResult(
 	}
 }
 
+//TODO:at bottom add dynamic revolved bar as not dead flag
 //TODO:add mv function
 //TODO:doc - multi args how to
 //TODO:support temp words
