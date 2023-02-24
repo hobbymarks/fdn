@@ -109,7 +109,7 @@ var rootCmd = &cobra.Command{
 				ext := utils.Ext(path)
 				//ext empty if path is dir
 				bn := strings.TrimSuffix(filepath.Base(path), ext)
-				if fdned := FNDedFrom(bn); fdned != bn {
+				if fdned := FDNedFrom(bn); fdned != bn {
 					toPath = filepath.Join(filepath.Dir(path), fdned+ext)
 				}
 			}
@@ -726,8 +726,8 @@ func CheckDoFDN(
 	return nil
 }
 
-// FNDedFrom from input and return
-func FNDedFrom(input string) string {
+// FDNedFrom from input and return
+func FDNedFrom(input string) string {
 	//TODO:optimize name
 	output := input
 	output = ReplaceWords(input)
