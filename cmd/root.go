@@ -885,6 +885,7 @@ func OutputResult(
 
 // TODO:support ignore filename or filepath(add ignores,list ignores,delete
 // ignore,force ignore ignores)
+//TODO:cache not take effect result
 //TODO:at bottom add dynamic revolved bar as not dead flag
 //TODO:add mv function
 //TODO:doc - multi args how to
