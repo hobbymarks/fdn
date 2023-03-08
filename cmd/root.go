@@ -887,7 +887,7 @@ func OutputResult(
 // ignore,force ignore ignores)
 //TODO:cache not take effect result
 //TODO:at bottom add dynamic revolved bar as not dead flag
-//TODO:add mv function
+//TODO:add mv function (support move files)
 //TODO:doc - multi args how to
 //TODO:support temp words
 //TODO:recursive query for change records
