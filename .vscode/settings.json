@@ -1,52 +1,180 @@
 {
-  "editor.autoClosingBrackets": "always",
+  // Language-Specific Settings
+  "[JSON]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[YAML]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.formatOnSave": true
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[go]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    },
+    "editor.formatOnSave": true,
+    "editor.insertSpaces": false
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[javascript]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    },
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[python]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    },
+    "editor.formatOnSave": true,
+    "editor.minimap.enabled": false,
+    "editor.tabSize": 2,
+    "python.analysis.typeCheckingMode": "basic"
+  },
+  "[rust]": {
+    "editor.defaultFormatter": "rust-lang.rust-analyzer",
+    "editor.formatOnSave": true,
+    "rust-analyzer.inlayHints.parameterHints.enable": true,
+    "rust-analyzer.inlayHints.typeHints.enable": true
+  },
+  "[shellscript]": {
+    "editor.defaultFormatter": "foxundermoon.shell-format",
+    "editor.formatOnSave": true
+  },
+  "[typescript]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    },
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2
+  },
+  "editor.accessibilitySupport": "auto",
   "editor.bracketPairColorization.enabled": true,
-  "editor.folding": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  // General Editor Settings
   "editor.fontFamily": "Intel One Mono",
-  "editor.fontLigatures": true,
-  "editor.fontSize": 17,
+  "editor.fontSize": 16,
   "editor.formatOnSave": true,
-  "editor.matchBrackets": "always",
+  "editor.guides.bracketPairs": true,
+  "editor.insertSpaces": true,
+  "editor.lineHeight": 24,
+  "editor.minimap.maxColumn": 120,
+  "editor.minimap.renderCharacters": false,
+  "editor.minimap.size": "proportional",
+  "editor.renderWhitespace": "all",
   "editor.rulers": [
-    100,
+    99,
     102
   ],
+  "editor.stickyScroll.enabled": true,
+  "editor.tabSize": 4,
+  "editor.unicodeHighlight.ambiguousCharacters": true,
+  "editor.unicodeHighlight.nonBasicASCII": true,
   "editor.wordWrap": "wordWrapColumn",
-  "editor.wordWrapColumn": 100,
-  "files.insertFinalNewline": true,
-  "files.trimTrailingWhitespace": true,
-  "rust-analyzer.cargo.buildScripts.overrideCommand": [
-    "cargo",
-    "cranky",
-    "--quiet",
-    "--workspace",
-    "--message-format=json",
-    "--all-targets",
-    "--all-features"
+  "editor.wordWrapColumn": 99,
+  "emeraldwalk.runonsave": {
+    "commands": [
+      {
+        "cmd": "golines ${file} -w",
+        "match": "\\.go$"
+      }
+    ]
+  },
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/.pytest_cache/**": true,
+    "**/.ruff_cache/**": true,
+    "**/build/**": true,
+    "**/dist/**": true,
+    "**/node_modules/*/**": true
+  },
+  // Git Settings
+  "git.autofetch": true,
+  "git.branchProtection": [
+    "main",
+    "master",
+    "release/*"
   ],
-  // Tell Rust Analyzer to use its own target directory, so we don't need to wait for it to finish wen we want to `cargo run`
-  "rust-analyzer.check.overrideCommand": [
-    "cargo",
-    "cranky",
-    "--workspace",
-    "--message-format=json",
-    "--all-targets",
-    "--all-features"
-  ],
+  "git.branchProtectionPrompt": "alwaysCommitToNewBranch",
+  "git.branchRandomName.enable": true,
+  "git.confirmSync": false,
+  "git.mergeEditor": true,
+  "git.pullBeforeCheckout": true,
+  "git.rebaseWhenSync": true,
+  "gopls": {
+    "formatting.gofumpt": true,
+    "ui.diagnostic.staticcheck": true,
+    "ui.semanticTokens": true
+  },
+  // Prettier Settings
+  "prettier.arrowParens": "always",
+  "prettier.bracketSpacing": true,
+  "prettier.printWidth": 99,
+  "prettier.semi": true,
+  "prettier.singleQuote": true,
+  "prettier.trailingComma": "es5",
+  "prettier.useTabs": false,
+  "rust-analyzer.imports.granularity.enforce": true,
   "rust-analyzer.imports.granularity.group": "crate",
   "rust-analyzer.imports.group.enable": true,
   "rust-analyzer.rustfmt.extraArgs": [
     "--config",
-    "max_width=100"
+    "max_width=99"
   ],
-  "rust-analyzer.showUnlinkedFileNotification": false,
+  "rust-analyzer.showUnlinkedFileNotification": true,
+  // Search Exclusions
+  "search.exclude": {
+    "**/.pytest_cache/**": true,
+    "**/.ruff_cache/**": true,
+    "**/__pycache__": true,
+    "**/build": true,
+    "**/coverage": true,
+    "**/dist": true,
+    "**/node_modules": true,
+    "**/out": true,
+    ".vscode test": true,
+    ".vscode-test": true,
+    "languageServer*/**": true
+  },
+  "security.workspace.trust.enabled": true,
+  "telemetry.telemetryLevel": "off",
+  // Terminal Settings
   "terminal.integrated.cursorBlinking": true,
   "terminal.integrated.cursorStyle": "line",
-  "terminal.integrated.fontFamily": "Fira Code Retina",
-  "terminal.integrated.fontSize": 15,
-  "workbench.colorCustomizations": {
-    "editorIndentGuide.activeBackground1": "#ff0000",
-    "editorIndentGuide.background1": "#ff00ff"
-  },
-  "workbench.tree.indent": 17
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.fontFamily": "Intel One Mono",
+  "terminal.integrated.fontSize": 16,
+  "terminal.integrated.shellIntegration.enabled": true,
+  // Workbench Settings
+  "workbench.colorTheme": "Dracula Theme",
+  "workbench.editor.enablePreview": false,
+  "workbench.editor.enablePreviewFromQuickOpen": false,
+  "workbench.editor.limit.enabled": true,
+  "workbench.editor.limit.value": 10,
+  "workbench.editor.showTabs": "multiple",
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.statusBar.visible": true,
+  "workbench.tree.indent": 15
 }
