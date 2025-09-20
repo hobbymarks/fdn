@@ -1,6 +1,6 @@
 [package]
 name = "fdn"
-version = "0.8.5"
+version = "0.8.6"
 edition = "2021"
 authors = ["Marks <ihobbymarks@gmail.com>"]
 description = "A tool for uniformly change file or directory names and support rollback these operations"
@@ -33,4 +33,9 @@ winapi = "0.3.9"
 git2 = "0.20.2"
 
 [dev-dependencies]
+criterion = "0.7.0"
 tempfile = "3.22.0"
+
+[[bench]]
+name = "fdn_benchmark"
+harness = false
