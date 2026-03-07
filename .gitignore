@@ -4,3 +4,6 @@ prof/
 vendor/
 .DS_Store
 fdn
+
+tests/
+target/
