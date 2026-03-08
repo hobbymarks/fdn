@@ -78,7 +78,7 @@
   "editor.lineHeight": 24,
   "editor.minimap.maxColumn": 120,
   "editor.minimap.renderCharacters": false,
-  "editor.minimap.size": "proportional",
+  "editor.minimap.size": "fill",
   "editor.renderWhitespace": "all",
   "editor.rulers": [
     99,
