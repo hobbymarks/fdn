@@ -39,10 +39,6 @@ type Separator struct {
 func ConnectCFGDB(path ...string) *gorm.DB {
 	var dbPath string
 
-	// len(paths)!=0
-	if len(path) != 0 && utils.PathExist(path[0]) {
-		dbPath = path[0]
-	}
 	// len(paths)==0
 	if len(path) == 0 {
 		fdnDir := utils.FDNDir()

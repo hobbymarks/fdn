@@ -1,7 +1,8 @@
 /*
 Package cmd config subcommand
 Copyright © 2022 hobbymarks ihobbymarks@gmail.com
-*/package cmd
+*/
+package cmd
 
 import (
 	"os"
@@ -20,13 +21,14 @@ var configCmd = &cobra.Command{
 	Short: "config fdn",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		//Process Config Flag
+		// Process Config Flag
 		cfg, err := cmd.Flags().GetString("config")
 		if err != nil {
 			log.Fatal(err)
 		}
 		log.Trace(cfg)
-		if cfg == "twl" || cfg == "termkey_colon_termword_list" {
+		switch cfg {
+		case "twl", "termkey_colon_termword_list":
 			data := map[string]string{}
 			for _, arg := range args {
 				kvs := strings.Split(arg, ":")
@@ -36,19 +38,19 @@ var configCmd = &cobra.Command{
 				log.Error(err)
 			}
 			log.Trace("✓ConfigTerm")
-		} else if cfg == "swl" || cfg == "to_separator_word_list" {
+		case "swl", "to_separator_word_list":
 			if err := ConfigToSepWords(args); err != nil {
 				log.Error(err)
 			}
 			log.Trace("✓ConfigToBeSeparatorWord") /*✕*/
-		} else if cfg == "sep" || cfg == "separator" {
+		case "sep", "separator":
 			if err := ConfigSeparator(args[0]); err != nil {
 				log.Error(err)
 			}
 			log.Trace("✓ConfigSeparator")
 		}
 
-		//Process List Flag
+		// Process List Flag
 		lst, err := cmd.Flags().GetString("list")
 		if err != nil {
 			log.Fatal(err)
@@ -74,15 +76,16 @@ var configCmd = &cobra.Command{
 		}
 
 		log.Trace(lst)
-		if lst == "sep" || lst == "separator" {
+		switch lst {
+		case "sep", "separator":
 			_KVPrint("Separator", map[string]string{sep.KeyHash: sep.Value})
-		} else if lst == "twl" || lst == "termkey_colon_termword_list" {
+		case "twl", "termkey_colon_termword_list":
 			kvs := map[string]string{}
 			for _, tw := range termWords {
 				kvs[tw.KeyHash] = tw.OriginalLower + ":" + tw.TargetWord
 			}
 			_KVPrint("TermWords", kvs)
-		} else if lst == "swl" || lst == "to_separator_word_list" {
+		case "swl", "to_separator_word_list":
 			sws := map[string]string{}
 			for _, sw := range toSepWords {
 				sws[sw.KeyHash] = sw.Value
@@ -90,17 +93,18 @@ var configCmd = &cobra.Command{
 			_KVPrint("ToBeSepWords", sws)
 		}
 
-		//Process Delete Flag
+		// Process Delete Flag
 		dlt, err := cmd.Flags().GetString("delete")
 		if err != nil {
 			log.Fatal(err)
 		}
 		log.Trace(dlt)
-		if dlt == "twl" || dlt == "termkey_colon_termword_list" {
+		switch dlt {
+		case "twl", "termkey_colon_termword_list":
 			if err := DeleteTermWords(args); err != nil {
 				log.Error(err)
 			}
-		} else if dlt == "swl" || dlt == "to_separator_word_list" {
+		case "swl", "to_separator_word_list":
 			if err := DeleteToSepWords(args); err != nil {
 				log.Error(err)
 			}
