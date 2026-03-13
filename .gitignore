@@ -2,8 +2,4 @@ dist/
 bin/
 prof/
 vendor/
-.DS_Store
-fdn
-
-tests/
-target/
+fdncoverage.out

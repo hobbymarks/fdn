@@ -52,11 +52,12 @@ Available Commands:
  | completion  Generate the autocompletion script for the specified shell
  | config      config fdn
  | help        Help about any command
+ | mv          move files
 
 Flags:
  | -c, --confirm            Confirm
  | -d, --directory          If enable,directory only.Default regular file only
- | -f, --fullpath           FullPath
+ | -f, --fullpath           Printout full path of the file or directory
  | -h, --help               help for fdn
  | -i, --inplace            In-place
  | -l, --level int          Maxdepth level (default 1)
@@ -73,9 +74,9 @@ Use "fdn [command] --help" for more information about a command.
 **ATTENTION!**
 --------------
 
-When you run fdn ,you will see two kinds of output:
+When you run fdn ,you will see two kinds of outputs:
 
--  First Kind
+-  1st kind(default,dry run mode):
 
 ::
 
@@ -85,15 +86,15 @@ When you run fdn ,you will see two kinds of output:
 The output means: a file name ``sample file name`` will be changed to
 ``sample_file_name``
 
-``-->`` means in dry run mode ,operation not take effect.The character
-``▯`` means space ,every space will be replaced by one ``▯``.
+``-->`` means in dry run mode ,the operation doesn't take effect.The character
+``▯`` means space ,every space is replaced by one ``▯`` for display convenience.
 
 **The character ``▯`` is only for the convenience of visual contrast and
 only display in output.**
 
 or
 
--  Second Kind:
+-  2nd kind(inplace mode):
 
 ::
 
@@ -103,14 +104,14 @@ or
 The output means: a file named ``sample file name`` has been changed to
 ``sample_file_name``
 
-``==>`` means operation have taken effect.
+``==>`` means the operation has taken effect.
 
-all deleted character will be display as red color ,such as the original
+every deleted character will be display as red color ,such as the original
 file name:
 
 **sample ▯ file ▯ name**
 
-all added character will be diplayed as green color ,such as the changed
+every added character will be diplayed as green color ,such as the changed
 file name:
 
 **sample * file * name**
@@ -372,9 +373,9 @@ find.*
 简介
 ----
 
-一个小工具，用于日常统一更改文件（或者文件夹）名称
+一个CLI工具，用于日常统一更改文件（或者文件夹）名称
 
-目前的具体格式：
+具体格式：
 
 1. 文件名不保留空格（首先空格会被替换为下划线，之后根据是否存在连续下划线来决定缩减）；
 

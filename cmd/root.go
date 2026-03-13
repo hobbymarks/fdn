@@ -1,7 +1,8 @@
 /*
 Package cmd root subcommand is the default
 Copyright © 2022 hobbymarks ihobbymarks@gmail.com
-*/package cmd
+*/
+package cmd
 
 import (
 	"embed"
@@ -12,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"unicode"
@@ -20,7 +22,7 @@ import (
 	"github.com/hobbymarks/fdn/db"
 	"github.com/hobbymarks/fdn/utils"
 
-	//TODO:should better
+	// TODO(hm): should better
 	"github.com/hobbymarks/go-difflib/difflib"
 	"github.com/mattn/go-runewidth"
 	log "github.com/sirupsen/logrus"
@@ -31,16 +33,18 @@ import (
 
 var version = "0.0.0"
 
-var onlyDirectory bool
-var inputPaths []string
-var depthLevel int
-var inplace bool
-var confirm bool
-var reverse bool
-var fullpath bool
-var plainStyle bool
-var pretty bool
-var overwrite bool
+var (
+	onlyDirectory bool
+	inputPaths    []string
+	depthLevel    int
+	inplace       bool
+	confirm       bool
+	reverse       bool
+	fullpath      bool
+	plainStyle    bool
+	pretty        bool
+	overwrite     bool
+)
 
 var verbose bool
 
@@ -96,7 +100,7 @@ var rootCmd = &cobra.Command{
 		for _, path := range paths {
 			log.Infof("process...:%s", path)
 			path = filepath.Clean(path)
-			//remove tailing slash if exist
+			// remove tailing slash if exist
 			toPath := ""
 			if reverse {
 				curName := filepath.Base(path)
@@ -107,7 +111,7 @@ var rootCmd = &cobra.Command{
 				}
 			} else {
 				ext := utils.Ext(path)
-				//ext empty if path is dir
+				// ext empty if path is dir
 				bn := strings.TrimSuffix(filepath.Base(path), ext)
 				if fdned := FDNedFrom(bn); fdned != bn {
 					toPath = filepath.Join(filepath.Dir(path), fdned+ext)
@@ -174,7 +178,7 @@ func init() {
 	rootCmd.Flags().
 		BoolVarP(&verbose, "verbose", "V", false, "Print more verbose information")
 
-	//Process FDNConfig
+	// Process FDNConfig
 	fdnDir := utils.FDNDir()
 	FDNConfigPath = filepath.Join(fdnDir, "cfg.db")
 	if _, err := os.Lstat(FDNConfigPath); errors.Is(err, os.ErrNotExist) {
@@ -182,7 +186,7 @@ func init() {
 		if err != nil {
 			log.Errorf("read default config error:%s", err)
 		}
-		err = os.WriteFile(FDNConfigPath, contents, 0644)
+		err = os.WriteFile(FDNConfigPath, contents, 0o644)
 		if err != nil {
 			log.Errorf("copy default config error:%s", err)
 		}
@@ -436,11 +440,11 @@ func ConfigSeparator(separator string) error {
 // ReplaceWords process inputName string and return new string
 func ReplaceWords(inputName string) string {
 	outName := inputName
-	var mask = func(s string) ([]string, []bool) {
-		var regescape = func(s string) string {
-			s = strings.Replace(s, "+", "\\+", -1)
-			s = strings.Replace(s, "?", "\\?", -1)
-			s = strings.Replace(s, "*", "\\*", -1)
+	mask := func(s string) ([]string, []bool) {
+		regescape := func(s string) string {
+			s = strings.ReplaceAll(s, "+", "\\+")
+			s = strings.ReplaceAll(s, "?", "\\?")
+			s = strings.ReplaceAll(s, "*", "\\*")
 
 			return s
 		}
@@ -512,14 +516,14 @@ func ReplaceWords(inputName string) string {
 	for idx, wd := range words {
 		if !wordMasks[idx] {
 			for _, sw := range toSepWords {
-				//replaced by separator
-				wd = strings.Replace(wd, sw.Value, _sep, -1)
+				// replaced by separator
+				wd = strings.ReplaceAll(wd, sw.Value, _sep)
 			}
 		}
 		newWords = append(newWords, wd)
 	}
 	outName = strings.Join(newWords, "")
-	//Process continous separator
+	// Process continous separator
 	outName = rpCNS.ReplaceAllString(outName, _sep)
 	//
 	newWords = []string{}
@@ -550,7 +554,7 @@ func ProcessHeadTail(inputName string) string {
 	_sep := sep.Value
 
 	rpHTSeps := regexp.MustCompile("^" + _sep + "+" + "|" + _sep + "+" + "$")
-	//Process Head and Tail Sepatrators
+	// Process Head and Tail Sepatrators
 	outName = rpHTSeps.ReplaceAllString(outName, "")
 
 	return outName
@@ -560,8 +564,8 @@ func ProcessHeadTail(inputName string) string {
 func ASCHead(inputName string) string {
 	outName := inputName
 	sa := []rune(outName)
-	ascH := ""
-	var proxCS = func(c rune) string {
+	var ascH strings.Builder
+	proxCS := func(c rune) string {
 		if c > 'Z' {
 			return fmt.Sprintf(
 				"%c",
@@ -574,29 +578,19 @@ func ASCHead(inputName string) string {
 		}
 	}
 	if len(sa) >= 1 {
-		if !((unicode.IsDigit(sa[0])) ||
-			(unicode.IsLower(sa[0])) ||
-			(unicode.IsUpper(sa[0]))) {
-			uL := 3
-			if len(sa) < 3 {
-				uL = len(sa)
-			}
-			for i := 0; i < uL; i++ {
-				ascH += proxCS(sa[i])
+		if !(unicode.IsDigit(sa[0])) && !(unicode.IsLower(sa[0])) && !(unicode.IsUpper(sa[0])) {
+			uL := min(len(sa), 3)
+			for i := range uL {
+				ascH.WriteString(proxCS(sa[i]))
 			}
 		}
 	}
-	return ascH + outName
+	return ascH.String() + outName
 }
 
 // ArrayContainsElemenet check element e if exist in array s
 func ArrayContainsElemenet[T comparable](s []T, e T) bool {
-	for _, v := range s {
-		if v == e {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(s, e)
 }
 
 // FDNFile fdn a file
@@ -619,7 +613,7 @@ func FDNFile(currentPath string, toBePath string, reserve bool) error {
 		}
 		DeleteRecord(_db, _rd)
 	}
-	//FIXME:update db record and rename should make sure atomic
+	// FIXME:update db record and rename should make sure atomic
 	if err := os.Rename(currentPath, toBePath); err != nil {
 		log.Error(err)
 		return err
@@ -675,7 +669,7 @@ func DeleteRecord(_db *gorm.DB, _rd db.Record) {
 		} else {
 			rd.Count++
 			_rlt := _db.Unscoped().Delete(&rd)
-			//Delete permanently
+			// Delete permanently
 			if _rlt.Error != nil {
 				log.Error(_rlt.Error)
 			}
@@ -728,7 +722,7 @@ func CheckDoFDN(
 
 // FDNedFrom from input and return
 func FDNedFrom(input string) string {
-	//TODO:optimize name
+	// TODO(hm): Optimize name
 	output := input
 	output = ReplaceWords(input)
 	output = ProcessHeadTail(output)
@@ -750,21 +744,21 @@ func GetConfirm() UserInput {
 type UserInput string
 
 const (
-	//All for all
+	// All for all
 	All UserInput = "all"
-	//A shorcut all
+	// A shorcut all
 	A UserInput = "a"
-	//Yes for Ok only valid for current
+	// Yes for Ok only valid for current
 	Yes UserInput = "yes"
-	//Y shortcut for Yes
+	// Y shortcut for Yes
 	Y UserInput = "y"
-	//No for refuse only valid for current
+	// No for refuse only valid for current
 	No UserInput = "no"
-	//N shortcut for NO
+	// N shortcut for NO
 	N UserInput = "n"
-	//Quit exit app
+	// Quit exit app
 	Quit UserInput = "quit"
-	//Q shortcut for Quit
+	// Q shortcut for Quit
 	Q UserInput = "q"
 )
 
@@ -805,24 +799,21 @@ func OutputResult(
 			fmt.Println("-->", processed)
 		}
 	} else {
-		origin = strings.Replace(origin, " ", "▯", -1)
-		//for display space
-		processed = strings.Replace(processed, " ", "▯", -1)
-		a := []string{}
-		b := []string{}
-		for _, c := range []rune(origin) {
-			a = append(a, string(c))
-		}
-		for _, c := range []rune(processed) {
-			b = append(b, string(c))
-		}
+		// for display space
+		origin = strings.ReplaceAll(origin, " ", "▯")
+		processed = strings.ReplaceAll(processed, " ", "▯")
+
+		// TODO(hm): Maybe can optimize bu avoid creating intermediate slices to save more memory
+		a := strings.Split(origin, "")
+		b := strings.Split(processed, "")
+
 		seqm := difflib.NewMatcher(a, b)
 		red := color.New(color.FgRed).SprintFunc()
 		green := color.New(color.FgGreen).SprintFunc()
 		richOrigin := ""
 		richProcessed := ""
 		sw := runewidth.StringWidth
-		//shortcut
+		// shortcut
 		for _, opc := range seqm.GetOpCodes() {
 			switch opc.Tag {
 			case 'r':
@@ -855,7 +846,7 @@ func OutputResult(
 				}
 			case 'i':
 				as := strings.Join(a[opc.I1:opc.I2], "")
-				//empty string
+				// empty string
 				bs := strings.Join(b[opc.J1:opc.J2], "")
 				log.Trace("I:" + as + bs)
 				if pretty {
@@ -874,7 +865,7 @@ func OutputResult(
 			}
 		}
 		fmt.Println("   ", richOrigin)
-		//display space
+		// display space
 		if inplace {
 			fmt.Println("==>", richProcessed)
 		} else {
@@ -883,18 +874,18 @@ func OutputResult(
 	}
 }
 
-// TODO:support ignore filename or filepath(add ignores,list ignores,delete
+// TODO(hm): Support ignore filename or filepath(add ignores,list ignores,delete
 // ignore,force ignore ignores)
-//TODO:cache not take effect result
-//TODO:at bottom add dynamic revolved bar as not dead flag
-//TODO:add mv function (support move files)
-//TODO:doc - multi args how to
-//TODO:support temp words
-//TODO:recursive query for change records
-//TODO:add option for permanently delete record when count is 0 or soft delete
-//TODO:add dry run for config
-//TODO:remove nosense word
-//TODO:support directory and files
-//TODO:dry run result buffered for next step
-//TODO:support add prefix or postfix by private order
-//TODO:optimize loop through files performance
+// TODO(hm): Cache not take effect result
+// TODO(hm): At bottom add dynamic revolved bar as not dead flag
+// TODO(hm): Add mv function (support move files)
+// TODO(hm): Doc - multi args how to
+// TODO(hm): Support temp words
+// TODO(hm): Recursive query for change records
+// TODO(hm): Add option for permanently delete record when count is 0 or soft delete
+// TODO(hm): Add dry run for config
+// TODO(hm): Remove nosense word
+// TODO(hm): Support directory and files
+// TODO(hm): Dry run result buffered for next step
+// TODO(hm): Support add prefix or postfix by private order
+// TODO(hm): Optimize loop through files performance

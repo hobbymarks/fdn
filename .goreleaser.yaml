@@ -58,3 +58,31 @@ homebrew_casks:
     commit_author:
       name: hobbymarks
       email: ihobbymarks@gmail.com
+
+scoops:
+  - name: fdn
+    commit_author:
+      name: hobbymarks
+      email: ihobbymarks@gmail.com
+    directory: scoop-fdn
+
+nfpms:
+  - id: fdn
+    package_name: fdn
+    formats:
+      - deb
+      - rpm
+    bindir: /usr/bin
+    maintainer: "hobbymarks <ihobbymarks@gmail.com>"
+    description: "File and directory name normalizer with rollback"
+    homepage: "https://github.com/hobbymarks/fdn"
+    license: "MIT"
+
+aurs:
+  - name: fdn
+    homepage: "https://github.com/hobbymarks/fdn"
+    description: "File and directory name normalizer with rollback"
+    maintainers:
+      - "hobbymarks <ihobbymarks@gmail.com>"
+    license: "MIT"
+    directory: aur-fdn

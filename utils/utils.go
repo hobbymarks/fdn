@@ -1,7 +1,8 @@
 /*
-Package utils
+Package utils provides database, crypto, and path helpers for fdn.
 Copyright © 2022 hobbymarks ihobbymarks@gmail.com
-*/package utils
+*/
+package utils
 
 import (
 	"crypto/aes"
@@ -16,7 +17,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/glebarez/sqlite"
 	log "github.com/sirupsen/logrus"
@@ -31,7 +31,7 @@ func OpenDB(path string) *gorm.DB {
 		&gorm.Config{
 			Logger: logger.Default.LogMode(logger.Silent),
 		},
-		//TODO:set by env flag more better
+		// TODO(hm): Set by env flag more better
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -56,8 +56,7 @@ func HashTo32B(key string) []byte {
 
 // RandEnAlphDigitShiftDigit return rand string with length is n
 func RandEnAlphDigitShiftDigit(n int) string {
-	rand.Seed(time.Now().UnixMicro())
-	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()")
+	letters := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()")
 	b := make([]rune, n)
 	for i := range b {
 		b[i] = letters[rand.Intn(len(letters))]
@@ -67,8 +66,7 @@ func RandEnAlphDigitShiftDigit(n int) string {
 
 // RandEnAlphDigit return rand string with length is n
 func RandEnAlphDigit(n int) string {
-	rand.Seed(time.Now().UnixMicro())
-	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
+	letters := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
 	b := make([]rune, n)
 	for i := range b {
 		b[i] = letters[rand.Intn(len(letters))]
@@ -78,8 +76,7 @@ func RandEnAlphDigit(n int) string {
 
 // RandEnAlph return rand string with length is n
 func RandEnAlph(n int) string {
-	rand.Seed(time.Now().UnixMicro())
-	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	letters := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	b := make([]rune, n)
 	for i := range b {
 		b[i] = letters[rand.Intn(len(letters))]
@@ -104,7 +101,7 @@ func PathExist(path string) bool {
 // directory path failed
 func DBBaseDir() string {
 	homeDir, err := os.UserHomeDir()
-	//get home dir
+	// get home dir
 	if err != nil {
 		path, err := os.Executable()
 		if err != nil {
@@ -269,7 +266,7 @@ func SameFiles(
 	secondPath string,
 	morePaths ...string,
 ) (bool, error) {
-	//TODO:multi files comparation
+	// TODO(hm): Multi files comparation
 	fHash, err := FileMD5(firstPath)
 	if err != nil {
 		return false, err
@@ -279,7 +276,7 @@ func SameFiles(
 		return false, err
 	}
 	if len(morePaths) == 0 {
-		//No more paths
+		// No more paths
 		if strings.Compare(fHash, sHash) == 0 {
 			return true, nil
 		}
