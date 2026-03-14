@@ -7,6 +7,9 @@ before:
 
 release:
   prerelease: auto
+  github:
+    owner: hobbymarks
+    repo: release
 
 
 builds:
@@ -54,13 +57,16 @@ homebrew_casks:
   - name: fdn
     repository:
       owner: hobbymarks
-      name: homebrew-hobbymarks
+      name: release
     commit_author:
       name: hobbymarks
       email: ihobbymarks@gmail.com
 
 scoops:
   - name: fdn
+    bucket:
+      owner: hobbymarks
+      name: release
     commit_author:
       name: hobbymarks
       email: ihobbymarks@gmail.com
