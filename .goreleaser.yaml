@@ -7,10 +7,6 @@ before:
 
 release:
   prerelease: auto
-  github:
-    owner: hobbymarks
-    repo: release
-
 
 builds:
   - env:
