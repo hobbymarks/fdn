@@ -60,7 +60,7 @@ homebrew_casks:
 
 scoops:
   - name: fdn
-    bucket:
+    repository:
       owner: hobbymarks
       name: release
     commit_author:
