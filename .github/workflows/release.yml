@@ -2,9 +2,8 @@ name: goreleaser
 
 on:
   push:
-    branches: [ "gover" ]
-  pull_request:
-    branches: [ "gover" ]
+    tags:
+      - "v*"
 
 permissions:
   contents: write
