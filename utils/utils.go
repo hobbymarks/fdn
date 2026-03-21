@@ -96,6 +96,15 @@ func PathExist(path string) bool {
 	return true
 }
 
+// PathIsDirectory reports whether path exists and refers to a directory.
+func PathIsDirectory(path string) bool {
+	info, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return info.IsDir()
+}
+
 // DBBaseDir get database base directory path
 // default return home directory,return program executed path if return home
 // directory path failed
@@ -260,7 +269,11 @@ func FileMD5(filePath string) (string, error) {
 	return md5s, nil
 }
 
-// SameFiles if same return true,nil others return false,X
+// SameFiles reports whether the given regular files have identical content by comparing
+// truncated 128-bit MD5 digests from FileMD5. With only firstPath and secondPath, it
+// returns true when both hashes match. If morePaths is non-empty, firstPath and secondPath
+// must match each other and every path in morePaths must yield the same hash; otherwise it
+// returns false. A non-nil error is returned when any path cannot be opened or read.
 func SameFiles(
 	firstPath string,
 	secondPath string,

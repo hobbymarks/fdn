@@ -61,17 +61,22 @@ var rootCmd = &cobra.Command{
 	Use:     "fdn",
 	Version: version,
 	Short:   "A Tool For Unify File Name",
-	Long:    ``,
-	Run: func(cmd *cobra.Command, args []string) {
+	Long:    `A Tool For Unify File Name and Directory Name`,
+	Example: `  fdn mv ./a.txt ./b.txt
+  fdn mv ./doc.pdf ./backup/
+  fdn mv "My File.txt" ./inbox/My_File.txt`,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		logFormatter := new(log.TextFormatter)
+		logFormatter.TimestampFormat = "15:04:05.000"
+		logFormatter.FullTimestamp = true
+		log.SetFormatter(logFormatter)
 		if verbose {
-			debugFormatter := new(log.TextFormatter)
-			debugFormatter.TimestampFormat = "15:04:05.000"
-			debugFormatter.FullTimestamp = true
-			log.SetFormatter(debugFormatter)
 			log.SetLevel(log.InfoLevel)
 		} else {
 			log.SetLevel(log.WarnLevel)
 		}
+	},
+	Run: func(cmd *cobra.Command, args []string) {
 		log.Info("rootCmd executing ...")
 		PrintTipFlag := false
 		curHashEncryPre := map[string]string{}
@@ -593,14 +598,17 @@ func ArrayContainsElemenet[T comparable](s []T, e T) bool {
 	return slices.Contains(s, e)
 }
 
-// FDNFile fdn a file
-func FDNFile(currentPath string, toBePath string, reserve bool) error {
+// FDNFile updates the rename journal in the record database using the basenames of
+// currentPath and toBePath, then renames currentPath to toBePath on disk. When reversed is
+// false, it inserts a record for the forward rename; when true, it removes the matching
+// record for an undo. Returns any error from os.Rename.
+func FDNFile(currentPath string, toBePath string, reversed bool) error {
 	_to := filepath.Base(toBePath)
 	_cur := filepath.Base(currentPath)
 
 	_db := db.ConnectRDDB()
 	defer utils.DBClose(_db)
-	if !reserve {
+	if !reversed {
 		_rd := db.Record{
 			EncryptedPreviousName: utils.Encrypt(_to, _cur),
 			HashedCurrentName:     utils.KeyHash(_to),
@@ -677,7 +685,10 @@ func DeleteRecord(_db *gorm.DB, _rd db.Record) {
 	}
 }
 
-// CheckDoFDN check and do fdn
+// CheckDoFDN renames or normalizes currentPath into toBePath via FDNFile when the destination
+// rules allow it. If toBePath already exists and overwrite is false, it runs only when
+// currentPath and toBePath refer to the same file; otherwise it prints a skip message and
+// does nothing. Returns any error from FDNFile or related checks.
 func CheckDoFDN(
 	currentPath string,
 	toBePath string,
@@ -720,7 +731,10 @@ func CheckDoFDN(
 	return nil
 }
 
-// FDNedFrom from input and return
+// FDNedFrom returns the FDN-normalized form of input by applying, in order, ReplaceWords
+// (configured term and separator rules from the config DB), ProcessHeadTail (strip leading
+// and trailing separator runs), and ASCHead (synthetic ASCII prefix when the first rune is
+// not a Latin letter or digit).
 func FDNedFrom(input string) string {
 	// TODO(hm): Optimize name
 	output := input
@@ -780,7 +794,12 @@ func noEffectTip() {
 	}
 }
 
-// OutputResult fdn processed result
+// OutputResult prints a before/after line pair for an FDN rename: the original path and the
+// processed path. When fullpath is false, only the final path components are shown. The
+// second line uses "==>" when inplace is true (change applied) and "-->" when false (dry
+// run). With plainStyle, output is plain text; otherwise spaces are shown as "▯" and a
+// character-level diff is rendered with red/green highlighting (optionally width-aligned when
+// pretty is set).
 func OutputResult(
 	origin string,
 	processed string,

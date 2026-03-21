@@ -5,45 +5,77 @@ Copyright © 2023 hobbymarks ihobbymarks@gmail.com
 package cmd
 
 import (
-	"fmt"
+	"path/filepath"
 
 	"github.com/hobbymarks/fdn/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-// mvCmd represents the mv command
+// mv moves originPath to a resolved destination. Evaluation order:
+//
+//	origin exists?
+//	  no  → error
+//	  yes → target exists?
+//	          no  → rename origin to targetPath (new basename or path)
+//	          yes → target is directory?
+//	                  yes → rename origin to filepath.Join(target, filepath.Base(origin))
+//	                  no  → error (existing non-directory target)
 var mvCmd = &cobra.Command{
-	Use:   "mv",
-	Short: "move files",
-	Long:  `the utility rename the file or directory named by the source operand to the destination path named by the target operand or moves each file or directory named by a source operand to a destination file or directory in the existing directory named by the directory operand.`,
+	Use:   "mv SOURCE DEST",
+	Short: "Move or rename a file or directory (updates FDN rename records)",
+	Long: `Move or rename SOURCE to DEST using the same journal logic as the main fdn rename.
+
+Behavior:
+  • If DEST does not exist — SOURCE is renamed to DEST (new name or new path).
+  • If DEST exists and is a directory — SOURCE is placed inside it as DEST/basename(SOURCE).
+  • If DEST exists and is not a directory — the command fails (will not overwrite a file).
+
+SOURCE must exist. Paths with spaces must be quoted in the shell.`,
+	Example: `  fdn mv ./a.txt ./b.txt
+  fdn mv ./doc.pdf ./backup/
+  fdn mv "My File.txt" ./inbox/My_File.txt`,
+	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) <= 1 {
-			return
-		}
-		orgPath := args[0]
-		tgtPath := args[1]
+		originPath := args[0]
+		targetPath := args[1]
 
-		// org not exit
-		if !utils.PathExist(orgPath) {
-			// TODO(hm): Should print error and return if org is not exist
-			fmt.Println("NotExist:", orgPath)
+		// origin path is not exist
+		if !utils.PathExist(originPath) {
+			log.Error("Origin path is not exist:", originPath)
 			return
 		}
+		// then origin path is 	exist
+		// and target path is also exist
+		if utils.PathExist(targetPath) {
+			if utils.PathIsDirectory(targetPath) {
+				newTargetPath := filepath.Join(targetPath, filepath.Base(originPath))
 
-		// then org exist
-		// tgt exist
-		if utils.PathExist(tgtPath) {
-			// TODO(hm): Should check if the target is a directory and the source is a file ,and then move the file to the directory
-			fmt.Println("Target Exist:", tgtPath)
+				same, err := utils.SameFiles(newTargetPath, originPath)
+				if err == nil && same {
+					log.Warnf("Target path '%s' is the same as origin path '%s'", newTargetPath, originPath)
+					return
+				}
+
+				err = FDNFile(originPath, newTargetPath, false)
+				if err != nil {
+					log.Error("Error when move file from", originPath, " to ", newTargetPath, ":", err)
+					return
+				}
+
+				log.Info("Success move file from", originPath, " to ", newTargetPath)
+				return
+			}
+			log.Error("Target path is not a directory:", targetPath)
 			return
 		}
-		// TODO(hm): Should check if the target is a file and the source is a directory,and then print error and return
-		// tgt not exist
-		err := FDNFile(orgPath, tgtPath, false)
+		// target path is not exist, then move the origin path to the target path
+		err := FDNFile(originPath, targetPath, false)
 		if err != nil {
-			log.Error(err)
+			log.Error("Error when move file from", originPath, " to ", targetPath, ":", err)
+			return
 		}
+		log.Info("Success move file from", originPath, " to ", targetPath)
 	},
 }
 
