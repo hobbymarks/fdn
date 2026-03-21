@@ -2,4 +2,4 @@ dist/
 bin/
 prof/
 vendor/
-fdncoverage.out
+coverage.out

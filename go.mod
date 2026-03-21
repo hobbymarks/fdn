@@ -27,13 +27,13 @@ require (
 	modernc.org/libc v1.70.0 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
-	modernc.org/sqlite v1.46.1 // indirect
+	modernc.org/sqlite v1.47.0 // indirect
 )
 
 require (
-	github.com/fatih/color v1.18.0
+	github.com/fatih/color v1.19.0
 	github.com/glebarez/sqlite v1.11.0
-	github.com/hobbymarks/go-difflib v0.0.0-20230224055650-eb258ffcacc2
+	github.com/hobbymarks/go-difflib v0.0.0-20260314160634-df4eeacba6ba
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/mattn/go-runewidth v0.0.21
 	github.com/sirupsen/logrus v1.9.4
