@@ -18,16 +18,15 @@ import (
 	"unicode"
 
 	"github.com/fatih/color"
-	"github.com/hobbymarks/fdn/db"
-	"github.com/hobbymarks/fdn/utils"
-
-	// TODO(hm): should better
-	"github.com/hobbymarks/go-difflib/difflib"
 	"github.com/mattn/go-runewidth"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 	"gorm.io/gorm"
+
+	"github.com/hobbymarks/fdn/db"
+	"github.com/hobbymarks/fdn/utils"
+	"github.com/hobbymarks/go-difflib/difflib"
 )
 
 var version = "0.0.0"
@@ -881,9 +880,7 @@ func OutputResult(
 
 // TODO(hm): Support ignore filename or filepath(add ignores,list ignores,delete
 // ignore,force ignore ignores)
-// TODO(hm): Cache not take effect result
 // TODO(hm): At bottom add dynamic revolved bar as not dead flag
-// TODO(hm): Add mv function (support move files)
 // TODO(hm): Doc - multi args how to
 // TODO(hm): Support temp words
 // TODO(hm): Recursive query for change records
@@ -891,6 +888,5 @@ func OutputResult(
 // TODO(hm): Add dry run for config
 // TODO(hm): Remove nosense word
 // TODO(hm): Support directory and files
-// TODO(hm): Dry run result buffered for next step
 // TODO(hm): Support add prefix or postfix by private order
 // TODO(hm): Optimize loop through files performance

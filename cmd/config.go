@@ -15,11 +15,48 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// configCmd represents the config command
+// configCmd is the CLI entry for reading and changing FDN rules stored in the local database.
 var configCmd = &cobra.Command{
-	Use:   "config",
-	Short: "config fdn",
-	Long:  ``,
+	Use:   "config [flags] [args]",
+	Short: "View or change separator, term replacements, and “replace with separator” substrings",
+	Long: `Reads and writes naming configuration in ~/.fdn/fdn.db (separator character, per-term
+replacements, and substrings that are normalized to that separator).
+
+Use -l/--list to print tables, -c/--config to add or update entries, and -d/--delete to remove
+entries. Flag values accept short aliases (sep, twl, swl) or the long names shown in --help.
+
+Arguments depend on the mode:
+  • -c separator (sep): exactly one character or string — the separator used in FDN names.
+  • -c twl: one or more pairs key:targetword (key is matched case-insensitively when applied).
+  • -c swl: one or more literal substrings that should be treated as separator-like when rewriting.
+  • -d twl / -d swl: keys or substrings to remove, matching how they were configured.
+
+With no flags and no arguments, help is printed. Combining flags in one run is allowed (e.g. add
+a separator word and immediately list all separator words).`,
+	Example: `  # Show the configured separator character
+  fdn config -l sep
+
+  # List all term replacements (original:target)
+  fdn config --list termkey_colon_termword_list
+
+  # List substrings that are converted to the separator
+  fdn config -l swl
+
+  # Set the separator to underscore
+  fdn config -c sep _
+
+  # Add term replacements (keys are stored lowercased)
+  fdn config -c twl "MyBrand:mybrand" "wiki:wikipedia"
+
+  # Register punctuation or spaces to normalize toward the separator
+  fdn config -c swl "·" "—"
+
+  # Remove a term and a separator-word by the same strings used when adding
+  fdn config -d twl mybrand
+  fdn config -d swl "·"
+
+  # Add a separator word and print the separator table in one invocation
+  fdn config -c swl "+" -l sep`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Process Config Flag
 		cfg, err := cmd.Flags().GetString("config")

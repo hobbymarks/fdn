@@ -4,413 +4,260 @@ fdn
 Introduction
 ------------
 
-A tool for uniformly change file or directory names and support
-rollback these operations.
+**fdn** is a CLI tool to normalize file and directory names (underscore separator, configurable
+rules) and to **roll back** those renames using a local SQLite journal. Optional **dry-run**
+output shows proposed names before you apply them.
 
-File or directory name format:
+Naming behavior is driven by settings in a local database (separator character, term
+replacements, and “replace with separator” substrings). Edit those with ``fdn config``.
 
-1. no space in file name（firstly every space will be replaced by an
-   underscore,then multiple consecutive underscores will be reduced to
-   one);
+Typical goals include:
 
-2. only underscore allowed in file name，all other control characters
-   will be replaced by underscore;
+1. Spaces in the basename become the configured separator (default ``_``), with runs of that
+   separator collapsed.
+2. Other punctuation and control-like characters are normalized using your **config** rules
+   (not only a hard-coded underscore mapping).
+3. Leading/trailing separator runs on the basename (excluding extension) are trimmed.
+4. Bash-style special parameters (e.g. ``$0``, ``$?``) are preserved in the sense described in
+   the `bash manual on special parameters <https://www.gnu.org/software/bash/manual/html_node/Special-Parameters.html>`__.
+5. Configured **term words** can preserve or rewrite specific tokens (e.g. acronyms).
 
-3. multiple consecutive underscores will be reduced to one;
+For exact behavior, run ``fdn`` on a copy of your files or use dry-run (default without
+``-i`` / ``-c``).
 
-4. underscore at the beginning of file name will be deleted;
+Data directory
+--------------
 
-5. underscore at the end of file name will be deleted;
+State is stored under the user data directory:
 
-6. keep `bash special
-   parameters <https://www.gnu.org/software/bash/manual/html_node/Special-Parameters.html>`__
-   in file name;
+* **macOS / Linux:** ``~/.fdn/``
+* **Windows:** ``%USERPROFILE%\.fdn\`` (when ``HOME`` is unset, the tool falls back similarly to
+  Go’s user home directory rules)
 
-7. some terminology will remained(update continuously) ,such as
-   ``USB``,\ ``PCIe`` …​
+Single database file:
+
+* ``fdn.db`` — holds both **configuration** (separator, term words, separator-words) and
+  **rename records** (journal for reverse renames).
+
+On first startup, if ``fdn.db`` is missing but legacy ``cfg.db`` and/or ``rd.db`` exist in the
+same folder, they are **merged or renamed** into ``fdn.db`` automatically.
 
 Installation
 ------------
 
-To install fdn via
-`brew <https://brew.sh/>`__:
+macOS or Linux (Homebrew)
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you use `Homebrew <https://brew.sh/>`__ and the tap is available:
 
 .. code:: bash
 
-   $ brew tap hobbymarks/hobbymarks
-   $ brew install fdn
+   brew tap hobbymarks/release https://github.com/hobbymarks/release
+   brew install --cask fdn
 
-Usage/参数
-----------
-::
+Any platform (install from source with Go)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Usage:
- | fdn [flags]
- | fdn [command]
+1. Install `Go <https://go.dev/dl/>`__ **1.26** or newer (see ``go.mod`` in this repository).
 
-Available Commands:
- | completion  Generate the autocompletion script for the specified shell
- | config      config fdn
- | help        Help about any command
- | mv          move files
+2. Install or build the binary:
 
-Flags:
- | -c, --confirm            Confirm
- | -d, --directory          If enable,directory only.Default regular file only
- | -f, --fullpath           Printout full path of the file or directory
- | -h, --help               help for fdn
- | -i, --inplace            In-place
- | -l, --level int          Maxdepth level (default 1)
- | -o, --overwrite          Overwrite
- | -p, --path stringArray   Input paths (default [.])
- | -s, --plainstyle         PlainStyle Output
- | -e, --pretty             Pretty Display
- | -r, --reverse            Reverse
- | -v, --version            version for fdn
+   .. code:: bash
 
-Use "fdn [command] --help" for more information about a command.
+      go install github.com/hobbymarks/fdn@latest
 
+   The executable is placed in ``$(go env GOPATH)/bin``. Ensure that directory is on your
+   ``PATH``.
 
-**ATTENTION!**
---------------
+   Alternatively, clone the repository and run:
 
-When you run fdn ,you will see two kinds of outputs:
+   .. code:: bash
 
--  1st kind(default,dry run mode):
+      git clone https://github.com/hobbymarks/fdn.git
+      cd fdn
+      go build -o fdn .
 
-::
+   Then move ``fdn`` to a directory on your ``PATH``.
 
-         sample▯file▯name
-      -->sample_file_name
-
-The output means: a file name ``sample file name`` will be changed to
-``sample_file_name``
-
-``-->`` means in dry run mode ,the operation doesn't take effect.The character
-``▯`` means space ,every space is replaced by one ``▯`` for display convenience.
-
-**The character ``▯`` is only for the convenience of visual contrast and
-only display in output.**
-
-or
-
--  2nd kind(inplace mode):
-
-::
-
-         sample▯file▯name
-      ==>sample_file_name
-
-The output means: a file named ``sample file name`` has been changed to
-``sample_file_name``
-
-``==>`` means the operation has taken effect.
-
-every deleted character will be display as red color ,such as the original
-file name:
-
-**sample ▯ file ▯ name**
-
-every added character will be diplayed as green color ,such as the changed
-file name:
-
-**sample * file * name**
-
-Options
+Windows
 ~~~~~~~
 
--d option
+**Scoop** (recommended). GoReleaser publishes a Scoop manifest to the `hobbymarks/release
+<https://github.com/hobbymarks/release>`__ repository (``scoop-fdn/fdn.json``). With `Scoop
+<https://scoop.sh/>`__ installed, run:
 
-::
+.. code:: powershell
 
-   $  fdn tgt_root -f -t dir -d 2
-      tgt_root/test directory/$0_T\▯Only
-   -->tgt_root/test directory/$0_T_Only
-      tgt_root/!临时文件夹
-   -->tgt_root/LSW临时文件夹
-      tgt_root/_is▯dir▯%
-   -->tgt_root/Is_dir_%
-      tgt_root/测试@#文件夹
-   -->tgt_root/CS测试_文件夹
-      tgt_root/test▯directory
-   -->tgt_root/Test_Directory
-      tgt_root
-   -->Tgt_Root
-   ********************************************************************
-   In order to take effect,add option '-i' or '-c'
+   scoop install https://raw.githubusercontent.com/hobbymarks/release/main/scoop-fdn/fdn.json
 
-   $ fdn tgt_root -f -t dir -d 1
-      tgt_root/!临时文件夹
-   -->tgt_root/LSW临时文件夹
-      tgt_root/_is▯dir▯%
-   -->tgt_root/Is_dir_%
-      tgt_root/测试@#文件夹
-   -->tgt_root/CS测试_文件夹
-      tgt_root/test▯directory
-   -->tgt_root/Test_Directory
-      tgt_root
-   -->Tgt_Root
-   ********************************************************************
-   In order to take effect,add option '-i' or '-c'
+Updates:
 
--t option
+.. code:: powershell
 
-::
+   scoop update fdn
 
-   $  fdn tgt_root -f -t dir
-      tgt_root/!临时文件夹
-   -->tgt_root/LSW临时文件夹
-      tgt_root/测试@#文件夹
-   -->tgt_root/CS测试_文件夹
-      tgt_root/test▯directory
-   -->tgt_root/Test_Directory
-      tgt_root/_is▯dir▯%
-   -->tgt_root/Is_dir_%
-   ********************************************************************
-   In order to take effect,add option '-i' or '-c'
+**Go (from source).** Install Go from https://go.dev/dl/ and use the same ``go install`` command
+from **PowerShell** or **cmd** (ensure ``%USERPROFILE%\go\bin`` or your ``GOPATH\bin`` is on
+``PATH``).
 
-   $ fdn tgt_root -f
-      tgt_root/thi_Is_File_%.mp4
-   -->tgt_root/Thi_Is_File_%.mp4
-      tgt_root/$0▯▯测试用文件.html
-   -->tgt_root/$0_测试用文件.html
-   ********************************************************************
-   In order to take effect,add option '-i' or '-c'
+**Local build.** Clone the repo and run ``go build -o fdn.exe .``, then add the folder containing
+``fdn.exe`` to ``PATH``.
 
--i option
+Shell completion
+~~~~~~~~~~~~~~~~
 
-::
-
-   $ fdn tgt_root/\$0\ \ 测试用文件.html -io
-      $0▯▯测试用文件.html
-   ==>$0_测试用文件.html
-
--c option
-
-::
-
-   $ fdn tgt_root/\$0\ \ 测试用文件.html -c
-   $0  测试用文件.html
-   Please confirm(y/n/A/q) [no]:
-      $0▯▯测试用文件.html
-   -->$0_测试用文件.html
-
-   $ fdn tgt_root/\$0\ \ 测试用文件.html -c
-   $0  测试用文件.html
-   Please confirm(y/n/A/q) [no]: y
-      $0▯▯测试用文件.html
-   ==>$0_测试用文件.html
-
--l option
-
-This Option
-
--f option
-
-::
-
-   $ fdn tgt_root/\$0\ \ 测试用文件.html
-      $0▯▯测试用文件.html
-   -->$0_测试用文件.html
-   ********************************************************************
-   In order to take effect,add option '-i' or '-c'
-
-   $ fdn tgt_root/\$0\ \ 测试用文件.html -f
-      tgt_root/$0▯▯测试用文件.html
-   -->tgt_root/$0_测试用文件.html
-   ********************************************************************
-   In order to take effect,add option '-i' or '-c'
-
--a option
-
-::
-
-   $ fdn
-      a▯Test-file.txt
-   -->A_Test_File.txt
-   ********************************************************************
-   In order to take effect,add option '-i' or '-c'
-
-   $ fdn -a
-      /home/hma/a▯Test-file.txt
-   -->/home/hma/A_Test_File.txt
-   ********************************************************************
-   In order to take effect,add option '-i' or '-c'
-
--r option
-
-::
-
-   $ fdn tgt_root/\$0_测试用文件.html -r
-      $0_测试用文件.html
-   -->$0▯▯测试用文件.html
-   ********************************************************************
-   In order to take effect,add option '-i' or '-c'
-
--o option
-
-::
-
-   $ fdn tgt_root/\$0\ \ 测试用文件.html -i
-   Exist:$0_测试用文件.html
-   Skipped:$0  测试用文件.html
-   With option '-o' to enable overwrite.
-
-   $ fdn tgt_root/\$0\ \ 测试用文件.html -io
-      $0▯▯测试用文件.html
-   ==>$0_测试用文件.html
-
--p option
-
-::
-
-   $ fdn tgt_root
-      thi_Is_File_%.mp4
-   -->Thi_Is_File_%.mp4
-      $0▯▯测试用文件.html
-   -->$0_测试用文件.html
-   ********************************************************************
-   In order to take effect,add option '-i' or '-c'
-
-   $ fdn tgt_root -p
-      thi_Is_File_%.mp4
-   -->Thi_Is_File_%.mp4
-      $0▯▯测试用文件.html
-   -->$0 _测试用文件.html
-   ********************************************************************
-   In order to take effect,add option '-i' or '-c'
-
--e option
-
-::
-
-   $ fdn tgt_root/\$0_测试用文件.html -re
-      $0_测试用文件.html
-   -->$0▯▯测试用文件.html
-   ********************************************************************
-   In order to take effect,add option '-i' or '-c'
-
-Example/示例
---------------
-
-change one file name/修改一个文件名
-------------------------------------
-
-::
-
-   $ fdn tgt_root/\$0\ 测试用文件.html
-      $0▯测试用文件.html
-   -->$0_测试用文件.html
-   ********************************************************************
-   In order to take effect,add option '-i' or '-c'
-
-change files in dir/修改指定目录下文件名
-----------------------------------------
-
-::
-
-   $ fdn tgt_root
-      $0▯测试用文件.html
-   -->$0_测试用文件.html
-      This▯is▯a▯Test▯file.pdf
-   -->This_Is_A_Test_File.pdf
-      _thi▯is▯file▯%.mp4
-   -->thi_Is_File_%.mp4
-      这是测试文件▯.jpg
-   -->ZSC这是测试文件.jpg
-   ********************************************************************
-   In order to take effect,add option '-i' or '-c'
-
-rollback one file changed/取消一个文件名的修改
-----------------------------------------------
-
-::
-
-   $ fdn tgt_root/\$0_测试用文件.html -r
-      $0_测试用文件.html
-   -->$0▯测试用文件.html
-   ********************************************************************
-   In order to take effect,add option '-i' or '-c'
-
-rollback files changed in dir/取消目录下文件名的修改
-----------------------------------------------------
-
-::
-
-   $ fdn tgt_root -r
-      This_Is_A_Test_File.pdf
-   -->This▯is▯a▯Test▯file.pdf
-      ZSC这是测试文件.jpg
-   -->这是测试文件▯.jpg
-      thi_Is_File_%.mp4
-   -->_thi▯▯is▯▯▯file▯%.mp4
-      $0_测试用文件.html
-   -->$0▯测试用文件.html
-   ********************************************************************
-   In order to take effect,add option '-i' or '-c'
-
-joint work with ``fd``/与 ``fd`` 工具联合工作
----------------------------------------------
-
-`fd <https://github.com/sharkdp/fd>`__ is a program to find entries in
-your filesytem. It is a simple, fast and user-friendly alternative to
-find.*
-
-::
-
-   $ fdfind -HIi html -x fdn -p {}
-      $0▯▯测试用文件.html
-   -->$0_测试用文件.html
-   ********************************************************************
-   In order to take effect,add option '-i' or '-c'
-
-   $ fdfind -HIi html -x fdn -pf {}
-      tgt_root/$0▯▯测试用文件.html
-   -->tgt_root/$0 _测试用文件.html
-   ********************************************************************
-   In order to take effect,add option '-i' or '-c'
-
-简介
-----
-
-一个CLI工具，用于日常统一更改文件（或者文件夹）名称
-
-具体格式：
-
-1. 文件名不保留空格（首先空格会被替换为下划线，之后根据是否存在连续下划线来决定缩减）；
-
-2. 文件名中只保留下划线字符，其余的控制类字符会被替换为下划线；
-
-3. 多个连续的下划线字符会被缩减为一个下划线；
-
-4. 如果文件名首字符为下划线将会被删除；
-
-5. 除去扩展名后的文件名如果最后一个字符是下划线也会被删除；
-
-6. 在文件名中保留 `bash special
-   parameters <https://www.gnu.org/software/bash/manual/html_node/Special-Parameters.html>`__
-   ;
-
-7. 文件名中包含的一些术语会保留术语本身的大小写写法(持续更新中…​),例如
-   ``USB``,\ ``PCIe`` 等;
-
-安装
-----
-
-建议使用\ `brew <https://brew.sh/>`__
-进行安装:
+After installation, generate scripts with:
 
 .. code:: bash
 
-   $ brew tap hobbymarks/hobbymarks
-   $ brew install fdn
+   fdn completion bash
+   fdn completion zsh
+   fdn completion fish
+   fdn completion powershell
 
-参数
-----
+Follow the instructions printed by your shell’s plugin documentation to load the script.
 
-请前往\ `Usage/参数`_ 查看
+Usage overview
+--------------
 
-示例
-----
+.. code:: text
 
-参考 \ `Example/示例`_ 查看
+   fdn [flags]                    # scan path(s), print or apply renames
+   fdn [command] [flags] [args]   # config, mv, completion, help
+
+Run ``fdn --help`` or ``fdn <command> --help`` for the full flag list.
+
+Root command (bulk rename)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+   :widths: 20 30 50
+   :header-rows: 1
+
+   * - Short
+     - Long
+     - Description
+   * - ``-c``
+     - ``--confirm``
+     - Prompt per file: apply rename, skip, apply all, or quit (stdin).
+   * - ``-d``
+     - ``--directory``
+     - Only consider directories (default is regular files only).
+   * - ``-f``
+     - ``--fullpath``
+     - Show full paths in output instead of basenames.
+   * - ``-i``
+     - ``--inplace``
+     - Apply renames (otherwise dry-run).
+   * - ``-l``
+     - ``--level``
+     - Max directory depth when recursing (default ``1``).
+   * - ``-o``
+     - ``--overwrite``
+     - Allow replacing an existing destination when applying a rename.
+   * - ``-p``
+     - ``--path``
+     - Input path(s); repeatable (default ``.``).
+   * - ``-r``
+     - ``--reverse``
+     - Use the journal to restore previous names where possible.
+   * - ``-s``
+     - ``--plainstyle``
+     - Plain text output (no color / diff styling).
+   * - ``-e``
+     - ``--pretty``
+     - Richer diff alignment in colored output.
+   * - ``-V``
+     - ``--verbose``
+     - More log output.
+   * - ``-v``
+     - ``--version``
+     - Print version and exit.
+   * - ``-h``
+     - ``--help``
+     - Help for ``fdn``.
+
+Confirm mode prints ``Please confirm (all,yes,no,quit):`` and accepts responses such as
+``all``/``a``, ``yes``/``y``, ``no``/``n``, ``quit``/``q``.
+
+``fdn config``
+~~~~~~~~~~~~~~
+
+Manage ``fdn.db`` settings (separator, term list, separator-word list). Typical patterns:
+
+.. code:: bash
+
+   fdn config -l sep
+   fdn config -c sep _
+   fdn config -c twl "MyBrand:mybrand"
+   fdn config -c swl "·"
+   fdn config -d twl mybrand
+
+See ``fdn config --help`` for full examples and flag aliases (``sep`` / ``twl`` / ``swl``).
+
+``fdn mv``
+~~~~~~~~~~
+
+Move or rename a single file or directory and update the same journal as the main command:
+
+.. code:: bash
+
+   fdn mv ./a.txt ./b.txt
+   fdn mv ./doc.pdf ./backup/
+   fdn mv "My File.txt" ./inbox/My_File.txt
+
+If the destination exists and is a directory, the source is placed inside it. Existing
+non-directory destinations are **not** overwritten unless your workflow uses other tools.
+
+Output modes
+------------
+
+When you run **without** ``-i`` (in-place) or without confirming with ``-c``, **fdn** only
+**shows** proposed renames (dry run).
+
+* ``-->`` — proposed change (not applied).
+* ``==>`` — applied rename (in-place or after confirmation).
+* In colored mode, spaces may be shown as ``▯`` for readability; that symbol is **display-only**.
+
+Examples
+--------
+
+Dry-run on the current directory:
+
+.. code:: bash
+
+   fdn
+
+Apply renames under ``./mydir`` (depth 1):
+
+.. code:: bash
+
+   fdn -p mydir -i
+
+Reverse (journal) on a path, then apply:
+
+.. code:: bash
+
+   fdn -p mydir -r -i
+
+Use with `fd <https://github.com/sharkdp/fd>`__ (invoke **fdn** per match; pass flags after
+``--`` if your shell requires it). On some Linux packages the executable is ``fdfind`` instead
+of ``fd``.
+
+.. code:: bash
+
+   fd -e html -x fdn -p {} -i
+
+简介（中文）
+------------
+
+**fdn** 是用于统一整理文件/目录名称的 CLI，可对照本地数据库中的规则进行规范化，并支持依据
+日志做**撤销式**回滚。默认不写入磁盘（干跑）；使用 ``-i`` 或 ``-c`` 才会真正改名。
+
+配置与改名记录保存在用户目录下的 ``.fdn/fdn.db``（已从旧的 ``cfg.db`` / ``rd.db`` 自动合并
+或迁移）。使用 ``fdn config`` 维护分隔符与词条等规则。
+
+安装方式见 `Installation`_：Homebrew（若可用）、Windows 上可用 `Scoop <https://scoop.sh/>`__
+安装发布清单，或使用 Go 源码安装 / 本地 ``go build`` 并配置 ``PATH``。
+
+更多参数与示例请运行 ``fdn --help``、``fdn config --help``、``fdn mv --help``。
