@@ -244,8 +244,12 @@ func TestAddRecord_incrementCount(t *testing.T) {
 		HashedCurrentName:     utils.KeyHash(to),
 		Count:                 1,
 	}
-	AddRecord(_db, rd)
-	AddRecord(_db, rd)
+	if err := AddRecord(_db, rd); err != nil {
+		t.Fatal(err)
+	}
+	if err := AddRecord(_db, rd); err != nil {
+		t.Fatal(err)
+	}
 	var got db.Record
 	if err := _db.Where("hashed_current_name = ?", utils.KeyHash(to)).First(&got).Error; err != nil {
 		t.Fatal(err)
@@ -272,14 +276,18 @@ func TestDeleteRecord_decrementAndRemove(t *testing.T) {
 		EncryptedPreviousName: utils.Encrypt(to, cur),
 		HashedCurrentName:     utils.KeyHash(to),
 	}
-	DeleteRecord(_db, del)
+	if err := DeleteRecord(_db, del); err != nil {
+		t.Fatal(err)
+	}
 	var mid db.Record
 	if err := _db.Where("id = ?", rd.ID).First(&mid).Error; err != nil {
 		t.Fatal(err)
 	}
 	assert.Equal(t, int64(1), mid.Count)
 
-	DeleteRecord(_db, del)
+	if err := DeleteRecord(_db, del); err != nil {
+		t.Fatal(err)
+	}
 	err := _db.Where("id = ?", rd.ID).First(&db.Record{}).Error
 	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
 }
@@ -476,7 +484,9 @@ func TestAddRecord_createsNew(t *testing.T) {
 		HashedCurrentName:     utils.KeyHash(to),
 		Count:                 1,
 	}
-	AddRecord(_db, rd)
+	if err := AddRecord(_db, rd); err != nil {
+		t.Fatal(err)
+	}
 	var got db.Record
 	if err := _db.Where("hashed_current_name = ?", utils.KeyHash(to)).First(&got).Error; err != nil {
 		t.Fatal(err)

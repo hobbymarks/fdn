@@ -598,39 +598,47 @@ func ArrayContainsElemenet[T comparable](s []T, e T) bool {
 	return slices.Contains(s, e)
 }
 
-// FDNFile updates the rename journal in the record database using the basenames of
-// currentPath and toBePath, then renames currentPath to toBePath on disk. When reversed is
-// false, it inserts a record for the forward rename; when true, it removes the matching
-// record for an undo. Returns any error from os.Rename.
+// FDNFile renames currentPath to toBePath, then updates the rename journal (record DB)
+// from basenames. Filesystem and DB cannot be one true atomic transaction; order is
+// rename-first so the journal never describes a rename that did not occur. If the journal
+// step fails, the rename is rolled back when os.Rename can reverse it.
 func FDNFile(currentPath string, toBePath string, reversed bool) error {
 	_to := filepath.Base(toBePath)
 	_cur := filepath.Base(currentPath)
 
+	if err := os.Rename(currentPath, toBePath); err != nil {
+		log.Error(err)
+		return err
+	}
+
 	_db := db.ConnectRDDB()
 	defer utils.DBClose(_db)
+	var journalErr error
 	if !reversed {
 		_rd := db.Record{
 			EncryptedPreviousName: utils.Encrypt(_to, _cur),
 			HashedCurrentName:     utils.KeyHash(_to),
 		}
-		AddRecord(_db, _rd)
+		journalErr = AddRecord(_db, _rd)
 	} else {
 		_rd := db.Record{
 			EncryptedPreviousName: utils.Encrypt(_cur, _to),
 			HashedCurrentName:     utils.KeyHash(_cur),
 		}
-		DeleteRecord(_db, _rd)
+		journalErr = DeleteRecord(_db, _rd)
 	}
-	// FIXME:update db record and rename should make sure atomic
-	if err := os.Rename(currentPath, toBePath); err != nil {
-		log.Error(err)
-		return err
+	if journalErr != nil {
+		if rb := os.Rename(toBePath, currentPath); rb != nil {
+			return fmt.Errorf("%w; rename rollback failed: %v", journalErr, rb)
+		}
+		log.Error(journalErr)
+		return journalErr
 	}
 	return nil
 }
 
 // AddRecord add a record in db
-func AddRecord(_db *gorm.DB, _rd db.Record) {
+func AddRecord(_db *gorm.DB, _rd db.Record) error {
 	var rd db.Record
 	rlt := _db.First(
 		&rd,
@@ -640,24 +648,16 @@ func AddRecord(_db *gorm.DB, _rd db.Record) {
 	)
 	if rlt.Error != nil {
 		if errors.Is(rlt.Error, gorm.ErrRecordNotFound) {
-			_rlt := _db.Create(&_rd)
-			if _rlt.Error != nil {
-				log.Error(_rlt.Error)
-			}
-		} else {
-			log.Fatal(rlt.Error)
+			return _db.Create(&_rd).Error
 		}
-	} else {
-		rd.Count++
-		_rlt := _db.Save(&rd)
-		if _rlt.Error != nil {
-			log.Error(_rlt.Error)
-		}
+		return rlt.Error
 	}
+	rd.Count++
+	return _db.Save(&rd).Error
 }
 
 // DeleteRecord delete a record in db
-func DeleteRecord(_db *gorm.DB, _rd db.Record) {
+func DeleteRecord(_db *gorm.DB, _rd db.Record) error {
 	var rd db.Record
 	rlt := _db.First(
 		&rd,
@@ -666,23 +666,14 @@ func DeleteRecord(_db *gorm.DB, _rd db.Record) {
 		_rd.HashedCurrentName,
 	)
 	if rlt.Error != nil {
-		log.Fatal(rlt.Error)
-	} else {
-		rd.Count--
-		if rd.Count != 0 {
-			_rlt := _db.Save(&rd)
-			if _rlt.Error != nil {
-				log.Error(_rlt.Error)
-			}
-		} else {
-			rd.Count++
-			_rlt := _db.Unscoped().Delete(&rd)
-			// Delete permanently
-			if _rlt.Error != nil {
-				log.Error(_rlt.Error)
-			}
-		}
+		return rlt.Error
 	}
+	rd.Count--
+	if rd.Count != 0 {
+		return _db.Save(&rd).Error
+	}
+	rd.Count++
+	return _db.Unscoped().Delete(&rd).Error
 }
 
 // CheckDoFDN renames or normalizes currentPath into toBePath via FDNFile when the destination
