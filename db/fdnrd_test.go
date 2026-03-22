@@ -14,7 +14,10 @@ import (
 )
 
 func TestConnectRDDB_NoParam(t *testing.T) {
-	dp := filepath.Join(utils.FDNDir(), "rd.db")
+	tmp := t.TempDir()
+	t.Setenv("HOME", tmp)
+	t.Setenv("USERPROFILE", tmp)
+	dp := filepath.Join(utils.FDNDir(), FDNDBFileName)
 	if utils.PathExist(dp) {
 		t.Errorf("please remove file %s", dp)
 		return

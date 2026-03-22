@@ -10,7 +10,7 @@ import (
 
 func TestEnsureDefaultCFG_seedsOnce(t *testing.T) {
 	dir := t.TempDir()
-	p := filepath.Join(dir, "sub", "cfg.db")
+	p := filepath.Join(dir, "sub", "fdn.db")
 	if err := EnsureDefaultCFG(p); err != nil {
 		t.Fatal(err)
 	}

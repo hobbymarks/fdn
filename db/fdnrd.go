@@ -27,8 +27,7 @@ func ConnectRDDB(path ...string) *gorm.DB {
 
 	// len(paths)==0
 	if len(path) == 0 {
-		fdnDir := utils.FDNDir()
-		dbPath = filepath.Join(fdnDir, "rd.db")
+		dbPath = DefaultFDNDBPath()
 	} else {
 		// path not exist
 		if err := os.MkdirAll(filepath.Dir(path[0]), os.ModePerm); err != nil {

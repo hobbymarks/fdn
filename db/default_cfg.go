@@ -14,7 +14,7 @@ func EnsureDefaultCFG(dbPath string) error {
 		return err
 	}
 	_db := utils.OpenDB(dbPath)
-	if err := _db.AutoMigrate(&TermWord{}, &ToSepWord{}, &Separator{}); err != nil {
+	if err := _db.AutoMigrate(&TermWord{}, &ToSepWord{}, &Separator{}, &Record{}); err != nil {
 		return err
 	}
 	var n int64
