@@ -5,7 +5,6 @@ Copyright © 2022 hobbymarks ihobbymarks@gmail.com
 package cmd
 
 import (
-	"embed"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -47,9 +46,6 @@ var (
 )
 
 var verbose bool
-
-//go:embed cfg.db
-var defaultCFG embed.FS
 
 // FDNConfigPath is the config file path
 var FDNConfigPath string
@@ -187,13 +183,8 @@ func init() {
 	fdnDir := utils.FDNDir()
 	FDNConfigPath = filepath.Join(fdnDir, "cfg.db")
 	if _, err := os.Lstat(FDNConfigPath); errors.Is(err, os.ErrNotExist) {
-		contents, err := defaultCFG.ReadFile("cfg.db")
-		if err != nil {
-			log.Errorf("read default config error:%s", err)
-		}
-		err = os.WriteFile(FDNConfigPath, contents, 0o644)
-		if err != nil {
-			log.Errorf("copy default config error:%s", err)
+		if err := db.EnsureDefaultCFG(FDNConfigPath); err != nil {
+			log.Errorf("init default config error:%s", err)
 		}
 	}
 }
