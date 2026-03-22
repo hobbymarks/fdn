@@ -47,10 +47,10 @@ var (
 
 var verbose bool
 
-// FDNConfigPath is the config file path
+// FDNConfigPath is the unified FDN database path (config + rename records); kept for compatibility.
 var FDNConfigPath string
 
-// FDNRecordPath is the record file path
+// FDNRecordPath matches FDNConfigPath; both point at fdn.db.
 var FDNRecordPath string
 
 var rootCmd = &cobra.Command{
@@ -154,9 +154,22 @@ var rootCmd = &cobra.Command{
 
 // Execute is the cmd entry
 func Execute() {
+	prepareFDNDataDir()
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
+	}
+}
+
+func prepareFDNDataDir() {
+	fdnDir := utils.FDNDir()
+	if err := db.MigrateLegacyFDNDatabases(fdnDir); err != nil {
+		log.Errorf("migrate legacy fdn databases: %s", err)
+	}
+	FDNConfigPath = filepath.Join(fdnDir, db.FDNDBFileName)
+	FDNRecordPath = FDNConfigPath
+	if err := db.EnsureDefaultCFG(FDNConfigPath); err != nil {
+		log.Errorf("init default config error:%s", err)
 	}
 }
 
@@ -178,15 +191,6 @@ func init() {
 
 	rootCmd.Flags().
 		BoolVarP(&verbose, "verbose", "V", false, "Print more verbose information")
-
-	// Process FDNConfig
-	fdnDir := utils.FDNDir()
-	FDNConfigPath = filepath.Join(fdnDir, "cfg.db")
-	if _, err := os.Lstat(FDNConfigPath); errors.Is(err, os.ErrNotExist) {
-		if err := db.EnsureDefaultCFG(FDNConfigPath); err != nil {
-			log.Errorf("init default config error:%s", err)
-		}
-	}
 }
 
 // RetrievedAbsPaths Paths from args by flag

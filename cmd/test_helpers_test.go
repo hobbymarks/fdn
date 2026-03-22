@@ -19,7 +19,7 @@ func testIsolatedHome(t *testing.T) string {
 func seedEmbeddedCfgDB(t *testing.T) {
 	t.Helper()
 	testIsolatedHome(t)
-	p := filepath.Join(utils.FDNDir(), "cfg.db")
+	p := filepath.Join(utils.FDNDir(), db.FDNDBFileName)
 	if err := db.EnsureDefaultCFG(p); err != nil {
 		t.Fatal(err)
 	}

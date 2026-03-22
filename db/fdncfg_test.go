@@ -15,7 +15,10 @@ import (
 )
 
 func TestConnectCFGDB_NoParam(t *testing.T) {
-	dp := filepath.Join(utils.FDNDir(), "cfg.db")
+	tmp := t.TempDir()
+	t.Setenv("HOME", tmp)
+	t.Setenv("USERPROFILE", tmp)
+	dp := filepath.Join(utils.FDNDir(), FDNDBFileName)
 	if utils.PathExist(dp) {
 		t.Errorf("please remove file %s", dp)
 		return
