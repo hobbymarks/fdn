@@ -3,3 +3,5 @@ bin/
 prof/
 vendor/
 coverage.out
+
+.vscode/
