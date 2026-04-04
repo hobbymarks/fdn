@@ -199,13 +199,13 @@ Manage ``fdn.db`` settings (separator, term list, separator-word list). Typical 
 
 .. code:: bash
 
-   fdn config -l sep
-   fdn config -c sep _
-   fdn config -c twl "MyBrand:mybrand"
-   fdn config -c swl "·"
-   fdn config -d twl mybrand
+   fdn config list sep
+   fdn config set separator _
+   fdn config add term "MyBrand:mybrand"
+   fdn config add sepword "·"
+   fdn config delete term mybrand
 
-See ``fdn config --help`` for full examples and flag aliases (``sep`` / ``twl`` / ``swl``).
+See ``fdn config --help`` for subcommands (``list`` / ``set`` / ``add`` / ``delete``).
 
 ``fdn mv``
 ~~~~~~~~~~

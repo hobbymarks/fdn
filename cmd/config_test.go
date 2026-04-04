@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"io"
 	"os"
 	"testing"
 
@@ -35,110 +36,92 @@ func Test_KVPrint(t *testing.T) {
 	assert.Contains(t, out, "v1")
 }
 
+func executeRoot(t *testing.T, args ...string) {
+	t.Helper()
+	rootCmd.SetOut(io.Discard)
+	rootCmd.SetErr(io.Discard)
+	rootCmd.SetArgs(args)
+	t.Cleanup(func() { rootCmd.SetArgs(nil) })
+	assert.NoError(t, rootCmd.Execute())
+}
+
 func Test_configCmd_listSeparator(t *testing.T) {
 	seedEmbeddedCfgDB(t)
-	assert.NoError(t, configCmd.Flags().Set("list", "sep"))
-	configCmd.Run(configCmd, nil)
-	assert.NoError(t, configCmd.Flags().Set("list", ""))
+	executeRoot(t, "config", "list", "sep")
 }
 
 func Test_configCmd_listTermWords(t *testing.T) {
 	seedEmbeddedCfgDB(t)
-	assert.NoError(t, configCmd.Flags().Set("list", "twl"))
-	configCmd.Run(configCmd, nil)
-	assert.NoError(t, configCmd.Flags().Set("list", ""))
+	executeRoot(t, "config", "list", "twl")
 }
 
 func Test_configCmd_listToSepWords(t *testing.T) {
 	seedEmbeddedCfgDB(t)
-	assert.NoError(t, configCmd.Flags().Set("list", "swl"))
-	configCmd.Run(configCmd, nil)
-	assert.NoError(t, configCmd.Flags().Set("list", ""))
+	executeRoot(t, "config", "list", "swl")
 }
 
 func Test_configCmd_listAliases(t *testing.T) {
 	seedEmbeddedCfgDB(t)
-	assert.NoError(t, configCmd.Flags().Set("list", "separator"))
-	configCmd.Run(configCmd, nil)
-	assert.NoError(t, configCmd.Flags().Set("list", "termkey_colon_termword_list"))
-	configCmd.Run(configCmd, nil)
-	assert.NoError(t, configCmd.Flags().Set("list", "to_separator_word_list"))
-	configCmd.Run(configCmd, nil)
-	assert.NoError(t, configCmd.Flags().Set("list", ""))
+	executeRoot(t, "config", "list", "separator")
+	executeRoot(t, "config", "list", "termkey_colon_termword_list")
+	executeRoot(t, "config", "list", "to_separator_word_list")
 }
 
 func Test_configCmd_configSeparator(t *testing.T) {
 	seedEmbeddedCfgDB(t)
-	assert.NoError(t, configCmd.Flags().Set("config", "sep"))
-	configCmd.Run(configCmd, []string{"_"})
-	assert.NoError(t, configCmd.Flags().Set("config", ""))
+	executeRoot(t, "config", "set", "separator", "_")
 }
 
 func Test_configCmd_configSeparatorAlias(t *testing.T) {
 	seedEmbeddedCfgDB(t)
-	assert.NoError(t, configCmd.Flags().Set("config", "separator"))
-	configCmd.Run(configCmd, []string{"z"})
-	assert.NoError(t, configCmd.Flags().Set("config", ""))
+	executeRoot(t, "config", "set", "separator", "z")
 }
 
 func Test_configCmd_configToSepWords(t *testing.T) {
 	seedEmbeddedCfgDB(t)
-	assert.NoError(t, configCmd.Flags().Set("config", "swl"))
-	configCmd.Run(configCmd, []string{"§"})
-	assert.NoError(t, configCmd.Flags().Set("config", ""))
+	executeRoot(t, "config", "add", "sepword", "§")
 }
 
 func Test_configCmd_configTermWords(t *testing.T) {
 	seedEmbeddedCfgDB(t)
-	assert.NoError(t, configCmd.Flags().Set("config", "twl"))
-	configCmd.Run(configCmd, []string{"mykey:myval"})
-	assert.NoError(t, configCmd.Flags().Set("config", ""))
+	executeRoot(t, "config", "add", "term", "mykey:myval")
 }
 
 func Test_configCmd_configTermWordsMultiple(t *testing.T) {
 	seedEmbeddedCfgDB(t)
-	assert.NoError(t, configCmd.Flags().Set("config", "twl"))
-	configCmd.Run(configCmd, []string{"k1:v1", "k2:v2"})
-	assert.NoError(t, configCmd.Flags().Set("config", ""))
+	executeRoot(t, "config", "add", "term", "k1:v1", "k2:v2")
 }
 
 func Test_configCmd_deleteToSepWords(t *testing.T) {
 	seedEmbeddedCfgDB(t)
 	_ = ConfigToSepWords([]string{"delme_sep_word"})
-	assert.NoError(t, configCmd.Flags().Set("delete", "swl"))
-	configCmd.Run(configCmd, []string{"delme_sep_word"})
-	assert.NoError(t, configCmd.Flags().Set("delete", ""))
+	executeRoot(t, "config", "delete", "sepword", "delme_sep_word")
 }
 
 func Test_configCmd_deleteTermWords(t *testing.T) {
 	seedEmbeddedCfgDB(t)
 	_ = ConfigTermWords(map[string]string{"delterm": "v"})
-	assert.NoError(t, configCmd.Flags().Set("delete", "twl"))
-	configCmd.Run(configCmd, []string{"delterm"})
-	assert.NoError(t, configCmd.Flags().Set("delete", ""))
+	executeRoot(t, "config", "delete", "term", "delterm")
 }
 
 func Test_configCmd_configTermWordsLongAlias(t *testing.T) {
 	seedEmbeddedCfgDB(t)
-	assert.NoError(t, configCmd.Flags().Set("config", "termkey_colon_termword_list"))
-	configCmd.Run(configCmd, []string{"longaliaskey:longaliasval"})
-	assert.NoError(t, configCmd.Flags().Set("config", ""))
+	executeRoot(t, "config", "add", "term", "longaliaskey:longaliasval")
 }
 
 func Test_configCmd_listLongAliases(t *testing.T) {
 	seedEmbeddedCfgDB(t)
-	assert.NoError(t, configCmd.Flags().Set("list", "separator"))
-	configCmd.Run(configCmd, nil)
-	assert.NoError(t, configCmd.Flags().Set("list", "to_separator_word_list"))
-	configCmd.Run(configCmd, nil)
-	assert.NoError(t, configCmd.Flags().Set("list", ""))
+	executeRoot(t, "config", "list", "separator")
+	executeRoot(t, "config", "list", "to_separator_word_list")
 }
 
-func Test_configCmd_combinedFlagsNoExit(t *testing.T) {
+func Test_configCmd_addSepwordThenListSep(t *testing.T) {
 	seedEmbeddedCfgDB(t)
-	assert.NoError(t, configCmd.Flags().Set("config", "swl"))
-	assert.NoError(t, configCmd.Flags().Set("list", "sep"))
-	configCmd.Run(configCmd, []string{"+"})
-	assert.NoError(t, configCmd.Flags().Set("config", ""))
-	assert.NoError(t, configCmd.Flags().Set("list", ""))
+	executeRoot(t, "config", "add", "sepword", "+")
+	executeRoot(t, "config", "list", "sep")
+}
+
+func Test_normalizeConfigKind_invalid(t *testing.T) {
+	_, err := normalizeConfigKind("nope")
+	assert.Error(t, err)
 }
