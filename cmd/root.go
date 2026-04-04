@@ -887,6 +887,5 @@ func OutputResult(
 // TODO(hm): Add option for permanently delete record when count is 0 or soft delete
 // TODO(hm): Add dry run for config
 // TODO(hm): Remove nosense word
-// TODO(hm): Support directory and files
 // TODO(hm): Support add prefix or postfix by private order
 // TODO(hm): Optimize loop through files performance

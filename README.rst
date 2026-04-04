@@ -82,19 +82,31 @@ Any platform (install from source with Go)
 Windows
 ~~~~~~~
 
-**Scoop** (recommended). GoReleaser publishes a Scoop manifest to the `hobbymarks/release
-<https://github.com/hobbymarks/release>`__ repository (``scoop-fdn/fdn.json``). With `Scoop
-<https://scoop.sh/>`__ installed, run:
+**Scoop** (recommended). With `Scoop <https://scoop.sh/>`__ installed:
 
-.. code:: powershell
+1. Add the bucket (one-time setup):
 
-   scoop install https://raw.githubusercontent.com/hobbymarks/release/main/scoop-fdn/fdn.json
+   .. code:: powershell
 
-Updates:
+      scoop bucket add hobbymarks https://github.com/hobbymarks/release
 
-.. code:: powershell
+2. Install fdn:
 
-   scoop update fdn
+   .. code:: powershell
+
+      scoop install hobbymarks/fdn
+
+3. Update:
+
+   .. code:: powershell
+
+      scoop update fdn
+
+   Alternatively, if you prefer a single-command installation without adding a bucket:
+
+   .. code:: powershell
+
+      scoop install https://raw.githubusercontent.com/hobbymarks/release/main/scoop-fdn/fdn.json
 
 **Go (from source).** Install Go from https://go.dev/dl/ and use the same ``go install`` command
 from **PowerShell** or **cmd** (ensure ``%USERPROFILE%\go\bin`` or your ``GOPATH\bin`` is on

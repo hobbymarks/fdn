@@ -3,7 +3,7 @@ module github.com/hobbymarks/fdn
 go 1.26.0
 
 require (
-	github.com/jedib0t/go-pretty/v6 v6.7.8
+	github.com/jedib0t/go-pretty/v6 v6.7.9
 	github.com/spf13/cobra v1.10.2
 	gorm.io/gorm v1.31.1
 )
@@ -27,7 +27,7 @@ require (
 	modernc.org/libc v1.70.0 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
-	modernc.org/sqlite v1.47.0 // indirect
+	modernc.org/sqlite v1.48.1 // indirect
 )
 
 require (
@@ -35,7 +35,7 @@ require (
 	github.com/glebarez/sqlite v1.11.0
 	github.com/hobbymarks/go-difflib v0.0.0-20260314160634-df4eeacba6ba
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/mattn/go-runewidth v0.0.21
+	github.com/mattn/go-runewidth v0.0.22
 	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/stretchr/testify v1.10.0
