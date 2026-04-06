@@ -17,6 +17,7 @@ import (
 	"github.com/hobbymarks/fdn/utils"
 )
 
+// version is 0.0.0 for local builds; release binaries get the tag from GoReleaser ldflags (.goreleaser.yaml).
 var version = "0.0.0"
 
 var (
@@ -99,7 +100,11 @@ var rootCmd = &cobra.Command{
 			} else {
 				ext := utils.Ext(path)
 				bn := strings.TrimSuffix(filepath.Base(path), ext)
-				if fdned := FDNedFrom(bn); fdned != bn {
+				fdned, err := FDNedFrom(bn)
+				if err != nil {
+					log.Fatal(err)
+				}
+				if fdned != bn {
 					toPath = filepath.Join(filepath.Dir(path), fdned+ext)
 				}
 			}
@@ -139,14 +144,16 @@ var rootCmd = &cobra.Command{
 
 // Execute is the cmd entry
 func Execute() {
-	prepareFDNDataDir()
+	if err := prepareFDNDataDir(); err != nil {
+		log.Fatal(err)
+	}
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
 	}
 }
 
-func prepareFDNDataDir() {
+func prepareFDNDataDir() error {
 	fdnDir := utils.FDNDir()
 	if err := db.MigrateLegacyFDNDatabases(fdnDir); err != nil {
 		log.Errorf("migrate legacy fdn databases: %s", err)
@@ -154,8 +161,9 @@ func prepareFDNDataDir() {
 	FDNConfigPath = filepath.Join(fdnDir, db.FDNDBFileName)
 	FDNRecordPath = FDNConfigPath
 	if err := db.EnsureDefaultCFG(FDNConfigPath); err != nil {
-		log.Errorf("init default config error:%s", err)
+		return err
 	}
+	return nil
 }
 
 func init() {

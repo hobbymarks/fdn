@@ -42,9 +42,9 @@ func captureStdout(t *testing.T, fn func()) string {
 	return <-outCh
 }
 
-func TestArrayContainsElemenet(t *testing.T) {
-	assert.True(t, ArrayContainsElemenet([]int{1, 2, 3}, 2))
-	assert.False(t, ArrayContainsElemenet([]string{"a"}, "b"))
+func TestArrayContainsElement(t *testing.T) {
+	assert.True(t, ArrayContainsElement([]int{1, 2, 3}, 2))
+	assert.False(t, ArrayContainsElement([]string{"a"}, "b"))
 }
 
 func TestDepthFiles_shallow(t *testing.T) {

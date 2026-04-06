@@ -32,6 +32,7 @@ func ConfigTermWords(keyValueMap map[string]string) error {
 			log.Debugf("skipped:%s", _termWord.OriginalLower)
 		}
 	}
+	invalidateTermWordRegexCache()
 	return nil
 }
 
@@ -45,6 +46,7 @@ func DeleteTermWords(keys []string) error {
 			log.Error(_rlt.Error)
 		}
 	}
+	invalidateTermWordRegexCache()
 	return nil
 }
 

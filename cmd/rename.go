@@ -1,88 +1,118 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"regexp"
 	"slices"
 	"strings"
+	"sync"
 	"unicode"
 	"unicode/utf8"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/hobbymarks/fdn/db"
 	"github.com/hobbymarks/fdn/utils"
 )
 
-func ReplaceWords(inputName string) string {
-	outName := inputName
-	mask := func(s string) ([]string, []bool) {
-		regescape := func(s string) string {
-			s = strings.ReplaceAll(s, "+", "\\+")
-			s = strings.ReplaceAll(s, "?", "\\?")
-			s = strings.ReplaceAll(s, "*", "\\*")
+var termWordRegexCache struct {
+	sync.RWMutex
+	pat string
+	re  *regexp.Regexp
+}
 
-			return s
-		}
+func invalidateTermWordRegexCache() {
+	termWordRegexCache.Lock()
+	defer termWordRegexCache.Unlock()
+	termWordRegexCache.pat = ""
+	termWordRegexCache.re = nil
+}
 
-		words := []string{}
-		wdmsk := []bool{}
-		var termWords []db.TermWord
-		_db := db.ConnectCFGDB()
-		defer utils.DBClose(_db)
-		rlt := _db.Find(&termWords)
-		if rlt.Error != nil {
-			log.Fatalf("retrive TermWord error %s", rlt.Error)
-		}
+func termWordAlternationRE(pattern string) *regexp.Regexp {
+	if pattern == "" {
+		return nil
+	}
+	termWordRegexCache.RLock()
+	if termWordRegexCache.pat == pattern && termWordRegexCache.re != nil {
+		re := termWordRegexCache.re
+		termWordRegexCache.RUnlock()
+		return re
+	}
+	termWordRegexCache.RUnlock()
 
-		pts := []string{}
-		for _, twd := range termWords {
-			pts = append(pts, regescape(twd.OriginalLower))
-		}
-		rp := regexp.MustCompile(strings.Join(pts, "|"))
-		allSliceIndex := rp.FindAllStringIndex(s, -1)
-		cur := 0
-		for _, slice := range allSliceIndex {
-			if slice[0] > cur {
-				words = append(words, s[cur:slice[0]])
-				wdmsk = append(wdmsk, false)
-			}
-			words = append(words, s[slice[0]:slice[1]])
-			wdmsk = append(wdmsk, true)
-			cur = slice[1]
-		}
-		if cur < len(s) {
-			words = append(words, s[cur:])
+	termWordRegexCache.Lock()
+	defer termWordRegexCache.Unlock()
+	if termWordRegexCache.pat == pattern && termWordRegexCache.re != nil {
+		return termWordRegexCache.re
+	}
+	termWordRegexCache.re = regexp.MustCompile(pattern)
+	termWordRegexCache.pat = pattern
+	return termWordRegexCache.re
+}
+
+func escapeTermForRegex(s string) string {
+	s = strings.ReplaceAll(s, "+", "\\+")
+	s = strings.ReplaceAll(s, "?", "\\?")
+	s = strings.ReplaceAll(s, "*", "\\*")
+	return s
+}
+
+func termAlternationPattern(termWords []db.TermWord) string {
+	if len(termWords) == 0 {
+		return ""
+	}
+	pts := make([]string, 0, len(termWords))
+	for _, twd := range termWords {
+		pts = append(pts, escapeTermForRegex(twd.OriginalLower))
+	}
+	return strings.Join(pts, "|")
+}
+
+func maskSegments(s string, termWords []db.TermWord) ([]string, []bool) {
+	pat := termAlternationPattern(termWords)
+	rp := termWordAlternationRE(pat)
+	if rp == nil {
+		return []string{s}, []bool{false}
+	}
+
+	words := []string{}
+	wdmsk := []bool{}
+	allSliceIndex := rp.FindAllStringIndex(s, -1)
+	cur := 0
+	for _, slice := range allSliceIndex {
+		if slice[0] > cur {
+			words = append(words, s[cur:slice[0]])
 			wdmsk = append(wdmsk, false)
 		}
-		return words, wdmsk
+		words = append(words, s[slice[0]:slice[1]])
+		wdmsk = append(wdmsk, true)
+		cur = slice[1]
 	}
-
-	words, wordMasks := mask(inputName)
-	if len(words) != len(wordMasks) {
-		log.Fatal("words not equal wordMasks")
+	if cur < len(s) {
+		words = append(words, s[cur:])
+		wdmsk = append(wdmsk, false)
 	}
+	return words, wdmsk
+}
 
-	newWords := []string{}
-
-	var sep db.Separator
-	var termWords []db.TermWord
-	var toSepWords []db.ToSepWord
+func ReplaceWords(inputName string) (string, error) {
 	_db := db.ConnectCFGDB()
 	defer utils.DBClose(_db)
-	rlt := _db.First(&sep)
-	if rlt.Error != nil {
-		log.Fatalf("retrieve Separator error %s", rlt.Error)
+
+	var termWords []db.TermWord
+	if rlt := _db.Find(&termWords); rlt.Error != nil {
+		return "", fmt.Errorf("retrieve TermWord: %w", rlt.Error)
+	}
+
+	var sep db.Separator
+	if rlt := _db.First(&sep); rlt.Error != nil {
+		return "", fmt.Errorf("retrieve Separator: %w", rlt.Error)
 	}
 	_sep := sep.Value
-	rlt = _db.Find(&termWords)
-	if rlt.Error != nil {
-		log.Fatalf("retrieve TermWord error %s", rlt.Error)
-	}
-	rlt = _db.Find(&toSepWords)
-	if rlt.Error != nil {
-		log.Fatalf("retrieve ToSepWord error %s", rlt.Error)
+
+	var toSepWords []db.ToSepWord
+	if rlt := _db.Find(&toSepWords); rlt.Error != nil {
+		return "", fmt.Errorf("retrieve ToSepWord: %w", rlt.Error)
 	}
 	slices.SortFunc(toSepWords, func(a, b db.ToSepWord) int {
 		ra := utf8.RuneCountInString(a.Value)
@@ -93,8 +123,14 @@ func ReplaceWords(inputName string) string {
 		return strings.Compare(a.Value, b.Value)
 	})
 
+	words, wordMasks := maskSegments(inputName, termWords)
+	if len(words) != len(wordMasks) {
+		return "", errors.New("words not equal wordMasks")
+	}
+
+	newWords := []string{}
 	rpCNS := regexp.MustCompile("[" + _sep + "]+")
-	termWordMap := make(map[string]string)
+	termWordMap := make(map[string]string, len(termWords))
 	for _, twd := range termWords {
 		termWordMap[twd.OriginalLower] = twd.TargetWord
 	}
@@ -106,9 +142,9 @@ func ReplaceWords(inputName string) string {
 		}
 		newWords = append(newWords, wd)
 	}
-	outName = strings.Join(newWords, "")
+	outName := strings.Join(newWords, "")
 	outName = rpCNS.ReplaceAllString(outName, _sep)
-	newWords = []string{}
+	newWords = newWords[:0]
 
 	for _, wd := range strings.Split(outName, _sep) {
 		if v, exist := termWordMap[wd]; exist {
@@ -118,25 +154,21 @@ func ReplaceWords(inputName string) string {
 	}
 	outName = strings.Join(newWords, _sep)
 
-	return outName
+	return outName, nil
 }
 
-func ProcessHeadTail(inputName string) string {
-	outName := inputName
-
-	var sep db.Separator
+func ProcessHeadTail(inputName string) (string, error) {
 	_db := db.ConnectCFGDB()
 	defer utils.DBClose(_db)
-	rlt := _db.First(&sep)
-	if rlt.Error != nil {
-		log.Fatalf("retrieve Separator error %s", rlt.Error)
+
+	var sep db.Separator
+	if rlt := _db.First(&sep); rlt.Error != nil {
+		return "", fmt.Errorf("retrieve Separator: %w", rlt.Error)
 	}
 	_sep := sep.Value
 
 	rpHTSeps := regexp.MustCompile("^" + _sep + "+" + "|" + _sep + "+" + "$")
-	outName = rpHTSeps.ReplaceAllString(outName, "")
-
-	return outName
+	return rpHTSeps.ReplaceAllString(inputName, ""), nil
 }
 
 func ASCHead(inputName string) string {
@@ -166,19 +198,19 @@ func ASCHead(inputName string) string {
 	return ascH.String() + outName
 }
 
-func ArrayContainsElemenet[T comparable](s []T, e T) bool {
+func ArrayContainsElement[T comparable](s []T, e T) bool {
 	return slices.Contains(s, e)
 }
 
-// FDNedFrom returns the FDN-normalized form of input by applying, in order, ReplaceWords
-// (configured term and separator rules from the config DB), ProcessHeadTail (strip leading
-// and trailing separator runs), and ASCHead (synthetic ASCII prefix when the first rune is
-// not a Latin letter or digit).
-func FDNedFrom(input string) string {
-	// TODO(hm): Optimize name
-	output := input
-	output = ReplaceWords(input)
-	output = ProcessHeadTail(output)
-	// output = ASCHead(output)
-	return output
+// FDNedFrom applies ReplaceWords then ProcessHeadTail using the config database.
+func FDNedFrom(input string) (string, error) {
+	out, err := ReplaceWords(input)
+	if err != nil {
+		return "", err
+	}
+	out, err = ProcessHeadTail(out)
+	if err != nil {
+		return "", err
+	}
+	return out, nil
 }

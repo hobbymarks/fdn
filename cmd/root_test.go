@@ -22,6 +22,7 @@ func TestRetrievedAbsPaths(t *testing.T) {
 
 func TestFDNedFrom(t *testing.T) {
 	seedEmbeddedCfgDB(t)
-	assert := assert.New(t)
-	assert.Equal(FDNedFrom("123 456 789"), "123_456_789", "should be equal")
+	out, err := FDNedFrom("123 456 789")
+	assert.NoError(t, err)
+	assert.Equal(t, "123_456_789", out)
 }
