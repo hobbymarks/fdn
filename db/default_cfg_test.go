@@ -32,6 +32,6 @@ func TestEnsureDefaultCFG_seedsOnce(t *testing.T) {
 		t.Fatal(err)
 	}
 	assert.Equal(t, int64(7), ts)
-	assert.Equal(t, int64(19), sws)
+	assert.Equal(t, int64(6320), sws)
 	assert.Equal(t, int64(1), seps)
 }

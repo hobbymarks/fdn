@@ -33,3 +33,7 @@ check:
     gopls version
     dlv version
     staticcheck --version
+
+# Regenerate db/default_emoji_sepwords.txt (Unicode inputs in db/; not loaded by fdn at runtime)
+emoji-sepwords:
+    cd db && go run ./emojigen -dir . -o default_emoji_sepwords.txt
