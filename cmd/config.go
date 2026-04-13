@@ -28,14 +28,16 @@ Subcommands:
   add term          add one or more original:target pairs (keys stored lowercased)
   add sepword       register substrings to replace with the separator (outside masked terms)
   delete term       remove terms by original key as configured
-  delete sepword    remove separator-words by the same literal strings used when adding`,
+  delete sepword    remove separator-words by the same literal strings used when adding
+  reset             reset all configuration to built-in defaults`,
 	Example: `  fdn config list sep
   fdn config list twl
   fdn config set separator _
   fdn config add term "MyBrand:mybrand" "wiki:wikipedia"
   fdn config add sepword "·" "—"
   fdn config delete term mybrand
-  fdn config delete sepword "·"`,
+  fdn config delete sepword "·"
+  fdn config reset`,
 }
 
 var configListCmd = &cobra.Command{
@@ -71,7 +73,7 @@ var configSetCmd = &cobra.Command{
 
 var configAddTermCmd = &cobra.Command{
 	Use:   "term <original:target>...",
-	Short: "Add or skip-existing term replacements (case-insensitive match on original)",
+	Short: "Add or update term replacements (case-insensitive match on original)",
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		data := make(map[string]string, len(args))
@@ -91,7 +93,7 @@ var configAddTermCmd = &cobra.Command{
 
 var configAddSepwordCmd = &cobra.Command{
 	Use:   "sepword <substring>...",
-	Short: "Add separator-like substrings (skipped if already present)",
+	Short: "Add or update separator-like substrings",
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := ConfigToSepWords(args); err != nil {
@@ -135,6 +137,16 @@ var configDeleteCmd = &cobra.Command{
 	Short: "Remove term mappings or separator-words",
 }
 
+var configResetCmd = &cobra.Command{
+	Use:   "reset",
+	Short: "Reset all configuration to built-in defaults",
+	Long: `Removes all user-defined configuration entries and restores built-in defaults.
+User-added term words, separator words, and separator settings will be lost.`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runConfigReset()
+	},
+}
+
 func normalizeConfigKind(s string) (string, error) {
 	switch strings.ToLower(strings.TrimSpace(s)) {
 	case "sep", "separator":
@@ -158,52 +170,68 @@ func runConfigList(kind string) error {
 		if rlt := _db.First(&sep); rlt.Error != nil {
 			return fmt.Errorf("retrieve Separator: %w", rlt.Error)
 		}
-		_KVPrint("Separator", map[string]string{sep.KeyHash: sep.Value})
+		_KVPrint("Separator", []kvEntry{{Key: sep.KeyHash, Source: sep.Source, Value: sep.Value}})
 		return nil
 	case "twl":
 		var termWords []db.TermWord
 		if rlt := _db.Find(&termWords); rlt.Error != nil {
 			return fmt.Errorf("retrieve TermWord: %w", rlt.Error)
 		}
-		kvs := map[string]string{}
-		for _, tw := range termWords {
-			kvs[tw.KeyHash] = tw.OriginalLower + ":" + tw.TargetWord
+		entries := make([]kvEntry, len(termWords))
+		for i, tw := range termWords {
+			entries[i] = kvEntry{Key: tw.KeyHash, Source: tw.Source, Value: tw.OriginalLower + ":" + tw.TargetWord}
 		}
-		_KVPrint("TermWords", kvs)
+		_KVPrint("TermWords", entries)
 		return nil
 	case "swl":
 		var toSepWords []db.ToSepWord
 		if rlt := _db.Find(&toSepWords); rlt.Error != nil {
 			return fmt.Errorf("retrieve ToSepWord: %w", rlt.Error)
 		}
-		sws := map[string]string{}
-		for _, sw := range toSepWords {
-			sws[sw.KeyHash] = sw.Value
+		entries := make([]kvEntry, len(toSepWords))
+		for i, sw := range toSepWords {
+			entries[i] = kvEntry{Key: sw.KeyHash, Source: sw.Source, Value: sw.Value}
 		}
-		_KVPrint("ToBeSepWords", sws)
+		_KVPrint("ToBeSepWords", entries)
 		return nil
 	default:
 		return fmt.Errorf("unknown kind %q", kind)
 	}
 }
 
+func runConfigReset() error {
+	fdnDir := utils.FDNDir()
+	dbPath := db.DefaultFDNDBPath()
+	if err := db.ResetCFG(dbPath); err != nil {
+		return fmt.Errorf("reset config: %w", err)
+	}
+	fmt.Fprintf(os.Stdout, "Configuration reset to built-in defaults in %s\n", fdnDir)
+	return nil
+}
+
 func init() {
 	rootCmd.AddCommand(configCmd)
 
-	configCmd.AddCommand(configListCmd, configSetCmd, configAddCmd, configDeleteCmd)
+	configCmd.AddCommand(configListCmd, configSetCmd, configAddCmd, configDeleteCmd, configResetCmd)
 	configSetCmd.AddCommand(configSetSeparatorCmd)
 	configAddCmd.AddCommand(configAddTermCmd, configAddSepwordCmd)
 	configDeleteCmd.AddCommand(configDeleteTermCmd, configDeleteSepwordCmd)
 }
 
-func _KVPrint(title string, kvs map[string]string) {
+type kvEntry struct {
+	Key    string
+	Source string
+	Value  string
+}
+
+func _KVPrint(title string, entries []kvEntry) {
 	t := table.NewWriter()
 	t.SetAutoIndex(true)
 	t.SetOutputMirror(os.Stdout)
 	t.SetTitle(title)
-	t.AppendHeader(table.Row{"KeyID", "Value"})
-	for k, v := range kvs {
-		t.AppendRow(table.Row{k, v})
+	t.AppendHeader(table.Row{"KeyID", "Source", "Value"})
+	for _, e := range entries {
+		t.AppendRow(table.Row{e.Key, e.Source, e.Value})
 	}
 	t.AppendSeparator()
 	t.Render()

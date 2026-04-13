@@ -13,12 +13,18 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	BuiltinSource = "builtin"
+	UserSource    = "user"
+)
+
 // TermWord Term Word
 type TermWord struct {
 	gorm.Model
 	KeyHash       string `gorm:"unique"`
 	OriginalLower string
 	TargetWord    string
+	Source        string `gorm:"default:user"`
 }
 
 // ToSepWord will be change to separator
@@ -26,6 +32,7 @@ type ToSepWord struct {
 	gorm.Model
 	KeyHash string `gorm:"unique"`
 	Value   string
+	Source  string `gorm:"default:user"`
 }
 
 // Separator separator
@@ -33,6 +40,7 @@ type Separator struct {
 	gorm.Model
 	KeyHash string `gorm:"unique"`
 	Value   string
+	Source  string `gorm:"default:user"`
 }
 
 // ConnectCFGDB connect config database

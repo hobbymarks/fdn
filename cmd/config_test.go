@@ -23,7 +23,7 @@ func Test_KVPrint(t *testing.T) {
 		close(done)
 	}()
 
-	_KVPrint("Title", map[string]string{"k1": "v1", "k2": "v2"})
+	_KVPrint("Title", []kvEntry{{Key: "k1", Source: "user", Value: "v1"}, {Key: "k2", Source: "builtin", Value: "v2"}})
 
 	_ = w.Close()
 	os.Stdout = old
