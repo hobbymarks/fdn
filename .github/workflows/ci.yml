@@ -1,0 +1,89 @@
+name: ci
+
+on:
+  push:
+    branches: [gover]
+  pull_request:
+    branches: [gover]
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+
+      - name: Go mod tidy
+        run: go mod tidy
+
+      - name: Go mod verify
+        run: go mod verify
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: golangci-lint
+        if: runner.os == 'Linux'
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.62
+          args: --timeout=5m
+
+      - name: Test (race on Linux)
+        if: runner.os == 'Linux'
+        run: go test -race ./...
+
+      - name: Test (Windows)
+        if: runner.os == 'Windows'
+        run: go test ./...
+
+      - name: Build (Unix)
+        if: runner.os != 'Windows'
+        run: go build -o fdn .
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: go build -o fdn.exe .
+
+      - name: Smoke CLI (Unix)
+        if: runner.os != 'Windows'
+        run: ./fdn -V && ./fdn --help >/dev/null
+
+      - name: Smoke CLI (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./fdn.exe -V; ./fdn.exe --help | Out-Null
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+
+      - name: Go mod vendor
+        run: go mod vendor
+
+      - uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.FDN_GITHUB_WORKFLOW_TOKEN }}
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
