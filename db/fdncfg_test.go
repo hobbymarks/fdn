@@ -14,6 +14,7 @@ import (
 )
 
 func TestConnectCFGDB_NoParam(t *testing.T) {
+	resetSharedDBOnCleanup(t)
 	tmp := t.TempDir()
 	t.Setenv("HOME", tmp)
 	t.Setenv("USERPROFILE", tmp)
@@ -43,6 +44,7 @@ func TestConnectCFGDB_NoParam(t *testing.T) {
 }
 
 func TestConnectCFGDB_AParam_Exist(t *testing.T) {
+	resetSharedDBOnCleanup(t)
 	f, err := os.CreateTemp("", "cfg*.db")
 	if err != nil {
 		log.Fatal(err)
@@ -67,6 +69,7 @@ func TestConnectCFGDB_AParam_Exist(t *testing.T) {
 }
 
 func TestConnectCFGDB_AParam_NotExist(t *testing.T) {
+	resetSharedDBOnCleanup(t)
 	dp := filepath.Join(
 		utils.RandEnAlph(32),
 		"cfg"+utils.RandEnAlph(9)+".db",

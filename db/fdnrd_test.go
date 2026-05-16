@@ -14,6 +14,7 @@ import (
 )
 
 func TestConnectRDDB_NoParam(t *testing.T) {
+	resetSharedDBOnCleanup(t)
 	tmp := t.TempDir()
 	t.Setenv("HOME", tmp)
 	t.Setenv("USERPROFILE", tmp)
@@ -43,6 +44,7 @@ func TestConnectRDDB_NoParam(t *testing.T) {
 }
 
 func TestConnectRDDB_AParam_Exist(t *testing.T) {
+	resetSharedDBOnCleanup(t)
 	f, err := os.CreateTemp("", "rd*.db")
 	if err != nil {
 		log.Fatal(err)
@@ -67,6 +69,7 @@ func TestConnectRDDB_AParam_Exist(t *testing.T) {
 }
 
 func TestConnectRDDB_AParam_NotExist(t *testing.T) {
+	resetSharedDBOnCleanup(t)
 	dp := filepath.Join(
 		utils.RandEnAlph(32),
 		"rd"+utils.RandEnAlph(9)+".db",
