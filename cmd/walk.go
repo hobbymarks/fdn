@@ -111,7 +111,7 @@ func FilteredSubPaths(
 		}
 		absolutePaths = paths
 	}
-	if onlyDir {
+	if onlyDir && depthLevel != -1 {
 		absPath, err := filepath.Abs(dirPath)
 		if err != nil {
 			slog.Error(err.Error())

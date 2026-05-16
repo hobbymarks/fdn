@@ -559,3 +559,73 @@ func TestConfigSeparator_skipDuplicate(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestE2E_renameAndReverse(t *testing.T) {
+	seedEmbeddedCfgDB(t)
+	defer withDisplayFlags(t, true, false, false)()
+
+	dir := t.TempDir()
+
+	orig := filepath.Join(dir, "My Test File.txt")
+	if err := os.WriteFile(orig, []byte("hello"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	out, err := FDNedFrom("My Test File")
+	if err != nil {
+		t.Fatal(err)
+	}
+	renamed := filepath.Join(dir, out+".txt")
+
+	if err := FDNFile(orig, renamed, false); err != nil {
+		t.Fatal(err)
+	}
+	assert.NoFileExists(t, orig)
+	assert.FileExists(t, renamed)
+
+	if err := FDNFile(renamed, orig, true); err != nil {
+		t.Fatal(err)
+	}
+	assert.FileExists(t, orig)
+	assert.NoFileExists(t, renamed)
+}
+
+func TestE2E_fullRenamePipeline(t *testing.T) {
+	seedEmbeddedCfgDB(t)
+	defer withDisplayFlags(t, true, false, false)()
+
+	dir := t.TempDir()
+	files := map[string]string{
+		"Hello World.txt": "Hello_World.txt",
+		"Foo  Bar.txt":    "Foo_Bar.txt",
+	}
+	for name := range files {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte("x"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	allPaths, err := RetrievedAbsPaths([]string{dir}, 1, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range allPaths {
+		fn := filepath.Base(p)
+		ext := filepath.Ext(fn)
+		bn := fn[:len(fn)-len(ext)]
+		if expected, ok := files[fn]; ok {
+			fdned, err := FDNedFrom(bn)
+			if err != nil {
+				t.Fatal(err)
+			}
+			assert.Equal(t, expected, fdned+ext)
+		}
+	}
+}
+
+func TestReplaceWords_spacesBecomeSeparator(t *testing.T) {
+	seedEmbeddedCfgDB(t)
+	out, err := ReplaceWords("Hello World Test")
+	assert.NoError(t, err)
+	assert.Equal(t, "Hello_World_Test", out)
+}

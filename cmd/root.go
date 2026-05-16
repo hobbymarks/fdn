@@ -57,15 +57,23 @@ var rootCmd = &cobra.Command{
 		printTipFlag := false
 		curHashEncryPre := map[string]string{}
 		if reverse {
-			var records []db.Record
 			conn, err := db.ConnectRDDB()
 			if err != nil {
 				slog.Error(err.Error())
 				os.Exit(1)
 			}
-			conn.Find(&records)
-
-			for _, rec := range records {
+			rows, err := conn.Model(&db.Record{}).Rows()
+			if err != nil {
+				slog.Error(err.Error())
+				os.Exit(1)
+			}
+			defer rows.Close()
+			for rows.Next() {
+				var rec db.Record
+				if err := conn.ScanRows(rows, &rec); err != nil {
+					slog.Error(err.Error())
+					continue
+				}
 				curHashEncryPre[rec.HashedCurrentName] = rec.EncryptedPreviousName
 			}
 		}
