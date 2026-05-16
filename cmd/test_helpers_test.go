@@ -11,10 +11,10 @@ import (
 func testIsolatedHome(t *testing.T) string {
 	t.Helper()
 	db.ResetSharedDB()
-	t.Cleanup(func() { db.ResetSharedDB() })
 	tmp := t.TempDir()
 	t.Setenv("HOME", tmp)
 	t.Setenv("USERPROFILE", tmp)
+	t.Cleanup(func() { db.ResetSharedDB() })
 	return tmp
 }
 
