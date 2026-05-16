@@ -176,10 +176,10 @@ func prepareFDNDataDir() error {
 		slog.Error(fmt.Sprintf("migrate legacy fdn databases: %s", err))
 	}
 	dbPath := filepath.Join(fdnDir, db.FDNDBFileName)
-	if err := db.EnsureDefaultCFG(dbPath); err != nil {
+	if err := db.InitDB(dbPath); err != nil {
 		return err
 	}
-	if err := db.InitDB(dbPath); err != nil {
+	if err := db.EnsureDefaultCFG(dbPath); err != nil {
 		return err
 	}
 	return nil

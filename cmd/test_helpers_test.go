@@ -26,10 +26,10 @@ func seedEmbeddedCfgDB(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := filepath.Join(fdnDir, db.FDNDBFileName)
-	if err := db.EnsureDefaultCFG(p); err != nil {
+	if err := db.InitDB(p); err != nil {
 		t.Fatal(err)
 	}
-	if err := db.InitDB(p); err != nil {
+	if err := db.EnsureDefaultCFG(p); err != nil {
 		t.Fatal(err)
 	}
 }
