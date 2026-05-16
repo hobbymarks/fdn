@@ -5,9 +5,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"log/slog"
+
 	"github.com/fatih/color"
 	"github.com/mattn/go-runewidth"
-	log "github.com/sirupsen/logrus"
 	"golang.org/x/term"
 
 	"github.com/hobbymarks/go-difflib/difflib"
@@ -41,7 +42,7 @@ func noEffectTip() {
 	if term.IsTerminal(0) {
 		tw, _, err := term.GetSize(0)
 		if err != nil {
-			log.Error(err)
+			slog.Error(err.Error())
 			tipsDivider = strings.Repeat("*", 80)
 		} else {
 			tipsDivider = strings.Repeat("*", tw)
@@ -88,7 +89,7 @@ func OutputResult(
 			case 'r':
 				as := strings.Join(a[opc.I1:opc.I2], "")
 				bs := strings.Join(b[opc.J1:opc.J2], "")
-				log.Trace("R:" + as + bs)
+				slog.Debug("R:" + as + bs)
 				if pretty {
 					if sw(as) > sw(bs) {
 						richOrigin += red(as)
@@ -106,7 +107,7 @@ func OutputResult(
 				}
 			case 'd':
 				as := strings.Join(a[opc.I1:opc.I2], "")
-				log.Trace("D:" + as)
+				slog.Debug("D:" + as)
 				if pretty {
 					richOrigin += red(as)
 					richProcessed += strings.Repeat(" ", sw(as))
@@ -116,7 +117,7 @@ func OutputResult(
 			case 'i':
 				as := strings.Join(a[opc.I1:opc.I2], "")
 				bs := strings.Join(b[opc.J1:opc.J2], "")
-				log.Trace("I:" + as + bs)
+				slog.Debug("I:" + as + bs)
 				if pretty {
 					richOrigin += as + strings.Repeat(" ", sw(bs))
 					richProcessed += green(bs)
@@ -127,7 +128,7 @@ func OutputResult(
 			case 'e':
 				as := strings.Join(a[opc.I1:opc.I2], "")
 				bs := strings.Join(b[opc.J1:opc.J2], "")
-				log.Trace("E:" + as + bs)
+				slog.Debug("E:" + as + bs)
 				richOrigin += as
 				richProcessed += bs
 			}

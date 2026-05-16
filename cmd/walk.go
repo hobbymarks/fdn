@@ -1,11 +1,11 @@
 package cmd
 
 import (
+	"errors"
 	"io/fs"
+	"log/slog"
 	"os"
 	"path/filepath"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func RetrievedAbsPaths(
@@ -14,31 +14,38 @@ func RetrievedAbsPaths(
 	onlyDir bool,
 ) ([]string, error) {
 	var absolutePaths []string
+	var errs []error
 
 	for _, path := range inputPaths {
 		fileInfo, err := os.Stat(path)
 		if err != nil {
-			log.Error(err)
+			slog.Error(err.Error())
+			errs = append(errs, err)
 			continue
 		} else {
 			if fileInfo.IsDir() {
 				paths, err := FilteredSubPaths(path, depthLevel, onlyDir)
 				if err != nil {
-					log.Error(err)
+					slog.Error(err.Error())
+					errs = append(errs, err)
 				} else {
 					absolutePaths = append(absolutePaths, paths...)
 				}
 			} else if !onlyDir && fileInfo.Mode().IsRegular() {
 				absPath, err := filepath.Abs(path)
 				if err != nil {
-					log.Error(err)
+					slog.Error(err.Error())
+					errs = append(errs, err)
 				} else {
 					absolutePaths = append(absolutePaths, absPath)
 				}
 			} else {
-				log.Trace("skipped:", path)
+				slog.Debug("skipped:" + path)
 			}
 		}
+	}
+	if len(absolutePaths) == 0 && len(errs) > 0 {
+		return nil, errors.Join(errs...)
 	}
 	return absolutePaths, nil
 }
@@ -48,13 +55,13 @@ func RemoveHidden(abspaths []string) []string {
 	for _, apath := range abspaths {
 		hidden, err := IsHidden(apath)
 		if err != nil {
-			log.Error(err)
+			slog.Error(err.Error())
 		} else {
 			if !hidden {
 				results = append(results, apath)
 			}
 		}
-		log.Trace("IsHidden:", hidden, apath)
+		slog.Debug("IsHidden:" + apath)
 	}
 	return results
 }
@@ -67,39 +74,39 @@ func FilteredSubPaths(
 	var absolutePaths []string
 
 	dirPath = filepath.Clean(dirPath)
-	log.Trace(dirPath)
+	slog.Debug(dirPath)
 	if depthLevel == -1 {
 		err := filepath.WalkDir(
 			dirPath,
 			func(path string, info fs.DirEntry, err error) error {
 				if err != nil {
-					log.Trace(err)
+					slog.Debug(err.Error())
 					return err
 				}
 				if (onlyDir && info.IsDir()) ||
 					(!onlyDir && info.Type().IsRegular()) {
-					log.Trace("isDir:", path)
+					slog.Debug("isDir:" + path)
 					absPath, err := filepath.Abs(filepath.Join(dirPath, path))
 					if err != nil {
-						log.Error(err)
+						slog.Error(err.Error())
 					} else {
 						absolutePaths = append(absolutePaths, absPath)
 					}
 					return nil
 				}
-				log.Trace("skipped:", path)
+				slog.Debug("skipped:" + path)
 
 				return nil
 			},
 		)
 		if err != nil {
-			log.Error(err)
+			slog.Error(err.Error())
 			return nil, err
 		}
 	} else {
 		paths, err := DepthFiles(dirPath, depthLevel, onlyDir)
 		if err != nil {
-			log.Error(err)
+			slog.Error(err.Error())
 			return nil, err
 		}
 		absolutePaths = paths
@@ -107,7 +114,7 @@ func FilteredSubPaths(
 	if onlyDir {
 		absPath, err := filepath.Abs(dirPath)
 		if err != nil {
-			log.Error(err)
+			slog.Error(err.Error())
 		} else {
 			absolutePaths = append(absolutePaths, absPath)
 		}
@@ -122,16 +129,16 @@ func DepthFiles(
 ) ([]string, error) {
 	var absolutePaths []string
 
-	log.Debug(depthLevel)
+	slog.Debug("depth", "level", depthLevel)
 	files, err := os.ReadDir(dirPath)
 	if err != nil {
-		log.Error(err)
+		slog.Error(err.Error())
 		return nil, err
 	}
 	for _, file := range files {
 		absPath, err := filepath.Abs(filepath.Join(dirPath, file.Name()))
 		if err != nil {
-			log.Error(err)
+			slog.Error(err.Error())
 		} else {
 			if (onlyDir && file.IsDir()) ||
 				(!onlyDir && file.Type().IsRegular()) {
@@ -140,7 +147,7 @@ func DepthFiles(
 			if depthLevel > 1 && file.Type().IsDir() {
 				files, err := DepthFiles(absPath, depthLevel-1, onlyDir)
 				if err != nil {
-					log.Error(err)
+					slog.Error(err.Error())
 				} else {
 					absolutePaths = append(absolutePaths, files...)
 				}

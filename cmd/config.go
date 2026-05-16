@@ -9,10 +9,11 @@ import (
 	"os"
 	"strings"
 
+	"log/slog"
+
 	"github.com/hobbymarks/fdn/db"
 	"github.com/hobbymarks/fdn/utils"
 	"github.com/jedib0t/go-pretty/v6/table"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -60,7 +61,7 @@ var configSetSeparatorCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := ConfigSeparator(args[0]); err != nil {
-			log.Error(err)
+			slog.Error(err.Error())
 		}
 		return nil
 	},
@@ -85,7 +86,7 @@ var configAddTermCmd = &cobra.Command{
 			data[key] = val
 		}
 		if err := ConfigTermWords(data); err != nil {
-			log.Error(err)
+			slog.Error(err.Error())
 		}
 		return nil
 	},
@@ -97,7 +98,7 @@ var configAddSepwordCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := ConfigToSepWords(args); err != nil {
-			log.Error(err)
+			slog.Error(err.Error())
 		}
 		return nil
 	},
@@ -114,7 +115,7 @@ var configDeleteTermCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := DeleteTermWords(args); err != nil {
-			log.Error(err)
+			slog.Error(err.Error())
 		}
 		return nil
 	},
@@ -126,7 +127,7 @@ var configDeleteSepwordCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := DeleteToSepWords(args); err != nil {
-			log.Error(err)
+			slog.Error(err.Error())
 		}
 		return nil
 	},

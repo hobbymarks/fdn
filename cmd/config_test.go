@@ -125,3 +125,9 @@ func Test_normalizeConfigKind_invalid(t *testing.T) {
 	_, err := normalizeConfigKind("nope")
 	assert.Error(t, err)
 }
+
+func Test_runConfigReset(t *testing.T) {
+	seedEmbeddedCfgDB(t)
+	executeRoot(t, "config", "reset")
+	executeRoot(t, "config", "list", "sep")
+}

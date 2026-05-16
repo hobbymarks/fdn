@@ -5,12 +5,13 @@ Copyright © 2022 hobbymarks ihobbymarks@gmail.com
 package cmd
 
 import (
+	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/hobbymarks/fdn/db"
@@ -43,25 +44,24 @@ var rootCmd = &cobra.Command{
   fdn mv ./doc.pdf ./backup/
   fdn mv "My File.txt" ./inbox/My_File.txt`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		logFormatter := new(log.TextFormatter)
-		logFormatter.TimestampFormat = "15:04:05.000"
-		logFormatter.FullTimestamp = true
-		log.SetFormatter(logFormatter)
+		level := slog.LevelWarn
 		if verbose {
-			log.SetLevel(log.InfoLevel)
-		} else {
-			log.SetLevel(log.WarnLevel)
+			level = slog.LevelInfo
 		}
+		opts := &slog.HandlerOptions{Level: level}
+		handler := slog.NewTextHandler(os.Stderr, opts)
+		slog.SetDefault(slog.New(handler))
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Info("rootCmd executing ...")
+		slog.Info("rootCmd executing ...")
 		printTipFlag := false
 		curHashEncryPre := map[string]string{}
 		if reverse {
 			var records []db.Record
 			conn, err := db.ConnectRDDB()
 			if err != nil {
-				log.Fatal(err)
+				slog.Error(err.Error())
+				os.Exit(1)
 			}
 			conn.Find(&records)
 
@@ -69,20 +69,21 @@ var rootCmd = &cobra.Command{
 				curHashEncryPre[rec.HashedCurrentName] = rec.EncryptedPreviousName
 			}
 		}
-		log.Infof("search paths...")
+		slog.Info("search paths...")
 		paths, err := RetrievedAbsPaths(inputPaths, depthLevel, onlyDirectory)
-		log.Infof("search paths!")
+		slog.Info("search paths!")
 		if err != nil {
-			log.Fatal(err)
+			slog.Error(err.Error())
+			os.Exit(1)
 		}
 		paths = RemoveHidden(paths)
 		sort.SliceStable(
 			paths,
 			func(i, j int) bool { return paths[i] > paths[j] },
 		)
-		log.Info("loopthrough process path...")
+		slog.Info("loopthrough process path...")
 		for _, path := range paths {
-			log.Infof("process...:%s", path)
+			slog.Info(fmt.Sprintf("process...:%s", path))
 			path = filepath.Clean(path)
 			toPath := ""
 			if reverse {
@@ -91,7 +92,8 @@ var rootCmd = &cobra.Command{
 				if exist {
 					preName, err := utils.Decrypt(curName, encryptedPre)
 					if err != nil {
-						log.Fatal(err)
+						slog.Error(err.Error())
+						os.Exit(1)
 					}
 					toPath = filepath.Join(filepath.Dir(path), preName)
 				}
@@ -100,14 +102,15 @@ var rootCmd = &cobra.Command{
 				bn := strings.TrimSuffix(filepath.Base(path), ext)
 				fdned, err := FDNedFrom(bn)
 				if err != nil {
-					log.Fatal(err)
+					slog.Error(err.Error())
+					os.Exit(1)
 				}
 				if fdned != bn {
 					toPath = filepath.Join(filepath.Dir(path), fdned+ext)
 				}
 			}
 			if toPath == "" {
-				log.Infof("process cont!:%s", path)
+				slog.Info(fmt.Sprintf("process cont!:%s", path))
 				continue
 			}
 			if inplace {
@@ -131,9 +134,9 @@ var rootCmd = &cobra.Command{
 					OutputResult(path, toPath, false, fullpath)
 				}
 			}
-			log.Infof("process!:%s", path)
+			slog.Info(fmt.Sprintf("process!:%s", path))
 		}
-		log.Info("loopthrough process path!")
+		slog.Info("loopthrough process path!")
 		if printTipFlag {
 			noEffectTip()
 		}
@@ -142,11 +145,12 @@ var rootCmd = &cobra.Command{
 
 func Execute() {
 	if err := prepareFDNDataDir(); err != nil {
-		log.Fatal(err)
+		slog.Error(err.Error())
+		os.Exit(1)
 	}
 	defer func() {
 		if err := db.CloseDB(); err != nil {
-			log.Error(err)
+			slog.Error(err.Error())
 		}
 	}()
 	err := rootCmd.Execute()
@@ -161,7 +165,7 @@ func prepareFDNDataDir() error {
 		return err
 	}
 	if err := db.MigrateLegacyFDNDatabases(fdnDir); err != nil {
-		log.Errorf("migrate legacy fdn databases: %s", err)
+		slog.Error(fmt.Sprintf("migrate legacy fdn databases: %s", err))
 	}
 	dbPath := filepath.Join(fdnDir, db.FDNDBFileName)
 	if err := db.EnsureDefaultCFG(dbPath); err != nil {

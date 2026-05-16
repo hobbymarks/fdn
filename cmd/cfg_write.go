@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
+	"log/slog"
 	"strings"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/hobbymarks/fdn/db"
 	"github.com/hobbymarks/fdn/utils"
@@ -31,7 +31,7 @@ func ConfigTermWords(keyValueMap map[string]string) error {
 		if count == 0 {
 			result := conn.Create(&termWord)
 			if result.Error != nil {
-				log.Error(result.Error)
+				slog.Error(result.Error.Error())
 			}
 		} else {
 			result := conn.Model(&db.TermWord{}).
@@ -41,9 +41,9 @@ func ConfigTermWords(keyValueMap map[string]string) error {
 					"source":      db.UserSource,
 				})
 			if result.Error != nil {
-				log.Error(result.Error)
+				slog.Error(result.Error.Error())
 			}
-			log.Debugf("updated:%s -> %s", termWord.OriginalLower, value)
+			slog.Debug(fmt.Sprintf("updated:%s -> %s", termWord.OriginalLower, value))
 		}
 	}
 	invalidateTermWordRegexCache()
@@ -60,12 +60,12 @@ func DeleteTermWords(keys []string) error {
 		var tw db.TermWord
 		if result := conn.Where("key_hash = ?", keyHash).First(&tw); result.Error == nil {
 			if tw.Source == db.BuiltinSource {
-				log.Infof("removing built-in term: %s (will be restored on next sync)", tw.OriginalLower)
+				slog.Info(fmt.Sprintf("removing built-in term: %s (will be restored on next sync)", tw.OriginalLower))
 			}
 		}
 		result := conn.Unscoped().Delete(&db.TermWord{}, keyHash)
 		if result.Error != nil {
-			log.Error(result.Error)
+			slog.Error(result.Error.Error())
 		}
 	}
 	invalidateTermWordRegexCache()
@@ -87,7 +87,7 @@ func ConfigToSepWords(words []string) error {
 		if count == 0 {
 			result := conn.Create(&toSepWord)
 			if result.Error != nil {
-				log.Error(result.Error)
+				slog.Error(result.Error.Error())
 			}
 		} else {
 			result := conn.Model(&db.ToSepWord{}).
@@ -97,9 +97,9 @@ func ConfigToSepWords(words []string) error {
 					"source": db.UserSource,
 				})
 			if result.Error != nil {
-				log.Error(result.Error)
+				slog.Error(result.Error.Error())
 			}
-			log.Debugf("updated sepword:%s", word)
+			slog.Debug(fmt.Sprintf("updated sepword:%s", word))
 		}
 	}
 	return nil
@@ -115,12 +115,12 @@ func DeleteToSepWords(keys []string) error {
 		var sw db.ToSepWord
 		if result := conn.Where("key_hash = ?", keyHash).First(&sw); result.Error == nil {
 			if sw.Source == db.BuiltinSource {
-				log.Infof("removing built-in sepword: %s (will be restored on next sync)", sw.Value)
+				slog.Info(fmt.Sprintf("removing built-in sepword: %s (will be restored on next sync)", sw.Value))
 			}
 		}
 		result := conn.Unscoped().Delete(&db.ToSepWord{}, keyHash)
 		if result.Error != nil {
-			log.Error(result.Error)
+			slog.Error(result.Error.Error())
 		}
 	}
 	return nil
@@ -142,7 +142,7 @@ func ConfigSeparator(separator string) error {
 			}
 			createResult := conn.Create(&sep)
 			if createResult.Error != nil {
-				log.Error(createResult.Error)
+				slog.Error(createResult.Error.Error())
 			}
 		} else {
 			return result.Error
@@ -154,9 +154,9 @@ func ConfigSeparator(separator string) error {
 			"source":   db.UserSource,
 		})
 		if updateResult.Error != nil {
-			log.Error(updateResult.Error)
+			slog.Error(updateResult.Error.Error())
 		}
-		log.Debugf("updated separator:%s", separator)
+		slog.Debug(fmt.Sprintf("updated separator:%s", separator))
 	}
 	return nil
 }

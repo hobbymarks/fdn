@@ -5,10 +5,10 @@ Copyright © 2023 hobbymarks ihobbymarks@gmail.com
 package cmd
 
 import (
+	"log/slog"
 	"path/filepath"
 
 	"github.com/hobbymarks/fdn/utils"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -42,7 +42,7 @@ SOURCE must exist. Paths with spaces must be quoted in the shell.`,
 
 		// origin path is not exist
 		if !utils.PathExist(originPath) {
-			log.Error("Origin path is not exist:", originPath)
+			slog.Error("Origin path is not exist:" + originPath)
 			return
 		}
 		// then origin path is 	exist
@@ -53,29 +53,29 @@ SOURCE must exist. Paths with spaces must be quoted in the shell.`,
 
 				same, err := utils.SameFiles(newTargetPath, originPath)
 				if err == nil && same {
-					log.Warnf("Target path '%s' is the same as origin path '%s'", newTargetPath, originPath)
+					slog.Warn("Target path '" + newTargetPath + "' is the same as origin path '" + originPath + "'")
 					return
 				}
 
 				err = FDNFile(originPath, newTargetPath, false)
 				if err != nil {
-					log.Error("Error when move file from", originPath, " to ", newTargetPath, ":", err)
+					slog.Error("Error when move file from" + originPath + " to " + newTargetPath + ":" + err.Error())
 					return
 				}
 
-				log.Info("Success move file from", originPath, " to ", newTargetPath)
+				slog.Info("Success move file from" + originPath + " to " + newTargetPath)
 				return
 			}
-			log.Error("Target path is not a directory:", targetPath)
+			slog.Error("Target path is not a directory:" + targetPath)
 			return
 		}
 		// target path is not exist, then move the origin path to the target path
 		err := FDNFile(originPath, targetPath, false)
 		if err != nil {
-			log.Error("Error when move file from", originPath, " to ", targetPath, ":", err)
+			slog.Error("Error when move file from" + originPath + " to " + targetPath + ":" + err.Error())
 			return
 		}
-		log.Info("Success move file from", originPath, " to ", targetPath)
+		slog.Info("Success move file from" + originPath + " to " + targetPath)
 	},
 }
 

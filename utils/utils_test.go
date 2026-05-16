@@ -6,6 +6,7 @@ package utils
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -94,5 +95,105 @@ func TestEncryDecry(t *testing.T) {
 		t.Errorf("%s not equal %s", decStr, plainText)
 	} else {
 		t.Logf("\ndecrypted==>%s\nplaintext==>%s", decStr, plainText)
+	}
+}
+
+func TestKeyHash(t *testing.T) {
+	h := KeyHash("test")
+	if len(h) == 0 {
+		t.Error("KeyHash returned empty string")
+	}
+	h2 := KeyHash("test")
+	if h != h2 {
+		t.Error("KeyHash should be deterministic")
+	}
+}
+
+func TestPathIsDirectory(t *testing.T) {
+	dir := t.TempDir()
+	if !PathIsDirectory(dir) {
+		t.Error("temp dir should be a directory")
+	}
+	f := filepath.Join(dir, "file.txt")
+	if err := os.WriteFile(f, []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if PathIsDirectory(f) {
+		t.Error("regular file should not be detected as directory")
+	}
+	if PathIsDirectory(filepath.Join(dir, "nonexistent")) {
+		t.Error("nonexistent path should not be detected as directory")
+	}
+}
+
+func TestFDNDir(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
+	dir, err := FDNDir()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !PathIsDirectory(dir) {
+		t.Error("FDNDir should create and return a directory")
+	}
+}
+
+func TestSameFiles(t *testing.T) {
+	dir := t.TempDir()
+	a := filepath.Join(dir, "a.txt")
+	b := filepath.Join(dir, "b.txt")
+	body := []byte("identical")
+	if err := os.WriteFile(a, body, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(b, body, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	same, err := SameFiles(a, b)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !same {
+		t.Error("identical files should be same")
+	}
+
+	c := filepath.Join(dir, "c.txt")
+	if err := os.WriteFile(c, []byte("different"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	same, err = SameFiles(a, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if same {
+		t.Error("different files should not be same")
+	}
+}
+
+func TestFileMD5(t *testing.T) {
+	dir := t.TempDir()
+	f := filepath.Join(dir, "f.txt")
+	if err := os.WriteFile(f, []byte("hello"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	md5s, err := FileMD5(f)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(md5s) == 0 {
+		t.Error("FileMD5 returned empty")
+	}
+
+	_, err = FileMD5(filepath.Join(dir, "nope"))
+	if err == nil {
+		t.Error("FileMD5 should error on missing file")
+	}
+}
+
+func TestSameFiles_missingPath(t *testing.T) {
+	_, err := SameFiles("/nope/a", "/nope/b")
+	if err == nil {
+		t.Error("SameFiles should error on missing paths")
 	}
 }

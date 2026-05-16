@@ -5,11 +5,10 @@ Copyright © 2022 hobbymarks ihobbymarks@gmail.com
 package db
 
 import (
+	"log"
 	"os"
 	"path/filepath"
 	"testing"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/hobbymarks/fdn/utils"
 )

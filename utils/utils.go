@@ -13,13 +13,13 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"log/slog"
 	"math/rand"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/glebarez/sqlite"
-	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -81,7 +81,7 @@ func PathExist(path string) bool {
 		if os.IsNotExist(err) {
 			return false
 		}
-		log.Error(err)
+		slog.Error(err.Error())
 		return false
 	}
 	return true
@@ -148,7 +148,7 @@ func PathMaker(typ string) (string, error) {
 func Ext(path string) string {
 	fileInfo, err := os.Stat(path)
 	if err != nil {
-		log.Error(err)
+		slog.Error(err.Error())
 		return ""
 	}
 	if fileInfo.IsDir() {
@@ -156,7 +156,7 @@ func Ext(path string) string {
 	} else if fileInfo.Mode().IsRegular() {
 		return filepath.Ext(path)
 	} else {
-		log.Trace("skipped:", path)
+		slog.Debug("skipped:" + path)
 		return ""
 	}
 }

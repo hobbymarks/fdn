@@ -179,7 +179,7 @@ func TestRetrievedAbsPaths_fileAndDir(t *testing.T) {
 
 func TestRetrievedAbsPaths_missingPath(t *testing.T) {
 	_, err := RetrievedAbsPaths([]string{"/nonexistent/path/that/does/not/exist/ever"}, 1, false)
-	assert.NoError(t, err)
+	assert.Error(t, err)
 }
 
 func TestRemoveHidden_filtersDotFile(t *testing.T) {

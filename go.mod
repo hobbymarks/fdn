@@ -36,7 +36,6 @@ require (
 	github.com/hobbymarks/go-difflib v0.0.0-20260314160634-df4eeacba6ba
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/mattn/go-runewidth v0.0.23
-	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/term v0.42.0

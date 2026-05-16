@@ -3,10 +3,10 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 
-	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
 	"github.com/hobbymarks/fdn/db"
@@ -18,13 +18,13 @@ func FDNFile(currentPath string, toBePath string, reversed bool) error {
 	curBase := filepath.Base(currentPath)
 
 	if err := os.Rename(currentPath, toBePath); err != nil {
-		log.Error(err)
+		slog.Error(err.Error())
 		return err
 	}
 
 	conn, err := db.ConnectRDDB()
 	if err != nil {
-		log.Error(err)
+		slog.Error(err.Error())
 		return err
 	}
 	var journalErr error
@@ -55,7 +55,7 @@ func FDNFile(currentPath string, toBePath string, reversed bool) error {
 		if rb := os.Rename(toBePath, currentPath); rb != nil {
 			return fmt.Errorf("%w; rename rollback failed: %v", journalErr, rb)
 		}
-		log.Error(journalErr)
+		slog.Error(journalErr.Error())
 		return journalErr
 	}
 	return nil
@@ -107,7 +107,7 @@ func CheckDoFDN(
 		if overwrite {
 			err := FDNFile(currentPath, toBePath, reverse)
 			if err != nil {
-				log.Error(err)
+				slog.Error(err.Error())
 				return err
 			}
 			OutputResult(currentPath, toBePath, true, fullpath)
@@ -119,7 +119,7 @@ func CheckDoFDN(
 				if same {
 					err := FDNFile(currentPath, toBePath, reverse)
 					if err != nil {
-						log.Error(err)
+						slog.Error(err.Error())
 						return err
 					}
 					OutputResult(currentPath, toBePath, true, fullpath)
@@ -131,7 +131,7 @@ func CheckDoFDN(
 	} else {
 		err := FDNFile(currentPath, toBePath, reverse)
 		if err != nil {
-			log.Error(err)
+			slog.Error(err.Error())
 			return err
 		}
 		OutputResult(currentPath, toBePath, true, fullpath)
