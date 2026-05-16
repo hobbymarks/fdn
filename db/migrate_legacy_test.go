@@ -10,6 +10,7 @@ import (
 
 func TestMigrateLegacyFDNDatabases_mergeCfgAndRd(t *testing.T) {
 	resetSharedDBOnCleanup(t)
+	defer ResetSharedDB()
 	tmp := t.TempDir()
 	t.Setenv("HOME", tmp)
 	t.Setenv("USERPROFILE", tmp)
@@ -66,6 +67,7 @@ func TestMigrateLegacyFDNDatabases_mergeCfgAndRd(t *testing.T) {
 
 func TestMigrateLegacyFDNDatabases_cfgOnlyRenames(t *testing.T) {
 	resetSharedDBOnCleanup(t)
+	defer ResetSharedDB()
 	tmp := t.TempDir()
 	t.Setenv("HOME", tmp)
 	t.Setenv("USERPROFILE", tmp)
@@ -88,6 +90,7 @@ func TestMigrateLegacyFDNDatabases_cfgOnlyRenames(t *testing.T) {
 
 func TestMigrateLegacyFDNDatabases_rdOnlyRenames(t *testing.T) {
 	resetSharedDBOnCleanup(t)
+	defer ResetSharedDB()
 	tmp := t.TempDir()
 	t.Setenv("HOME", tmp)
 	t.Setenv("USERPROFILE", tmp)

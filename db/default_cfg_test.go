@@ -12,6 +12,7 @@ import (
 
 func TestEnsureDefaultCFG_seedsOnce(t *testing.T) {
 	resetSharedDBOnCleanup(t)
+	defer ResetSharedDB()
 	dir := t.TempDir()
 	p := filepath.Join(dir, "sub", "fdn.db")
 	if err := EnsureDefaultCFG(p); err != nil {
@@ -43,6 +44,7 @@ func TestEnsureDefaultCFG_seedsOnce(t *testing.T) {
 
 func TestEnsureDefaultCFG_marksBuiltinSource(t *testing.T) {
 	resetSharedDBOnCleanup(t)
+	defer ResetSharedDB()
 	dir := t.TempDir()
 	p := filepath.Join(dir, "fdn.db")
 	require.NoError(t, EnsureDefaultCFG(p))
@@ -70,6 +72,7 @@ func TestEnsureDefaultCFG_marksBuiltinSource(t *testing.T) {
 
 func TestEnsureDefaultCFG_userOverridesProtected(t *testing.T) {
 	resetSharedDBOnCleanup(t)
+	defer ResetSharedDB()
 	dir := t.TempDir()
 	p := filepath.Join(dir, "fdn.db")
 	require.NoError(t, EnsureDefaultCFG(p))
@@ -97,6 +100,7 @@ func TestEnsureDefaultCFG_userOverridesProtected(t *testing.T) {
 
 func TestEnsureDefaultCFG_builtinValueChangedOnUpgrade(t *testing.T) {
 	resetSharedDBOnCleanup(t)
+	defer ResetSharedDB()
 	dir := t.TempDir()
 	p := filepath.Join(dir, "fdn.db")
 	require.NoError(t, EnsureDefaultCFG(p))
@@ -132,6 +136,7 @@ func TestEnsureDefaultCFG_builtinValueChangedOnUpgrade(t *testing.T) {
 
 func TestEnsureDefaultCFG_removesObsoleteBuiltin(t *testing.T) {
 	resetSharedDBOnCleanup(t)
+	defer ResetSharedDB()
 	dir := t.TempDir()
 	p := filepath.Join(dir, "fdn.db")
 	require.NoError(t, EnsureDefaultCFG(p))
@@ -162,6 +167,7 @@ func TestEnsureDefaultCFG_removesObsoleteBuiltin(t *testing.T) {
 
 func TestEnsureDefaultCFG_migrateExistingDefaults(t *testing.T) {
 	resetSharedDBOnCleanup(t)
+	defer ResetSharedDB()
 	dir := t.TempDir()
 	p := filepath.Join(dir, "fdn.db")
 
@@ -195,6 +201,7 @@ func TestEnsureDefaultCFG_migrateExistingDefaults(t *testing.T) {
 
 func TestResetCFG(t *testing.T) {
 	resetSharedDBOnCleanup(t)
+	defer ResetSharedDB()
 	dir := t.TempDir()
 	p := filepath.Join(dir, "fdn.db")
 	require.NoError(t, EnsureDefaultCFG(p))
@@ -236,6 +243,7 @@ func TestResetCFG(t *testing.T) {
 
 func TestSyncDefaultCFG_addsNewBuiltin(t *testing.T) {
 	resetSharedDBOnCleanup(t)
+	defer ResetSharedDB()
 	dir := t.TempDir()
 	p := filepath.Join(dir, "fdn.db")
 	require.NoError(t, EnsureDefaultCFG(p))
@@ -262,6 +270,7 @@ func TestSyncDefaultCFG_addsNewBuiltin(t *testing.T) {
 
 func TestSyncDefaultCFG_updatesBuiltinValue(t *testing.T) {
 	resetSharedDBOnCleanup(t)
+	defer ResetSharedDB()
 	dir := t.TempDir()
 	p := filepath.Join(dir, "fdn.db")
 	require.NoError(t, EnsureDefaultCFG(p))

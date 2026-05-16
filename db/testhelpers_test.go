@@ -5,5 +5,5 @@ import "testing"
 func resetSharedDBOnCleanup(t *testing.T) {
 	t.Helper()
 	ResetSharedDB()
-	t.Cleanup(func() { ResetSharedDB() })
+	
 }
