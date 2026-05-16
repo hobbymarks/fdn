@@ -62,10 +62,14 @@ func CloseDB() error {
 func ResetSharedDB() {
 	sharedMu.Lock()
 	defer sharedMu.Unlock()
-	sharedDB = nil
+	if sharedDB != nil {
+		utils.DBClose(sharedDB)
+		sharedDB = nil
+	}
 }
 
 func InitDB(path string) error {
+	ResetSharedDB()
 	conn, err := ConnectDB(path)
 	if err != nil {
 		return err
