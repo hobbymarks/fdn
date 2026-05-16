@@ -12,7 +12,10 @@ func TestMigrateLegacyFDNDatabases_mergeCfgAndRd(t *testing.T) {
 	tmp := t.TempDir()
 	t.Setenv("HOME", tmp)
 	t.Setenv("USERPROFILE", tmp)
-	fdnDir := utils.FDNDir()
+	fdnDir, err := utils.FDNDir()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	cfgPath := filepath.Join(fdnDir, "cfg.db")
 	rdPath := filepath.Join(fdnDir, "rd.db")
@@ -22,9 +25,11 @@ func TestMigrateLegacyFDNDatabases_mergeCfgAndRd(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	rdDB := utils.OpenDB(rdPath)
+	rdDB, err := utils.OpenDB(rdPath)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err := rdDB.AutoMigrate(&Record{}); err != nil {
-		utils.DBClose(rdDB)
 		t.Fatal(err)
 	}
 	if err := rdDB.Create(&Record{
@@ -32,10 +37,8 @@ func TestMigrateLegacyFDNDatabases_mergeCfgAndRd(t *testing.T) {
 		HashedCurrentName:     "hashdemo",
 		Count:                 1,
 	}).Error; err != nil {
-		utils.DBClose(rdDB)
 		t.Fatal(err)
 	}
-	utils.DBClose(rdDB)
 
 	if err := MigrateLegacyFDNDatabases(fdnDir); err != nil {
 		t.Fatal(err)
@@ -45,13 +48,17 @@ func TestMigrateLegacyFDNDatabases_mergeCfgAndRd(t *testing.T) {
 	assert.False(t, utils.PathExist(rdPath))
 	assert.True(t, utils.PathExist(fdnPath))
 
-	_db := ConnectCFGDB()
-	defer utils.DBClose(_db)
-	var nTerm, nRec int64
-	if err := _db.Model(&TermWord{}).Count(&nTerm).Error; err != nil {
+	ResetSharedDB()
+	conn, err := ConnectCFGDB()
+	if err != nil {
 		t.Fatal(err)
 	}
-	if err := _db.Model(&Record{}).Count(&nRec).Error; err != nil {
+	ResetSharedDB()
+	var nTerm, nRec int64
+	if err := conn.Model(&TermWord{}).Count(&nTerm).Error; err != nil {
+		t.Fatal(err)
+	}
+	if err := conn.Model(&Record{}).Count(&nRec).Error; err != nil {
 		t.Fatal(err)
 	}
 	assert.Equal(t, int64(7), nTerm)
@@ -62,7 +69,10 @@ func TestMigrateLegacyFDNDatabases_cfgOnlyRenames(t *testing.T) {
 	tmp := t.TempDir()
 	t.Setenv("HOME", tmp)
 	t.Setenv("USERPROFILE", tmp)
-	fdnDir := utils.FDNDir()
+	fdnDir, err := utils.FDNDir()
+	if err != nil {
+		t.Fatal(err)
+	}
 	cfgPath := filepath.Join(fdnDir, "cfg.db")
 	fdnPath := filepath.Join(fdnDir, FDNDBFileName)
 
@@ -80,16 +90,20 @@ func TestMigrateLegacyFDNDatabases_rdOnlyRenames(t *testing.T) {
 	tmp := t.TempDir()
 	t.Setenv("HOME", tmp)
 	t.Setenv("USERPROFILE", tmp)
-	fdnDir := utils.FDNDir()
+	fdnDir, err := utils.FDNDir()
+	if err != nil {
+		t.Fatal(err)
+	}
 	rdPath := filepath.Join(fdnDir, "rd.db")
 	fdnPath := filepath.Join(fdnDir, FDNDBFileName)
 
-	rdDB := utils.OpenDB(rdPath)
-	if err := rdDB.AutoMigrate(&Record{}); err != nil {
-		utils.DBClose(rdDB)
+	rdDB, err := utils.OpenDB(rdPath)
+	if err != nil {
 		t.Fatal(err)
 	}
-	utils.DBClose(rdDB)
+	if err := rdDB.AutoMigrate(&Record{}); err != nil {
+		t.Fatal(err)
+	}
 
 	if err := MigrateLegacyFDNDatabases(fdnDir); err != nil {
 		t.Fatal(err)

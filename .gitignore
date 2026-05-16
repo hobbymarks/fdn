@@ -3,5 +3,8 @@ bin/
 prof/
 vendor/
 coverage.out
+fdn
+fdn.exe
 
 .vscode/
+REVIEW.md

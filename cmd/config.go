@@ -161,38 +161,40 @@ func normalizeConfigKind(s string) (string, error) {
 }
 
 func runConfigList(kind string) error {
-	_db := db.ConnectCFGDB()
-	defer utils.DBClose(_db)
+	conn, err := db.ConnectCFGDB()
+	if err != nil {
+		return err
+	}
 
 	switch kind {
 	case "sep":
 		var sep db.Separator
-		if rlt := _db.First(&sep); rlt.Error != nil {
-			return fmt.Errorf("retrieve Separator: %w", rlt.Error)
+		if result := conn.First(&sep); result.Error != nil {
+			return fmt.Errorf("retrieve Separator: %w", result.Error)
 		}
-		_KVPrint("Separator", []kvEntry{{Key: sep.KeyHash, Source: sep.Source, Value: sep.Value}})
+		KVPrint("Separator", []kvEntry{{Key: sep.KeyHash, Source: sep.Source, Value: sep.Value}})
 		return nil
 	case "twl":
 		var termWords []db.TermWord
-		if rlt := _db.Find(&termWords); rlt.Error != nil {
-			return fmt.Errorf("retrieve TermWord: %w", rlt.Error)
+		if result := conn.Find(&termWords); result.Error != nil {
+			return fmt.Errorf("retrieve TermWord: %w", result.Error)
 		}
 		entries := make([]kvEntry, len(termWords))
 		for i, tw := range termWords {
 			entries[i] = kvEntry{Key: tw.KeyHash, Source: tw.Source, Value: tw.OriginalLower + ":" + tw.TargetWord}
 		}
-		_KVPrint("TermWords", entries)
+		KVPrint("TermWords", entries)
 		return nil
 	case "swl":
 		var toSepWords []db.ToSepWord
-		if rlt := _db.Find(&toSepWords); rlt.Error != nil {
-			return fmt.Errorf("retrieve ToSepWord: %w", rlt.Error)
+		if result := conn.Find(&toSepWords); result.Error != nil {
+			return fmt.Errorf("retrieve ToSepWord: %w", result.Error)
 		}
 		entries := make([]kvEntry, len(toSepWords))
 		for i, sw := range toSepWords {
 			entries[i] = kvEntry{Key: sw.KeyHash, Source: sw.Source, Value: sw.Value}
 		}
-		_KVPrint("ToBeSepWords", entries)
+		KVPrint("ToBeSepWords", entries)
 		return nil
 	default:
 		return fmt.Errorf("unknown kind %q", kind)
@@ -200,7 +202,10 @@ func runConfigList(kind string) error {
 }
 
 func runConfigReset() error {
-	fdnDir := utils.FDNDir()
+	fdnDir, err := utils.FDNDir()
+	if err != nil {
+		return err
+	}
 	dbPath := db.DefaultFDNDBPath()
 	if err := db.ResetCFG(dbPath); err != nil {
 		return fmt.Errorf("reset config: %w", err)
@@ -224,7 +229,7 @@ type kvEntry struct {
 	Value  string
 }
 
-func _KVPrint(title string, entries []kvEntry) {
+func KVPrint(title string, entries []kvEntry) {
 	t := table.NewWriter()
 	t.SetAutoIndex(true)
 	t.SetOutputMirror(os.Stdout)

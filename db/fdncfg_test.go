@@ -18,13 +18,21 @@ func TestConnectCFGDB_NoParam(t *testing.T) {
 	tmp := t.TempDir()
 	t.Setenv("HOME", tmp)
 	t.Setenv("USERPROFILE", tmp)
-	dp := filepath.Join(utils.FDNDir(), FDNDBFileName)
+	fdnDir, err := utils.FDNDir()
+	if err != nil {
+		t.Fatal(err)
+	}
+	dp := filepath.Join(fdnDir, FDNDBFileName)
 	if utils.PathExist(dp) {
 		t.Errorf("please remove file %s", dp)
 		return
 	}
-	ConnectCFGDB()
-	_, err := os.Stat(dp)
+	ResetSharedDB()
+	if _, err := ConnectCFGDB(); err != nil {
+		t.Fatal(err)
+	}
+	ResetSharedDB()
+	_, err = os.Stat(dp)
 	if err != nil {
 		if os.IsNotExist(err) {
 			t.Errorf("%s not exist", dp)
@@ -44,7 +52,11 @@ func TestConnectCFGDB_AParam_Exist(t *testing.T) {
 	defer os.Remove(f.Name())
 
 	dp := f.Name()
-	ConnectCFGDB(dp)
+	ResetSharedDB()
+	if _, err := ConnectCFGDB(dp); err != nil {
+		t.Fatal(err)
+	}
+	ResetSharedDB()
 	_, err = os.Stat(dp)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -73,7 +85,11 @@ func TestConnectCFGDB_AParam_NotExist(t *testing.T) {
 	t.Logf("CFG path %s", dp)
 	defer os.RemoveAll(dpDir)
 
-	ConnectCFGDB(dp)
+	ResetSharedDB()
+	if _, err := ConnectCFGDB(dp); err != nil {
+		t.Fatal(err)
+	}
+	ResetSharedDB()
 	_, err := os.Stat(dp)
 	if err != nil {
 		if os.IsNotExist(err) {

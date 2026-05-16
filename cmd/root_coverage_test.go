@@ -42,11 +42,6 @@ func captureStdout(t *testing.T, fn func()) string {
 	return <-outCh
 }
 
-func TestArrayContainsElement(t *testing.T) {
-	assert.True(t, ArrayContainsElement([]int{1, 2, 3}, 2))
-	assert.False(t, ArrayContainsElement([]string{"a"}, "b"))
-}
-
 func TestDepthFiles_shallow(t *testing.T) {
 	dir := t.TempDir()
 	if err := os.WriteFile(filepath.Join(dir, "f.txt"), []byte("x"), 0o644); err != nil {
@@ -235,23 +230,29 @@ func TestFDNFile_forwardRename(t *testing.T) {
 
 func TestAddRecord_incrementCount(t *testing.T) {
 	testIsolatedHome(t)
-	_db := db.ConnectRDDB()
-	defer utils.DBClose(_db)
+	conn, err := db.ConnectRDDB()
+	if err != nil {
+		t.Fatal(err)
+	}
 	to := "bname"
 	cur := "aname"
-	rd := db.Record{
-		EncryptedPreviousName: utils.Encrypt(to, cur),
+	encPrev, err := utils.Encrypt(to, cur)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rec := db.Record{
+		EncryptedPreviousName: encPrev,
 		HashedCurrentName:     utils.KeyHash(to),
 		Count:                 1,
 	}
-	if err := AddRecord(_db, rd); err != nil {
+	if err := AddRecord(conn, rec); err != nil {
 		t.Fatal(err)
 	}
-	if err := AddRecord(_db, rd); err != nil {
+	if err := AddRecord(conn, rec); err != nil {
 		t.Fatal(err)
 	}
 	var got db.Record
-	if err := _db.Where("hashed_current_name = ?", utils.KeyHash(to)).First(&got).Error; err != nil {
+	if err := conn.Where("hashed_current_name = ?", utils.KeyHash(to)).First(&got).Error; err != nil {
 		t.Fatal(err)
 	}
 	assert.Equal(t, int64(2), got.Count)
@@ -259,36 +260,42 @@ func TestAddRecord_incrementCount(t *testing.T) {
 
 func TestDeleteRecord_decrementAndRemove(t *testing.T) {
 	testIsolatedHome(t)
-	_db := db.ConnectRDDB()
-	defer utils.DBClose(_db)
+	conn, err := db.ConnectRDDB()
+	if err != nil {
+		t.Fatal(err)
+	}
 	to := "tb"
 	cur := "ta"
-	rd := db.Record{
-		EncryptedPreviousName: utils.Encrypt(to, cur),
+	encPrev, err := utils.Encrypt(to, cur)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rec := db.Record{
+		EncryptedPreviousName: encPrev,
 		HashedCurrentName:     utils.KeyHash(to),
 		Count:                 2,
 	}
-	if err := _db.Create(&rd).Error; err != nil {
+	if err := conn.Create(&rec).Error; err != nil {
 		t.Fatal(err)
 	}
 
 	del := db.Record{
-		EncryptedPreviousName: utils.Encrypt(to, cur),
+		EncryptedPreviousName: encPrev,
 		HashedCurrentName:     utils.KeyHash(to),
 	}
-	if err := DeleteRecord(_db, del); err != nil {
+	if err := DeleteRecord(conn, del); err != nil {
 		t.Fatal(err)
 	}
 	var mid db.Record
-	if err := _db.Where("id = ?", rd.ID).First(&mid).Error; err != nil {
+	if err := conn.Where("id = ?", rec.ID).First(&mid).Error; err != nil {
 		t.Fatal(err)
 	}
 	assert.Equal(t, int64(1), mid.Count)
 
-	if err := DeleteRecord(_db, del); err != nil {
+	if err := DeleteRecord(conn, del); err != nil {
 		t.Fatal(err)
 	}
-	err := _db.Where("id = ?", rd.ID).First(&db.Record{}).Error
+	err = conn.Where("id = ?", rec.ID).First(&db.Record{}).Error
 	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
 }
 
@@ -475,20 +482,26 @@ func TestOutputResult_richEqual(t *testing.T) {
 
 func TestAddRecord_createsNew(t *testing.T) {
 	testIsolatedHome(t)
-	_db := db.ConnectRDDB()
-	defer utils.DBClose(_db)
+	conn, err := db.ConnectRDDB()
+	if err != nil {
+		t.Fatal(err)
+	}
 	to := "uniqnew_to"
 	cur := "uniqnew_from"
-	rd := db.Record{
-		EncryptedPreviousName: utils.Encrypt(to, cur),
+	encPrev, err := utils.Encrypt(to, cur)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rec := db.Record{
+		EncryptedPreviousName: encPrev,
 		HashedCurrentName:     utils.KeyHash(to),
 		Count:                 1,
 	}
-	if err := AddRecord(_db, rd); err != nil {
+	if err := AddRecord(conn, rec); err != nil {
 		t.Fatal(err)
 	}
 	var got db.Record
-	if err := _db.Where("hashed_current_name = ?", utils.KeyHash(to)).First(&got).Error; err != nil {
+	if err := conn.Where("hashed_current_name = ?", utils.KeyHash(to)).First(&got).Error; err != nil {
 		t.Fatal(err)
 	}
 	assert.Equal(t, int64(1), got.Count)

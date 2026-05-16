@@ -17,13 +17,21 @@ func TestConnectRDDB_NoParam(t *testing.T) {
 	tmp := t.TempDir()
 	t.Setenv("HOME", tmp)
 	t.Setenv("USERPROFILE", tmp)
-	dp := filepath.Join(utils.FDNDir(), FDNDBFileName)
+	fdnDir, err := utils.FDNDir()
+	if err != nil {
+		t.Fatal(err)
+	}
+	dp := filepath.Join(fdnDir, FDNDBFileName)
 	if utils.PathExist(dp) {
 		t.Errorf("please remove file %s", dp)
 		return
 	}
-	ConnectRDDB()
-	_, err := os.Stat(dp)
+	ResetSharedDB()
+	if _, err := ConnectRDDB(); err != nil {
+		t.Fatal(err)
+	}
+	ResetSharedDB()
+	_, err = os.Stat(dp)
 	if err != nil {
 		if os.IsNotExist(err) {
 			t.Errorf("%s not exist", dp)
@@ -43,7 +51,11 @@ func TestConnectRDDB_AParam_Exist(t *testing.T) {
 	defer os.Remove(f.Name())
 
 	dp := f.Name()
-	ConnectRDDB(dp)
+	ResetSharedDB()
+	if _, err := ConnectRDDB(dp); err != nil {
+		t.Fatal(err)
+	}
+	ResetSharedDB()
 	_, err = os.Stat(dp)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -72,7 +84,11 @@ func TestConnectRDDB_AParam_NotExist(t *testing.T) {
 	t.Logf("CFG path %s", dp)
 	defer os.RemoveAll(dpDir)
 
-	ConnectRDDB(dp)
+	ResetSharedDB()
+	if _, err := ConnectRDDB(dp); err != nil {
+		t.Fatal(err)
+	}
+	ResetSharedDB()
 	_, err := os.Stat(dp)
 	if err != nil {
 		if os.IsNotExist(err) {

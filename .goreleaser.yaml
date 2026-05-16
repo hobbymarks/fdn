@@ -49,24 +49,27 @@ changelog:
       - '^test:'
 
 
-homebrew_casks:
-  - name: fdn
-    repository:
+brews:
+  - repository:
       owner: hobbymarks
       name: release
-    commit_author:
-      name: hobbymarks
-      email: ihobbymarks@gmail.com
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    homepage: "https://github.com/hobbymarks/fdn"
+    description: "File and directory name normalizer with rollback"
+    license: "MIT"
+    directory: Formula
+    install: |
+      bin.install "fdn"
 
 scoops:
-  - name: fdn
-    repository:
+  - repository:
       owner: hobbymarks
       name: release
-    commit_author:
-      name: hobbymarks
-      email: ihobbymarks@gmail.com
-    directory: scoop-fdn
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    homepage: "https://github.com/hobbymarks/fdn"
+    description: "File and directory name normalizer with rollback"
+    license: "MIT"
+    directory: bucket
 
 nfpms:
   - id: fdn

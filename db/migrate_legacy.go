@@ -30,15 +30,12 @@ func MigrateLegacyFDNDatabases(fdnDir string) error {
 		return os.Rename(rdPath, fdnPath)
 	}
 
-	_db := utils.OpenDB(fdnPath)
-	defer utils.DBClose(_db)
-
-	if err := _db.AutoMigrate(&TermWord{}, &ToSepWord{}, &Separator{}, &Record{}); err != nil {
-		_ = os.Remove(fdnPath)
+	conn, err := ConnectDB(fdnPath)
+	if err != nil {
 		return err
 	}
 
-	sqlDB, err := _db.DB()
+	sqlDB, err := conn.DB()
 	if err != nil {
 		_ = os.Remove(fdnPath)
 		return err
@@ -66,14 +63,14 @@ func MigrateLegacyFDNDatabases(fdnDir string) error {
 	}
 
 	for _, tbl := range []string{"term_words", "to_sep_words", "separators"} {
-		if err := copyAttachedTable(_db, "legacy_cfg", tbl); err != nil {
+		if err := copyAttachedTable(conn, "legacy_cfg", tbl); err != nil {
 			_, _ = sqlDB.Exec("DETACH DATABASE legacy_rd")
 			_, _ = sqlDB.Exec("DETACH DATABASE legacy_cfg")
 			_ = os.Remove(fdnPath)
 			return err
 		}
 	}
-	if err := copyAttachedTable(_db, "legacy_rd", "records"); err != nil {
+	if err := copyAttachedTable(conn, "legacy_rd", "records"); err != nil {
 		_, _ = sqlDB.Exec("DETACH DATABASE legacy_rd")
 		_, _ = sqlDB.Exec("DETACH DATABASE legacy_cfg")
 		_ = os.Remove(fdnPath)

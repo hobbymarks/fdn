@@ -26,68 +26,75 @@ var defaultTermWordDefs = []struct{ orig, target string }{
 }
 
 var defaultPunctWords = []string{
-	"-",      // U+002D
-	" ",      // U+0020
-	"\u201C", // U+201C "
-	"\u201D", // U+201D "
-	"\uFF0C", // U+FF0C ，
-	"\uFF1F", // U+FF1F ？
-	"(",      // U+0028
-	")",      // U+0029
-	"~",      // U+007E
-	"\u3001", // U+3001 、
-	"\u3002", // U+3002 。
-	"\u30FB", // U+30FB ・
-	"\uFF02", // U+FF02 ＂
-	"\uFF1A", // U+FF1A ：
-	"\u3010", // U+3010 【
-	"\u3011", // U+3011 】
-	"\u4E28", // U+4E28 丨
-	"\uFF5C", // U+FF5C ｜
-	"\uFF01", // U+FF01 ！
-	"\uFF08", // U+FF08 （
-	"\uFF09", // U+FF09 ）
-	"\u300A", // U+300A 《
-	"\u300B", // U+300B 》
-	"<",      // U+003C
-	">",      // U+003E
-	":",      // U+003A
-	"\"",     // U+0022
-	"/",      // U+002F
-	"\u29F8", // U+29F8 ⧸
-	"\\",     // U+005C
-	"|",      // U+007C
-	"?",      // U+003F
-	"*",      // U+002A
-	"!",      // U+0021
-	"@",      // U+0040
-	"#",      // U+0023
-	"$",      // U+0024
-	"%",      // U+0025
-	"^",      // U+005E
-	"&",      // U+0026
-	"`",      // U+0060
-	";",      // U+003B
-	",",      // U+002C
-	"[",      // U+005B
-	"]",      // U+005D
-	"{",      // U+007B
-	"}",      // U+007D
-	"'",      // U+0027
-	"+",      // U+002B
-	"=",      // U+003D
+	"-",
+	" ",
+	"\u201C",
+	"\u201D",
+	"\uFF0C",
+	"\uFF1F",
+	"(",
+	")",
+	"~",
+	"\u3001",
+	"\u3002",
+	"\u30FB",
+	"\uFF02",
+	"\uFF1A",
+	"\u3010",
+	"\u3011",
+	"\u4E28",
+	"\uFF5C",
+	"\uFF01",
+	"\uFF08",
+	"\uFF09",
+	"\u300A",
+	"\u300B",
+	"<",
+	">",
+	":",
+	"\"",
+	"/",
+	"\u29F8",
+	"\\",
+	"|",
+	"?",
+	"*",
+	"!",
+	"@",
+	"#",
+	"$",
+	"%",
+	"^",
+	"&",
+	"`",
+	";",
+	",",
+	"[",
+	"]",
+	"{",
+	"}",
+	"'",
+	"+",
+	"=",
+}
+
+func getOrConnectDB(dbPath string) (*gorm.DB, error) {
+	conn := GetDB()
+	if conn != nil {
+		return conn, nil
+	}
+	return ConnectDB(dbPath)
 }
 
 func EnsureDefaultCFG(dbPath string) error {
 	if err := os.MkdirAll(filepath.Dir(dbPath), 0o755); err != nil {
 		return err
 	}
-	_db := utils.OpenDB(dbPath)
-	defer utils.DBClose(_db)
-	if err := _db.AutoMigrate(&TermWord{}, &ToSepWord{}, &Separator{}, &Record{}); err != nil {
+	conn, err := getOrConnectDB(dbPath)
+	if err != nil {
 		return err
 	}
-	return _db.Transaction(func(tx *gorm.DB) error {
+	return conn.Transaction(func(tx *gorm.DB) error {
 		if err := migrateExistingDefaults(tx); err != nil {
 			return err
 		}
@@ -237,9 +244,11 @@ func upsertBuiltinToSepWord(tx *gorm.DB, sw ToSepWord) *gorm.DB {
 }
 
 func ResetCFG(dbPath string) error {
-	_db := utils.OpenDB(dbPath)
-	defer utils.DBClose(_db)
-	return _db.Transaction(func(tx *gorm.DB) error {
+	conn, err := getOrConnectDB(dbPath)
+	if err != nil {
+		return err
+	}
+	return conn.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Unscoped().Where("1 = 1").Delete(&TermWord{}).Error; err != nil {
 			return err
 		}

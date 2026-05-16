@@ -14,29 +14,42 @@ import (
 )
 
 func FDNFile(currentPath string, toBePath string, reversed bool) error {
-	_to := filepath.Base(toBePath)
-	_cur := filepath.Base(currentPath)
+	toBase := filepath.Base(toBePath)
+	curBase := filepath.Base(currentPath)
 
 	if err := os.Rename(currentPath, toBePath); err != nil {
 		log.Error(err)
 		return err
 	}
 
-	_db := db.ConnectRDDB()
-	defer utils.DBClose(_db)
+	conn, err := db.ConnectRDDB()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
 	var journalErr error
 	if !reversed {
-		_rd := db.Record{
-			EncryptedPreviousName: utils.Encrypt(_to, _cur),
-			HashedCurrentName:     utils.KeyHash(_to),
+		encPrev, err := utils.Encrypt(toBase, curBase)
+		if err != nil {
+			journalErr = err
+		} else {
+			rec := db.Record{
+				EncryptedPreviousName: encPrev,
+				HashedCurrentName:     utils.KeyHash(toBase),
+			}
+			journalErr = AddRecord(conn, rec)
 		}
-		journalErr = AddRecord(_db, _rd)
 	} else {
-		_rd := db.Record{
-			EncryptedPreviousName: utils.Encrypt(_cur, _to),
-			HashedCurrentName:     utils.KeyHash(_cur),
+		encPrev, err := utils.Encrypt(curBase, toBase)
+		if err != nil {
+			journalErr = err
+		} else {
+			rec := db.Record{
+				EncryptedPreviousName: encPrev,
+				HashedCurrentName:     utils.KeyHash(curBase),
+			}
+			journalErr = DeleteRecord(conn, rec)
 		}
-		journalErr = DeleteRecord(_db, _rd)
 	}
 	if journalErr != nil {
 		if rb := os.Rename(toBePath, currentPath); rb != nil {
@@ -48,41 +61,40 @@ func FDNFile(currentPath string, toBePath string, reversed bool) error {
 	return nil
 }
 
-func AddRecord(_db *gorm.DB, _rd db.Record) error {
-	var rd db.Record
-	rlt := _db.First(
-		&rd,
+func AddRecord(conn *gorm.DB, rec db.Record) error {
+	var existing db.Record
+	result := conn.First(
+		&existing,
 		"encrypted_previous_name = ? AND hashed_current_name = ?",
-		_rd.EncryptedPreviousName,
-		_rd.HashedCurrentName,
+		rec.EncryptedPreviousName,
+		rec.HashedCurrentName,
 	)
-	if rlt.Error != nil {
-		if errors.Is(rlt.Error, gorm.ErrRecordNotFound) {
-			return _db.Create(&_rd).Error
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return conn.Create(&rec).Error
 		}
-		return rlt.Error
+		return result.Error
 	}
-	rd.Count++
-	return _db.Save(&rd).Error
+	existing.Count++
+	return conn.Save(&existing).Error
 }
 
-func DeleteRecord(_db *gorm.DB, _rd db.Record) error {
-	var rd db.Record
-	rlt := _db.First(
-		&rd,
+func DeleteRecord(conn *gorm.DB, rec db.Record) error {
+	var existing db.Record
+	result := conn.First(
+		&existing,
 		"encrypted_previous_name = ? AND hashed_current_name = ?",
-		_rd.EncryptedPreviousName,
-		_rd.HashedCurrentName,
+		rec.EncryptedPreviousName,
+		rec.HashedCurrentName,
 	)
-	if rlt.Error != nil {
-		return rlt.Error
+	if result.Error != nil {
+		return result.Error
 	}
-	rd.Count--
-	if rd.Count != 0 {
-		return _db.Save(&rd).Error
+	existing.Count--
+	if existing.Count != 0 {
+		return conn.Save(&existing).Error
 	}
-	rd.Count++
-	return _db.Unscoped().Delete(&rd).Error
+	return conn.Unscoped().Delete(&existing).Error
 }
 
 func CheckDoFDN(

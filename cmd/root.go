@@ -17,8 +17,7 @@ import (
 	"github.com/hobbymarks/fdn/utils"
 )
 
-// version is 0.0.0 for local builds; release binaries get the tag from GoReleaser ldflags (.goreleaser.yaml).
-var version = "0.0.0"
+var version = "1.0.4"
 
 var (
 	onlyDirectory bool
@@ -34,12 +33,6 @@ var (
 )
 
 var verbose bool
-
-// FDNConfigPath is the unified FDN database path (config + rename records); kept for compatibility.
-var FDNConfigPath string
-
-// FDNRecordPath matches FDNConfigPath; both point at fdn.db.
-var FDNRecordPath string
 
 var rootCmd = &cobra.Command{
 	Use:     "fdn",
@@ -62,16 +55,18 @@ var rootCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Info("rootCmd executing ...")
-		PrintTipFlag := false
+		printTipFlag := false
 		curHashEncryPre := map[string]string{}
 		if reverse {
-			var rds []db.Record
-			_db := db.ConnectRDDB()
-			defer utils.DBClose(_db)
-			_db.Find(&rds)
+			var records []db.Record
+			conn, err := db.ConnectRDDB()
+			if err != nil {
+				log.Fatal(err)
+			}
+			conn.Find(&records)
 
-			for _, rd := range rds {
-				curHashEncryPre[rd.HashedCurrentName] = rd.EncryptedPreviousName
+			for _, rec := range records {
+				curHashEncryPre[rec.HashedCurrentName] = rec.EncryptedPreviousName
 			}
 		}
 		log.Infof("search paths...")
@@ -94,7 +89,10 @@ var rootCmd = &cobra.Command{
 				curName := filepath.Base(path)
 				encryptedPre, exist := curHashEncryPre[utils.KeyHash(curName)]
 				if exist {
-					preName := utils.Decrypt(curName, encryptedPre)
+					preName, err := utils.Decrypt(curName, encryptedPre)
+					if err != nil {
+						log.Fatal(err)
+					}
 					toPath = filepath.Join(filepath.Dir(path), preName)
 				}
 			} else {
@@ -129,24 +127,28 @@ var rootCmd = &cobra.Command{
 						os.Exit(0)
 					}
 				} else {
-					PrintTipFlag = true
+					printTipFlag = true
 					OutputResult(path, toPath, false, fullpath)
 				}
 			}
 			log.Infof("process!:%s", path)
 		}
 		log.Info("loopthrough process path!")
-		if PrintTipFlag {
+		if printTipFlag {
 			noEffectTip()
 		}
 	},
 }
 
-// Execute is the cmd entry
 func Execute() {
 	if err := prepareFDNDataDir(); err != nil {
 		log.Fatal(err)
 	}
+	defer func() {
+		if err := db.CloseDB(); err != nil {
+			log.Error(err)
+		}
+	}()
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
@@ -154,13 +156,18 @@ func Execute() {
 }
 
 func prepareFDNDataDir() error {
-	fdnDir := utils.FDNDir()
+	fdnDir, err := utils.FDNDir()
+	if err != nil {
+		return err
+	}
 	if err := db.MigrateLegacyFDNDatabases(fdnDir); err != nil {
 		log.Errorf("migrate legacy fdn databases: %s", err)
 	}
-	FDNConfigPath = filepath.Join(fdnDir, db.FDNDBFileName)
-	FDNRecordPath = FDNConfigPath
-	if err := db.EnsureDefaultCFG(FDNConfigPath); err != nil {
+	dbPath := filepath.Join(fdnDir, db.FDNDBFileName)
+	if err := db.EnsureDefaultCFG(dbPath); err != nil {
+		return err
+	}
+	if err := db.InitDB(dbPath); err != nil {
 		return err
 	}
 	return nil
@@ -185,15 +192,3 @@ func init() {
 	rootCmd.Flags().
 		BoolVarP(&verbose, "verbose", "V", false, "Print more verbose information")
 }
-
-// TODO(hm): Support ignore filename or filepath(add ignores,list ignores,delete
-// ignore,force ignore ignores)
-// TODO(hm): At bottom add dynamic revolved bar as not dead flag
-// TODO(hm): Doc - multi args how to
-// TODO(hm): Support temp words
-// TODO(hm): Recursive query for change records
-// TODO(hm): Add option for permanently delete record when count is 0 or soft delete
-// TODO(hm): Add dry run for config
-// TODO(hm): Remove nosense word
-// TODO(hm): Support add prefix or postfix by private order
-// TODO(hm): Optimize loop through files performance

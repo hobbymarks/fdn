@@ -24,29 +24,24 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-// OpenDB only open the db
-func OpenDB(path string) *gorm.DB {
-	_db, err := gorm.Open(
+func OpenDB(path string) (*gorm.DB, error) {
+	conn, err := gorm.Open(
 		sqlite.Open(path),
 		&gorm.Config{
 			Logger: logger.Default.LogMode(logger.Silent),
 		},
-		// TODO(hm): Set by env flag more better
 	)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-
-	return _db
+	return conn, nil
 }
 
-// KeyHash create hash from key and return string
 func KeyHash(key string) string {
 	data := []byte(key)
 	return fmt.Sprintf("%x", md5.Sum(data))
 }
 
-// HashTo32B hash input to 32 bytes and return
 func HashTo32B(key string) []byte {
 	h := sha256.New()
 	h.Write([]byte(key))
@@ -54,7 +49,6 @@ func HashTo32B(key string) []byte {
 	return bs
 }
 
-// RandEnAlphDigitShiftDigit return rand string with length is n
 func RandEnAlphDigitShiftDigit(n int) string {
 	letters := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()")
 	b := make([]rune, n)
@@ -64,7 +58,6 @@ func RandEnAlphDigitShiftDigit(n int) string {
 	return string(b)
 }
 
-// RandEnAlphDigit return rand string with length is n
 func RandEnAlphDigit(n int) string {
 	letters := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
 	b := make([]rune, n)
@@ -74,7 +67,6 @@ func RandEnAlphDigit(n int) string {
 	return string(b)
 }
 
-// RandEnAlph return rand string with length is n
 func RandEnAlph(n int) string {
 	letters := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	b := make([]rune, n)
@@ -84,7 +76,6 @@ func RandEnAlph(n int) string {
 	return string(b)
 }
 
-// PathExist check path exist
 func PathExist(path string) bool {
 	if _, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
@@ -96,7 +87,6 @@ func PathExist(path string) bool {
 	return true
 }
 
-// PathIsDirectory reports whether path exists and refers to a directory.
 func PathIsDirectory(path string) bool {
 	info, err := os.Stat(path)
 	if err != nil {
@@ -105,63 +95,56 @@ func PathIsDirectory(path string) bool {
 	return info.IsDir()
 }
 
-// DBBaseDir get database base directory path
-// default return home directory,return program executed path if return home
-// directory path failed
-func DBBaseDir() string {
+func DBBaseDir() (string, error) {
 	homeDir, err := os.UserHomeDir()
-	// get home dir
 	if err != nil {
 		path, err := os.Executable()
 		if err != nil {
-			log.Fatalf("Get DatabaseDir Failed:%s", err)
+			return "", fmt.Errorf("get database dir failed: %w", err)
 		}
-		return path
+		return path, nil
 	}
-	return homeDir
+	return homeDir, nil
 }
 
-// FDNDir get fdn data directory path
-func FDNDir() string {
-	dbBaseDir := DBBaseDir()
-	fdnDir := filepath.Join(dbBaseDir, ".fdn")
-	_, err := os.Lstat(fdnDir)
+func FDNDir() (string, error) {
+	dbBaseDir, err := DBBaseDir()
 	if err != nil {
+		return "", err
+	}
+	fdnDir := filepath.Join(dbBaseDir, ".fdn")
+	if _, err := os.Lstat(fdnDir); err != nil {
 		if os.IsNotExist(err) {
 			if err := os.Mkdir(fdnDir, os.ModePerm); err != nil {
-				log.Fatal(err)
+				return "", err
 			}
 		} else {
-			log.Fatal(err)
+			return "", err
 		}
 	}
-	return fdnDir
+	return fdnDir, nil
 }
 
-// PathMaker make path with random string
-func PathMaker(_type string) string {
+func PathMaker(typ string) (string, error) {
 	var path string
 
-	// defer os.RemoveAll(filepath.Dir(_f.Name()))
-
-	if _type == "f" {
-		_f, err := os.CreateTemp("", "fdn"+RandEnAlphDigit(18)+".*")
+	if typ == "f" {
+		tmp, err := os.CreateTemp("", "fdn"+RandEnAlphDigit(18)+".*")
 		if err != nil {
-			log.Fatal(err)
+			return "", err
 		}
-		path = _f.Name()
+		path = tmp.Name()
 	}
-	if _type == "d" {
-		_f, err := os.MkdirTemp("", "fdn"+RandEnAlphDigit(32))
+	if typ == "d" {
+		tmp, err := os.MkdirTemp("", "fdn"+RandEnAlphDigit(32))
 		if err != nil {
-			log.Fatal(err)
+			return "", err
 		}
-		path = _f
+		path = tmp
 	}
-	return path
+	return path, nil
 }
 
-// Ext retrieve path extension if directory or error return empty string
 func Ext(path string) string {
 	fileInfo, err := os.Stat(path)
 	if err != nil {
@@ -197,59 +180,53 @@ var iv = []byte{
 	100,
 } /*aFDNinternalused*/
 
-// EncodeBase64 encode bytes with base64 to string
 func EncodeBase64(b []byte) string {
 	return base64.StdEncoding.EncodeToString(b)
 }
 
-// DecodeBase64 decode string with base64 to bytes
-func DecodeBase64(s string) []byte {
+func DecodeBase64(s string) ([]byte, error) {
 	data, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return data
+	return data, nil
 }
 
-// Encrypt encrypt text with key return string
-func Encrypt(key, text string) string {
+func Encrypt(key, text string) (string, error) {
 	block, err := aes.NewCipher(HashTo32B(key))
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 	plaintext := []byte(text)
 	cfb := cipher.NewCFBEncrypter(block, iv)
 	ciphertext := make([]byte, len(plaintext))
 	cfb.XORKeyStream(ciphertext, plaintext)
-	return EncodeBase64(ciphertext)
+	return EncodeBase64(ciphertext), nil
 }
 
-// Decrypt decrypt text with key return string
-func Decrypt(key, text string) string {
+func Decrypt(key, text string) (string, error) {
 	block, err := aes.NewCipher(HashTo32B(key))
 	if err != nil {
-		panic(err)
+		return "", err
 	}
-	ciphertext := DecodeBase64(text)
+	ciphertext, err := DecodeBase64(text)
+	if err != nil {
+		return "", err
+	}
 	cfb := cipher.NewCFBDecrypter(block, iv)
 	plaintext := make([]byte, len(ciphertext))
 	cfb.XORKeyStream(plaintext, ciphertext)
-	return string(plaintext)
+	return string(plaintext), nil
 }
 
-// DBClose close the gorm.DB via sqlDB
-func DBClose(db *gorm.DB) {
+func DBClose(db *gorm.DB) error {
 	sqlDB, err := db.DB()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	err = sqlDB.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
+	return sqlDB.Close()
 }
 
-// FileMD5 return file content md5 checksum
 func FileMD5(filePath string) (string, error) {
 	var md5s string
 
@@ -269,17 +246,11 @@ func FileMD5(filePath string) (string, error) {
 	return md5s, nil
 }
 
-// SameFiles reports whether the given regular files have identical content by comparing
-// truncated 128-bit MD5 digests from FileMD5. With only firstPath and secondPath, it
-// returns true when both hashes match. If morePaths is non-empty, firstPath and secondPath
-// must match each other and every path in morePaths must yield the same hash; otherwise it
-// returns false. A non-nil error is returned when any path cannot be opened or read.
 func SameFiles(
 	firstPath string,
 	secondPath string,
 	morePaths ...string,
 ) (bool, error) {
-	// TODO(hm): Multi files comparation
 	fHash, err := FileMD5(firstPath)
 	if err != nil {
 		return false, err
@@ -289,14 +260,11 @@ func SameFiles(
 		return false, err
 	}
 	if len(morePaths) == 0 {
-		// No more paths
 		if strings.Compare(fHash, sHash) == 0 {
 			return true, nil
 		}
 		return false, nil
 	} else {
-		// At least three paths(firstPath,secondPath,at least a path in
-		// morePaths)
 		if strings.Compare(fHash, sHash) != 0 {
 			return false, nil
 		}

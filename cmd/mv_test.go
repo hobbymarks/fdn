@@ -6,11 +6,13 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/hobbymarks/fdn/db"
 	"github.com/stretchr/testify/assert"
 )
 
 func testMvHome(t *testing.T) string {
 	t.Helper()
+	db.ResetSharedDB()
 	tmp := t.TempDir()
 	t.Setenv("HOME", tmp)
 	t.Setenv("USERPROFILE", tmp)

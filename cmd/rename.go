@@ -12,7 +12,6 @@ import (
 	"unicode/utf8"
 
 	"github.com/hobbymarks/fdn/db"
-	"github.com/hobbymarks/fdn/utils"
 )
 
 var termWordRegexCache struct {
@@ -95,24 +94,51 @@ func maskSegments(s string, termWords []db.TermWord) ([]string, []bool) {
 	return words, wdmsk
 }
 
+var sepReplacerCache struct {
+	sync.RWMutex
+	sep string
+	re  *regexp.Regexp
+}
+
+func getSepCollapseRe(sep string) *regexp.Regexp {
+	sepReplacerCache.RLock()
+	if sepReplacerCache.sep == sep && sepReplacerCache.re != nil {
+		re := sepReplacerCache.re
+		sepReplacerCache.RUnlock()
+		return re
+	}
+	sepReplacerCache.RUnlock()
+
+	sepReplacerCache.Lock()
+	defer sepReplacerCache.Unlock()
+	if sepReplacerCache.sep == sep && sepReplacerCache.re != nil {
+		return sepReplacerCache.re
+	}
+	sepReplacerCache.re = regexp.MustCompile("[" + sep + "]+")
+	sepReplacerCache.sep = sep
+	return sepReplacerCache.re
+}
+
 func ReplaceWords(inputName string) (string, error) {
-	_db := db.ConnectCFGDB()
-	defer utils.DBClose(_db)
+	conn, err := db.ConnectCFGDB()
+	if err != nil {
+		return "", err
+	}
 
 	var termWords []db.TermWord
-	if rlt := _db.Find(&termWords); rlt.Error != nil {
-		return "", fmt.Errorf("retrieve TermWord: %w", rlt.Error)
+	if result := conn.Find(&termWords); result.Error != nil {
+		return "", fmt.Errorf("retrieve TermWord: %w", result.Error)
 	}
 
 	var sep db.Separator
-	if rlt := _db.First(&sep); rlt.Error != nil {
-		return "", fmt.Errorf("retrieve Separator: %w", rlt.Error)
+	if result := conn.First(&sep); result.Error != nil {
+		return "", fmt.Errorf("retrieve Separator: %w", result.Error)
 	}
-	_sep := sep.Value
+	sepStr := sep.Value
 
 	var toSepWords []db.ToSepWord
-	if rlt := _db.Find(&toSepWords); rlt.Error != nil {
-		return "", fmt.Errorf("retrieve ToSepWord: %w", rlt.Error)
+	if result := conn.Find(&toSepWords); result.Error != nil {
+		return "", fmt.Errorf("retrieve ToSepWord: %w", result.Error)
 	}
 	slices.SortFunc(toSepWords, func(a, b db.ToSepWord) int {
 		ra := utf8.RuneCountInString(a.Value)
@@ -129,7 +155,7 @@ func ReplaceWords(inputName string) (string, error) {
 	}
 
 	newWords := []string{}
-	rpCNS := regexp.MustCompile("[" + _sep + "]+")
+	rpCNS := getSepCollapseRe(sepStr)
 	termWordMap := make(map[string]string, len(termWords))
 	for _, twd := range termWords {
 		termWordMap[twd.OriginalLower] = twd.TargetWord
@@ -137,37 +163,39 @@ func ReplaceWords(inputName string) (string, error) {
 	for idx, wd := range words {
 		if !wordMasks[idx] {
 			for _, sw := range toSepWords {
-				wd = strings.ReplaceAll(wd, sw.Value, _sep)
+				wd = strings.ReplaceAll(wd, sw.Value, sepStr)
 			}
 		}
 		newWords = append(newWords, wd)
 	}
 	outName := strings.Join(newWords, "")
-	outName = rpCNS.ReplaceAllString(outName, _sep)
+	outName = rpCNS.ReplaceAllString(outName, sepStr)
 	newWords = newWords[:0]
 
-	for _, wd := range strings.Split(outName, _sep) {
+	for _, wd := range strings.Split(outName, sepStr) {
 		if v, exist := termWordMap[wd]; exist {
 			wd = v
 		}
 		newWords = append(newWords, wd)
 	}
-	outName = strings.Join(newWords, _sep)
+	outName = strings.Join(newWords, sepStr)
 
 	return outName, nil
 }
 
 func ProcessHeadTail(inputName string) (string, error) {
-	_db := db.ConnectCFGDB()
-	defer utils.DBClose(_db)
+	conn, err := db.ConnectCFGDB()
+	if err != nil {
+		return "", err
+	}
 
 	var sep db.Separator
-	if rlt := _db.First(&sep); rlt.Error != nil {
-		return "", fmt.Errorf("retrieve Separator: %w", rlt.Error)
+	if result := conn.First(&sep); result.Error != nil {
+		return "", fmt.Errorf("retrieve Separator: %w", result.Error)
 	}
-	_sep := sep.Value
+	sepStr := sep.Value
 
-	rpHTSeps := regexp.MustCompile("^" + _sep + "+" + "|" + _sep + "+" + "$")
+	rpHTSeps := regexp.MustCompile("^" + sepStr + "+" + "|" + sepStr + "+" + "$")
 	return rpHTSeps.ReplaceAllString(inputName, ""), nil
 }
 
@@ -198,11 +226,6 @@ func ASCHead(inputName string) string {
 	return ascH.String() + outName
 }
 
-func ArrayContainsElement[T comparable](s []T, e T) bool {
-	return slices.Contains(s, e)
-}
-
-// FDNedFrom applies ReplaceWords then ProcessHeadTail using the config database.
 func FDNedFrom(input string) (string, error) {
 	out, err := ReplaceWords(input)
 	if err != nil {

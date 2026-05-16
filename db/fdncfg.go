@@ -5,10 +5,6 @@ Copyright © 2022 hobbymarks ihobbymarks@gmail.com
 package db
 
 import (
-	"log"
-	"os"
-	"path/filepath"
-
 	"github.com/hobbymarks/fdn/utils"
 	"gorm.io/gorm"
 )
@@ -18,7 +14,6 @@ const (
 	UserSource    = "user"
 )
 
-// TermWord Term Word
 type TermWord struct {
 	gorm.Model
 	KeyHash       string `gorm:"unique"`
@@ -27,7 +22,6 @@ type TermWord struct {
 	Source        string `gorm:"default:user"`
 }
 
-// ToSepWord will be change to separator
 type ToSepWord struct {
 	gorm.Model
 	KeyHash string `gorm:"unique"`
@@ -35,7 +29,6 @@ type ToSepWord struct {
 	Source  string `gorm:"default:user"`
 }
 
-// Separator separator
 type Separator struct {
 	gorm.Model
 	KeyHash string `gorm:"unique"`
@@ -43,25 +36,30 @@ type Separator struct {
 	Source  string `gorm:"default:user"`
 }
 
-// ConnectCFGDB connect config database
-func ConnectCFGDB(path ...string) *gorm.DB {
-	var dbPath string
+func ConnectCFGDB(path ...string) (*gorm.DB, error) {
+	conn := GetDB()
+	if conn != nil {
+		return conn, nil
+	}
+	return ConnectDB(path...)
+}
 
-	// len(paths)==0
-	if len(path) == 0 {
-		dbPath = DefaultFDNDBPath()
-	} else {
-		// path not exist
-		if err := os.MkdirAll(filepath.Dir(path[0]), os.ModePerm); err != nil {
-			log.Fatal(err)
-		}
-		dbPath = path[0]
+func ConnectRDDB(path ...string) (*gorm.DB, error) {
+	conn := GetDB()
+	if conn != nil {
+		return conn, nil
 	}
-	// open _db and init
-	_db := utils.OpenDB(dbPath)
-	err := _db.AutoMigrate(&TermWord{}, &ToSepWord{}, &Separator{})
-	if err != nil {
-		log.Fatal(err)
+	return ConnectDB(path...)
+}
+
+func RekeySeparator(conn *gorm.DB) error {
+	var sep Separator
+	if err := conn.First(&sep).Error; err != nil {
+		return err
 	}
-	return _db
+	if sep.Source != BuiltinSource {
+		sep.KeyHash = utils.KeyHash(sep.Value)
+		return conn.Save(&sep).Error
+	}
+	return nil
 }

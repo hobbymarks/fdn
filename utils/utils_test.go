@@ -15,8 +15,11 @@ func TestOpenDB_LegalPath(t *testing.T) {
 		t.Errorf("please remove file %s", dp)
 		return
 	}
-	OpenDB(dp)
-	_, err := os.Stat(dp)
+	_, err := OpenDB(dp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = os.Stat(dp)
 	if err != nil {
 		if os.IsNotExist(err) {
 			t.Errorf("%s not exist", dp)
@@ -28,37 +31,49 @@ func TestOpenDB_LegalPath(t *testing.T) {
 }
 
 func TestPathMaker(t *testing.T) {
-	_f := PathMaker("f")
-	if !PathExist(_f) {
-		t.Errorf("'f' error:%s", _f)
-	} else {
-		t.Logf("%s", _f)
-		os.RemoveAll(_f)
+	path, err := PathMaker("f")
+	if err != nil {
+		t.Fatal(err)
 	}
-	_d := PathMaker("d")
-	if !PathExist(_d) {
-		t.Errorf("'d' error:%s", _d)
+	if !PathExist(path) {
+		t.Errorf("'f' error:%s", path)
 	} else {
-		t.Logf("%s", _d)
-		os.RemoveAll(_d)
+		t.Logf("%s", path)
+		os.RemoveAll(path)
+	}
+	dir, err := PathMaker("d")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !PathExist(dir) {
+		t.Errorf("'d' error:%s", dir)
+	} else {
+		t.Logf("%s", dir)
+		os.RemoveAll(dir)
 	}
 }
 
 func TestExt(t *testing.T) {
-	_f := PathMaker("f")
-	if _ext := Ext(_f); _ext == "" {
-		t.Errorf("ext '%s' error:%s", _f, _ext)
+	path, err := PathMaker("f")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ext := Ext(path); ext == "" {
+		t.Errorf("ext '%s' error:%s", path, ext)
 	} else {
-		t.Logf("file '%s' ext:%s", _f, _ext)
-		os.RemoveAll(_f)
+		t.Logf("file '%s' ext:%s", path, ext)
+		os.RemoveAll(path)
 	}
 
-	_d := PathMaker("d")
-	if _ext := Ext(_d); _ext != "" {
-		t.Errorf("ext '%s' error:%s", _d, _ext)
+	dir, err := PathMaker("d")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ext := Ext(dir); ext != "" {
+		t.Errorf("ext '%s' error:%s", dir, ext)
 	} else {
-		t.Logf("dir '%s' ext:%s", _d, _ext)
-		os.RemoveAll(_d)
+		t.Logf("dir '%s' ext:%s", dir, ext)
+		os.RemoveAll(dir)
 	}
 }
 
@@ -66,12 +81,18 @@ func TestEncryDecry(t *testing.T) {
 	key := ".......|.......|.......|.......|.......|.......|"
 	plainText := ".... simple plain ...."
 
-	_encry := Encrypt(key, plainText)
-	_decry := Decrypt(key, _encry)
+	encStr, err := Encrypt(key, plainText)
+	if err != nil {
+		t.Fatal(err)
+	}
+	decStr, err := Decrypt(key, encStr)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	if _decry != plainText {
-		t.Errorf("%s not equal %s", _decry, plainText)
+	if decStr != plainText {
+		t.Errorf("%s not equal %s", decStr, plainText)
 	} else {
-		t.Logf("\ndecrypted==>%s\nplaintext==>%s", _decry, plainText)
+		t.Logf("\ndecrypted==>%s\nplaintext==>%s", decStr, plainText)
 	}
 }

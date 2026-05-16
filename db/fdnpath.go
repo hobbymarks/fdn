@@ -10,7 +10,11 @@ import (
 const FDNDBFileName = "fdn.db"
 
 func DefaultFDNDBPath() string {
-	return filepath.Join(utils.FDNDir(), FDNDBFileName)
+	fdnDir, err := utils.FDNDir()
+	if err != nil {
+		panic("fdn data directory unavailable: " + err.Error())
+	}
+	return filepath.Join(fdnDir, FDNDBFileName)
 }
 
 func sqliteQuotePath(p string) (string, error) {

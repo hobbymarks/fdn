@@ -10,6 +10,7 @@ import (
 
 func testIsolatedHome(t *testing.T) string {
 	t.Helper()
+	db.ResetSharedDB()
 	tmp := t.TempDir()
 	t.Setenv("HOME", tmp)
 	t.Setenv("USERPROFILE", tmp)
@@ -18,9 +19,17 @@ func testIsolatedHome(t *testing.T) string {
 
 func seedEmbeddedCfgDB(t *testing.T) {
 	t.Helper()
+	db.ResetSharedDB()
 	testIsolatedHome(t)
-	p := filepath.Join(utils.FDNDir(), db.FDNDBFileName)
+	fdnDir, err := utils.FDNDir()
+	if err != nil {
+		t.Fatal(err)
+	}
+	p := filepath.Join(fdnDir, db.FDNDBFileName)
 	if err := db.EnsureDefaultCFG(p); err != nil {
+		t.Fatal(err)
+	}
+	if err := db.InitDB(p); err != nil {
 		t.Fatal(err)
 	}
 }

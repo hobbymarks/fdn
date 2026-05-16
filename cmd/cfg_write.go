@@ -12,36 +12,38 @@ import (
 )
 
 func ConfigTermWords(keyValueMap map[string]string) error {
-	_db := db.ConnectCFGDB()
-	defer utils.DBClose(_db)
+	conn, err := db.ConnectCFGDB()
+	if err != nil {
+		return err
+	}
 	for key, value := range keyValueMap {
-		_key := strings.ToLower(key)
-		_termWord := db.TermWord{
-			KeyHash:       utils.KeyHash(_key),
-			OriginalLower: _key,
+		keyHash := utils.KeyHash(strings.ToLower(key))
+		termWord := db.TermWord{
+			KeyHash:       keyHash,
+			OriginalLower: strings.ToLower(key),
 			TargetWord:    value,
 			Source:        db.UserSource,
 		}
-		var _cnt int64 = 0
-		_db.Model(&db.TermWord{}).
-			Where("key_hash = ?", _termWord.KeyHash).
-			Count(&_cnt)
-		if _cnt == 0 {
-			_rlt := _db.Create(&_termWord)
-			if _rlt.Error != nil {
-				log.Error(_rlt.Error)
+		var count int64 = 0
+		conn.Model(&db.TermWord{}).
+			Where("key_hash = ?", termWord.KeyHash).
+			Count(&count)
+		if count == 0 {
+			result := conn.Create(&termWord)
+			if result.Error != nil {
+				log.Error(result.Error)
 			}
 		} else {
-			_rlt := _db.Model(&db.TermWord{}).
-				Where("key_hash = ?", _termWord.KeyHash).
+			result := conn.Model(&db.TermWord{}).
+				Where("key_hash = ?", termWord.KeyHash).
 				Updates(map[string]interface{}{
 					"target_word": value,
 					"source":      db.UserSource,
 				})
-			if _rlt.Error != nil {
-				log.Error(_rlt.Error)
+			if result.Error != nil {
+				log.Error(result.Error)
 			}
-			log.Debugf("updated:%s -> %s", _termWord.OriginalLower, value)
+			log.Debugf("updated:%s -> %s", termWord.OriginalLower, value)
 		}
 	}
 	invalidateTermWordRegexCache()
@@ -49,19 +51,21 @@ func ConfigTermWords(keyValueMap map[string]string) error {
 }
 
 func DeleteTermWords(keys []string) error {
-	_db := db.ConnectCFGDB()
-	defer utils.DBClose(_db)
+	conn, err := db.ConnectCFGDB()
+	if err != nil {
+		return err
+	}
 	for _, key := range keys {
-		_key := utils.KeyHash(key)
+		keyHash := utils.KeyHash(key)
 		var tw db.TermWord
-		if rlt := _db.Where("key_hash = ?", _key).First(&tw); rlt.Error == nil {
+		if result := conn.Where("key_hash = ?", keyHash).First(&tw); result.Error == nil {
 			if tw.Source == db.BuiltinSource {
 				log.Infof("removing built-in term: %s (will be restored on next sync)", tw.OriginalLower)
 			}
 		}
-		_rlt := _db.Unscoped().Delete(&db.TermWord{}, _key)
-		if _rlt.Error != nil {
-			log.Error(_rlt.Error)
+		result := conn.Unscoped().Delete(&db.TermWord{}, keyHash)
+		if result.Error != nil {
+			log.Error(result.Error)
 		}
 	}
 	invalidateTermWordRegexCache()
@@ -69,29 +73,31 @@ func DeleteTermWords(keys []string) error {
 }
 
 func ConfigToSepWords(words []string) error {
-	_db := db.ConnectCFGDB()
-	defer utils.DBClose(_db)
+	conn, err := db.ConnectCFGDB()
+	if err != nil {
+		return err
+	}
 	for _, word := range words {
-		_key := utils.KeyHash(word)
-		_toSepWord := db.ToSepWord{KeyHash: _key, Value: word, Source: db.UserSource}
-		var _cnt int64 = 0
-		_db.Model(&db.ToSepWord{}).
-			Where("key_hash = ?", _toSepWord.KeyHash).
-			Count(&_cnt)
-		if _cnt == 0 {
-			_rlt := _db.Create(&_toSepWord)
-			if _rlt.Error != nil {
-				log.Error(_rlt.Error)
+		keyHash := utils.KeyHash(word)
+		toSepWord := db.ToSepWord{KeyHash: keyHash, Value: word, Source: db.UserSource}
+		var count int64 = 0
+		conn.Model(&db.ToSepWord{}).
+			Where("key_hash = ?", toSepWord.KeyHash).
+			Count(&count)
+		if count == 0 {
+			result := conn.Create(&toSepWord)
+			if result.Error != nil {
+				log.Error(result.Error)
 			}
 		} else {
-			_rlt := _db.Model(&db.ToSepWord{}).
-				Where("key_hash = ?", _toSepWord.KeyHash).
+			result := conn.Model(&db.ToSepWord{}).
+				Where("key_hash = ?", toSepWord.KeyHash).
 				Updates(map[string]interface{}{
 					"value":  word,
 					"source": db.UserSource,
 				})
-			if _rlt.Error != nil {
-				log.Error(_rlt.Error)
+			if result.Error != nil {
+				log.Error(result.Error)
 			}
 			log.Debugf("updated sepword:%s", word)
 		}
@@ -100,51 +106,55 @@ func ConfigToSepWords(words []string) error {
 }
 
 func DeleteToSepWords(keys []string) error {
-	_db := db.ConnectCFGDB()
-	defer utils.DBClose(_db)
+	conn, err := db.ConnectCFGDB()
+	if err != nil {
+		return err
+	}
 	for _, key := range keys {
-		_key := utils.KeyHash(key)
+		keyHash := utils.KeyHash(key)
 		var sw db.ToSepWord
-		if rlt := _db.Where("key_hash = ?", _key).First(&sw); rlt.Error == nil {
+		if result := conn.Where("key_hash = ?", keyHash).First(&sw); result.Error == nil {
 			if sw.Source == db.BuiltinSource {
 				log.Infof("removing built-in sepword: %s (will be restored on next sync)", sw.Value)
 			}
 		}
-		_rlt := _db.Unscoped().Delete(&db.ToSepWord{}, _key)
-		if _rlt.Error != nil {
-			log.Error(_rlt.Error)
+		result := conn.Unscoped().Delete(&db.ToSepWord{}, keyHash)
+		if result.Error != nil {
+			log.Error(result.Error)
 		}
 	}
 	return nil
 }
 
 func ConfigSeparator(separator string) error {
-	_db := db.ConnectCFGDB()
-	defer utils.DBClose(_db)
+	conn, err := db.ConnectCFGDB()
+	if err != nil {
+		return err
+	}
 	var existing db.Separator
-	rlt := _db.First(&existing)
-	if rlt.Error != nil {
-		if errors.Is(rlt.Error, gorm.ErrRecordNotFound) {
-			_sep := db.Separator{
+	result := conn.First(&existing)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			sep := db.Separator{
 				KeyHash: utils.KeyHash(separator),
 				Value:   separator,
 				Source:  db.UserSource,
 			}
-			_rlt := _db.Create(&_sep)
-			if _rlt.Error != nil {
-				log.Error(_rlt.Error)
+			createResult := conn.Create(&sep)
+			if createResult.Error != nil {
+				log.Error(createResult.Error)
 			}
 		} else {
-			return rlt.Error
+			return result.Error
 		}
 	} else {
-		_rlt := _db.Model(&existing).Updates(map[string]interface{}{
+		updateResult := conn.Model(&existing).Updates(map[string]interface{}{
 			"key_hash": utils.KeyHash(separator),
 			"value":    separator,
 			"source":   db.UserSource,
 		})
-		if _rlt.Error != nil {
-			log.Error(_rlt.Error)
+		if updateResult.Error != nil {
+			log.Error(updateResult.Error)
 		}
 		log.Debugf("updated separator:%s", separator)
 	}
