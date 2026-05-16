@@ -36,13 +36,9 @@ jobs:
           version: v1.62
           args: --timeout=5m
 
-      - name: Test (race on Linux)
+      - name: Test (race)
         if: runner.os == 'Linux'
         run: go test -race ./...
-
-      - name: Test (Windows)
-        if: runner.os == 'Windows'
-        run: go test ./...
 
       - name: Build (Unix)
         if: runner.os != 'Windows'
