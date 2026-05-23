@@ -1,6 +1,6 @@
-# Build the fdn binary in the current directory
+# Build the fdn binary in the current directory (version from git tag)
 build:
-    go build -o fdn .
+    go build -ldflags "-X github.com/hobbymarks/fdn/cmd.version=$(git describe --tags --always --dirty)" -o fdn .
 
 # Run all tests
 test:

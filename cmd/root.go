@@ -16,7 +16,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var version = "1.0.5"
+var version = "dev"
 
 var (
 	onlyDirectory bool
