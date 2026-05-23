@@ -1,39 +1,19 @@
-# Default recipe to run everything
-all: config-go install-tools update-shell
+# Build the fdn binary in the current directory
+build:
+    go build -o fdn .
 
-# Configure Go environment variables globally
-config-go:
-    go env -w GOPROXY="https://proxy.golang.org,direct"
-    go env -w GOSUMDB="sum.golang.org"
-    @echo "Go Proxy and SumDB configured."
+# Run all tests
+test:
+    go test ./...
 
-# Install essential Go development tools
-install-tools:
-    @echo "Installing gopls..."
-    go install golang.org/x/tools/gopls@latest
-    @echo "Installing goimports..."
-    go install golang.org/x/tools/cmd/goimports@latest
-    @echo "Installing delve (dlv)..."
-    go install github.com/go-delve/delve/cmd/dlv@latest
-    @echo "Installing staticcheck..."
-    go install honnef.co/go/tools/cmd/staticcheck@latest
+# Run all tests with verbose output (no cache)
+test-verbose:
+    go test -v -count=1 ./...
 
-# Add Go bin to your .zshrc if it's not already there
-update-shell:
-    @if ! grep -q "GOPATH)/bin" ~/.zshrc; then \
-        echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.zshrc; \
-        echo "Added Go bin to ~/.zshrc. Please run 'source ~/.zshrc' to apply."; \
-    else \
-        echo "Go bin already in ~/.zshrc Path."; \
-    fi
+# Format all Go source files
+fmt:
+    gofmt -w .
 
-# Verify the installation
-check:
-    go env GOPROXY GOSUMDB
-    gopls version
-    dlv version
-    staticcheck --version
-
-# Regenerate db/default_emoji_sepwords.txt (Unicode inputs in db/; not loaded by fdn at runtime)
+# Regenerate db/default_emoji_sepwords.txt from Unicode emoji data files
 emoji-sepwords:
     cd db && go run ./emojigen -dir . -o default_emoji_sepwords.txt
