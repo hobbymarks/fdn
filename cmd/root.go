@@ -29,6 +29,7 @@ var (
 	plainStyle    bool
 	pretty        bool
 	overwrite     bool
+	tempInputs    []string
 )
 
 var verbose bool
@@ -74,6 +75,18 @@ var rootCmd = &cobra.Command{
 			paths,
 			func(i, j int) bool { return paths[i] > paths[j] },
 		)
+		if len(tempInputs) > 0 {
+			tempMap := make(map[string]string, len(tempInputs))
+			for _, t := range tempInputs {
+				key, val, ok := strings.Cut(t, ":")
+				if !ok || key == "" || val == "" {
+					slog.Error(fmt.Sprintf("invalid temp pair %q: want old:new", t))
+					os.Exit(1)
+				}
+				tempMap[key] = val
+			}
+			SetTempReplacements(tempMap)
+		}
 		slog.Info("loopthrough process path...")
 		for _, path := range paths {
 			slog.Info(fmt.Sprintf("process...:%s", path))
@@ -189,4 +202,6 @@ func init() {
 	rootCmd.Flags().
 		BoolVarP(&verbose, "verbose", "v", false, "Print more verbose information")
 	rootCmd.Flags().BoolP("version", "V", false, "Print version")
+	rootCmd.Flags().
+		StringArrayVar(&tempInputs, "temp", nil, "Temporary term replacement (old:new), repeatable")
 }

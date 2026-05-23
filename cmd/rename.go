@@ -26,6 +26,12 @@ var configDataCache struct {
 	loaded     bool
 }
 
+var tempReplacements map[string]string
+
+func SetTempReplacements(m map[string]string) {
+	tempReplacements = m
+}
+
 func InvalidateCaches() {
 	termWordRegexCache.Lock()
 	termWordRegexCache.pat = ""
@@ -173,6 +179,15 @@ func ReplaceWords(inputName string) (string, error) {
 	termWords := configDataCache.termWords
 	sepStr := configDataCache.separator.Value
 	toSepWords := configDataCache.toSepWords
+
+	if len(tempReplacements) > 0 {
+		for orig, target := range tempReplacements {
+			termWords = append(termWords, db.TermWord{
+				OriginalLower: strings.ToLower(orig),
+				TargetWord:    target,
+			})
+		}
+	}
 
 	words, wordMasks := maskSegments(inputName, termWords)
 	if len(words) != len(wordMasks) {
