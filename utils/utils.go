@@ -1,7 +1,4 @@
-/*
-Package utils provides database, crypto, and path helpers for fdn.
-Copyright © 2022 hobbymarks ihobbymarks@gmail.com
-*/
+// Package utils provides database, crypto, and path helpers for fdn.
 package utils
 
 import (

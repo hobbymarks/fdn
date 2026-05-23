@@ -1,7 +1,3 @@
-/*
-Package cmd mv subcommand
-Copyright © 2023 hobbymarks ihobbymarks@gmail.com
-*/
 package cmd
 
 import (

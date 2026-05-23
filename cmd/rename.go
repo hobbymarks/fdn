@@ -3,12 +3,10 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"math"
 	"regexp"
 	"slices"
 	"strings"
 	"sync"
-	"unicode"
 	"unicode/utf8"
 
 	"github.com/hobbymarks/fdn/db"
@@ -218,33 +216,6 @@ func ProcessHeadTail(inputName string) (string, error) {
 
 	rpHTSeps := regexp.MustCompile("^" + sepStr + "+" + "|" + sepStr + "+" + "$")
 	return rpHTSeps.ReplaceAllString(inputName, ""), nil
-}
-
-func ASCHead(inputName string) string {
-	outName := inputName
-	sa := []rune(outName)
-	var ascH strings.Builder
-	proxCS := func(c rune) string {
-		if c > 'Z' {
-			return fmt.Sprintf(
-				"%c",
-				int(c)-int(math.Ceil(float64(c-'Z')/26)*26),
-			)
-		} else if c < 'A' {
-			return fmt.Sprintf("%c", int(c)+int(math.Ceil(float64('A'-c)/26)*26))
-		} else {
-			return fmt.Sprintf("%c", int(c))
-		}
-	}
-	if len(sa) >= 1 {
-		if !(unicode.IsDigit(sa[0])) && !(unicode.IsLower(sa[0])) && !(unicode.IsUpper(sa[0])) {
-			uL := min(len(sa), 3)
-			for i := range uL {
-				ascH.WriteString(proxCS(sa[i]))
-			}
-		}
-	}
-	return ascH.String() + outName
 }
 
 func FDNedFrom(input string) (string, error) {

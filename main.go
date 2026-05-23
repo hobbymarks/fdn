@@ -1,7 +1,4 @@
-/*
-Package main
-Copyright © 2022 hobbymarks ihobbymarks@gmail.com
-*/
+// Package main is the entry point for the fdn CLI.
 package main
 
 import (

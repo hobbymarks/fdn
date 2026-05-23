@@ -1,9 +1,5 @@
 //go:build darwin || linux
 
-/*
-Package cmd notwin
-Copyright © 2022 hobbymarks ihobbymarks@gmail.com
-*/
 package cmd
 
 import (

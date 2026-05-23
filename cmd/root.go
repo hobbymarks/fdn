@@ -1,7 +1,4 @@
-/*
-Package cmd root subcommand is the default
-Copyright © 2022 hobbymarks ihobbymarks@gmail.com
-*/
+// Package cmd implements the fdn CLI commands.
 package cmd
 
 import (
@@ -16,6 +13,7 @@ import (
 
 	"github.com/hobbymarks/fdn/db"
 	"github.com/hobbymarks/fdn/utils"
+	"gorm.io/gorm"
 )
 
 var version = "1.0.5"
@@ -55,26 +53,13 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		slog.Info("rootCmd executing ...")
 		printTipFlag := false
-		curHashEncryPre := map[string]string{}
+		var reverseConn *gorm.DB
 		if reverse {
-			conn, err := db.ConnectCFGDB()
+			var err error
+			reverseConn, err = db.ConnectCFGDB()
 			if err != nil {
 				slog.Error(err.Error())
 				os.Exit(1)
-			}
-			rows, err := conn.Model(&db.Record{}).Rows()
-			if err != nil {
-				slog.Error(err.Error())
-				os.Exit(1)
-			}
-			defer rows.Close()
-			for rows.Next() {
-				var rec db.Record
-				if err := conn.ScanRows(rows, &rec); err != nil {
-					slog.Error(err.Error())
-					continue
-				}
-				curHashEncryPre[rec.HashedCurrentName] = rec.EncryptedPreviousName
 			}
 		}
 		slog.Info("search paths...")
@@ -96,9 +81,9 @@ var rootCmd = &cobra.Command{
 			toPath := ""
 			if reverse {
 				curName := filepath.Base(path)
-				encryptedPre, exist := curHashEncryPre[utils.KeyHash(curName)]
-				if exist {
-					preName, err := utils.Decrypt(curName, encryptedPre)
+				var rec db.Record
+				if err := reverseConn.Where("hashed_current_name = ?", utils.KeyHash(curName)).First(&rec).Error; err == nil {
+					preName, err := utils.Decrypt(curName, rec.EncryptedPreviousName)
 					if err != nil {
 						slog.Error(err.Error())
 						os.Exit(1)
@@ -202,5 +187,6 @@ func init() {
 	rootCmd.Flags().BoolVarP(&overwrite, "overwrite", "o", false, "Overwrite")
 
 	rootCmd.Flags().
-		BoolVarP(&verbose, "verbose", "V", false, "Print more verbose information")
+		BoolVarP(&verbose, "verbose", "v", false, "Print more verbose information")
+	rootCmd.Flags().BoolP("version", "V", false, "Print version")
 }

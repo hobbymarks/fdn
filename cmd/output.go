@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -28,12 +30,13 @@ const (
 )
 
 func GetConfirm() UserInput {
-	var cmsg string
-
 	fmt.Print("Please confirm (all,yes,no,quit):")
-	fmt.Scan(&cmsg)
-
-	return UserInput(strings.ToLower(cmsg))
+	scanner := bufio.NewScanner(os.Stdin)
+	if scanner.Scan() {
+		cmsg := strings.TrimSpace(scanner.Text())
+		return UserInput(strings.ToLower(cmsg))
+	}
+	return Quit
 }
 
 func noEffectTip() {

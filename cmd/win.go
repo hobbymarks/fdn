@@ -1,9 +1,5 @@
 //go:build windows
 
-/*
-Package cmd win only for windows
-Copyright © 2022 hobbymarks ihobbymarks@gmail.com
-*/
 package cmd
 
 import (

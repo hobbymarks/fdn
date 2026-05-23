@@ -205,13 +205,6 @@ func TestRemoveHidden_filtersDotFile(t *testing.T) {
 	assert.Contains(t, out, absPub)
 }
 
-func TestASCHead_variants(t *testing.T) {
-	assert.Contains(t, ASCHead("hello"), "hello")
-	assert.NotEmpty(t, ASCHead("中文"))
-	d := ASCHead("123abc")
-	assert.True(t, len(d) >= len("123abc"))
-}
-
 func TestFDNFile_forwardRename(t *testing.T) {
 	testIsolatedHome(t)
 	dir := t.TempDir()
