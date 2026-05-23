@@ -30,7 +30,7 @@ func main() {
 	if err != nil {
 		exitErr(err)
 	}
-	for _, line := range strings.Split(string(b), "\n") {
+	for line := range strings.SplitSeq(string(b), "\n") {
 		for _, s := range parseEmojiDataLine(line) {
 			addSepWord(seen, s)
 		}
@@ -40,7 +40,7 @@ func main() {
 	if err != nil {
 		exitErr(err)
 	}
-	for _, line := range strings.Split(string(b), "\n") {
+	for line := range strings.SplitSeq(string(b), "\n") {
 		for _, s := range parseEmojiSequenceLine(line) {
 			addSepWord(seen, s)
 		}
@@ -50,7 +50,7 @@ func main() {
 	if err != nil {
 		exitErr(err)
 	}
-	for _, line := range strings.Split(string(b), "\n") {
+	for line := range strings.SplitSeq(string(b), "\n") {
 		for _, s := range parseEmojiSequenceLine(line) {
 			addSepWord(seen, s)
 		}
@@ -121,12 +121,12 @@ func omitEmojiSepWord(s string) bool {
 }
 
 var emojiDataProps = map[string]struct{}{
-	"Emoji":                   {},
-	"Extended_Pictographic":   {},
-	"Emoji_Presentation":      {},
-	"Emoji_Modifier_Base":     {},
-	"Emoji_Modifier":          {},
-	"Emoji_Component":         {},
+	"Emoji":                 {},
+	"Extended_Pictographic": {},
+	"Emoji_Presentation":    {},
+	"Emoji_Modifier_Base":   {},
+	"Emoji_Modifier":        {},
+	"Emoji_Component":       {},
 }
 
 func parseEmojiDataLine(line string) []string {

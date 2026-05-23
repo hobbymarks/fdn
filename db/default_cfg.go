@@ -117,7 +117,7 @@ func migrateExistingDefaults(tx *gorm.DB) error {
 	for _, w := range defaultPunctWords {
 		swKeys = append(swKeys, utils.KeyHash(w))
 	}
-	for _, line := range strings.Split(string(defaultEmojiSepwordsData), "\n") {
+	for line := range strings.SplitSeq(string(defaultEmojiSepwordsData), "\n") {
 		w, ok := parseDefaultEmojiSepwordLine(line)
 		if !ok {
 			continue
@@ -177,7 +177,7 @@ func syncDefaultCFG(tx *gorm.DB) error {
 			return err
 		}
 	}
-	for _, line := range strings.Split(string(defaultEmojiSepwordsData), "\n") {
+	for line := range strings.SplitSeq(string(defaultEmojiSepwordsData), "\n") {
 		w, ok := parseDefaultEmojiSepwordLine(line)
 		if !ok {
 			continue
@@ -221,7 +221,7 @@ func syncDefaultCFG(tx *gorm.DB) error {
 func upsertBuiltinTermWord(tx *gorm.DB, tw TermWord) *gorm.DB {
 	return tx.Clauses(clause.OnConflict{
 		Columns: []clause.Column{{Name: "key_hash"}},
-		DoUpdates: clause.Assignments(map[string]interface{}{
+		DoUpdates: clause.Assignments(map[string]any{
 			"original_lower": tw.OriginalLower,
 			"target_word":    tw.TargetWord,
 		}),
@@ -234,7 +234,7 @@ func upsertBuiltinTermWord(tx *gorm.DB, tw TermWord) *gorm.DB {
 func upsertBuiltinToSepWord(tx *gorm.DB, sw ToSepWord) *gorm.DB {
 	return tx.Clauses(clause.OnConflict{
 		Columns: []clause.Column{{Name: "key_hash"}},
-		DoUpdates: clause.Assignments(map[string]interface{}{
+		DoUpdates: clause.Assignments(map[string]any{
 			"value": sw.Value,
 		}),
 		Where: clause.Where{Exprs: []clause.Expression{
@@ -267,8 +267,8 @@ func parseDefaultEmojiSepwordLine(line string) (literal string, ok bool) {
 	if line == "" || strings.HasPrefix(line, "#") {
 		return "", false
 	}
-	if i := strings.IndexByte(line, '\t'); i >= 0 {
-		return strings.TrimSpace(line[:i]), true
+	if before, _, ok := strings.Cut(line, "\t"); ok {
+		return strings.TrimSpace(before), true
 	}
 	return line, true
 }

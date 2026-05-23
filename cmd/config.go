@@ -9,8 +9,6 @@ import (
 	"os"
 	"strings"
 
-	"log/slog"
-
 	"github.com/hobbymarks/fdn/db"
 	"github.com/hobbymarks/fdn/utils"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -60,10 +58,7 @@ var configSetSeparatorCmd = &cobra.Command{
 	Short: "Set the separator used in FDN names",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := ConfigSeparator(args[0]); err != nil {
-			slog.Error(err.Error())
-		}
-		return nil
+		return ConfigSeparator(args[0])
 	},
 }
 
@@ -85,10 +80,7 @@ var configAddTermCmd = &cobra.Command{
 			}
 			data[key] = val
 		}
-		if err := ConfigTermWords(data); err != nil {
-			slog.Error(err.Error())
-		}
-		return nil
+		return ConfigTermWords(data)
 	},
 }
 
@@ -97,10 +89,7 @@ var configAddSepwordCmd = &cobra.Command{
 	Short: "Add or update separator-like substrings",
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := ConfigToSepWords(args); err != nil {
-			slog.Error(err.Error())
-		}
-		return nil
+		return ConfigToSepWords(args)
 	},
 }
 
@@ -114,10 +103,7 @@ var configDeleteTermCmd = &cobra.Command{
 	Short: "Delete term mappings by original key",
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := DeleteTermWords(args); err != nil {
-			slog.Error(err.Error())
-		}
-		return nil
+		return DeleteTermWords(args)
 	},
 }
 
@@ -126,10 +112,7 @@ var configDeleteSepwordCmd = &cobra.Command{
 	Short: "Delete separator-words by literal substring",
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := DeleteToSepWords(args); err != nil {
-			slog.Error(err.Error())
-		}
-		return nil
+		return DeleteToSepWords(args)
 	},
 }
 
@@ -207,7 +190,10 @@ func runConfigReset() error {
 	if err != nil {
 		return err
 	}
-	dbPath := db.DefaultFDNDBPath()
+	dbPath, err := db.DefaultFDNDBPath()
+	if err != nil {
+		return fmt.Errorf("default fdn db path: %w", err)
+	}
 	if err := db.ResetCFG(dbPath); err != nil {
 		return fmt.Errorf("reset config: %w", err)
 	}

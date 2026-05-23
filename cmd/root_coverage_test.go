@@ -230,7 +230,7 @@ func TestFDNFile_forwardRename(t *testing.T) {
 
 func TestAddRecord_incrementCount(t *testing.T) {
 	testIsolatedHome(t)
-	conn, err := db.ConnectRDDB()
+	conn, err := db.ConnectCFGDB()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -260,7 +260,7 @@ func TestAddRecord_incrementCount(t *testing.T) {
 
 func TestDeleteRecord_decrementAndRemove(t *testing.T) {
 	testIsolatedHome(t)
-	conn, err := db.ConnectRDDB()
+	conn, err := db.ConnectCFGDB()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -482,7 +482,7 @@ func TestOutputResult_richEqual(t *testing.T) {
 
 func TestAddRecord_createsNew(t *testing.T) {
 	testIsolatedHome(t)
-	conn, err := db.ConnectRDDB()
+	conn, err := db.ConnectCFGDB()
 	if err != nil {
 		t.Fatal(err)
 	}

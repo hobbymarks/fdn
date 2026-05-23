@@ -44,14 +44,6 @@ func ConnectCFGDB(path ...string) (*gorm.DB, error) {
 	return ConnectDB(path...)
 }
 
-func ConnectRDDB(path ...string) (*gorm.DB, error) {
-	conn := GetDB()
-	if conn != nil {
-		return conn, nil
-	}
-	return ConnectDB(path...)
-}
-
 func RekeySeparator(conn *gorm.DB) error {
 	var sep Separator
 	if err := conn.First(&sep).Error; err != nil {

@@ -11,6 +11,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -161,25 +162,6 @@ func Ext(path string) string {
 	}
 }
 
-var iv = []byte{
-	97,
-	70,
-	68,
-	78,
-	105,
-	110,
-	116,
-	101,
-	114,
-	110,
-	97,
-	108,
-	117,
-	115,
-	101,
-	100,
-} /*aFDNinternalused*/
-
 func EncodeBase64(b []byte) string {
 	return base64.StdEncoding.EncodeToString(b)
 }
@@ -192,15 +174,23 @@ func DecodeBase64(s string) ([]byte, error) {
 	return data, nil
 }
 
+func gcmNonce(key []byte) []byte {
+	h := sha256.New()
+	h.Write(key)
+	return h.Sum(nil)[:12]
+}
+
 func Encrypt(key, text string) (string, error) {
 	block, err := aes.NewCipher(HashTo32B(key))
 	if err != nil {
 		return "", err
 	}
-	plaintext := []byte(text)
-	cfb := cipher.NewCFBEncrypter(block, iv)
-	ciphertext := make([]byte, len(plaintext))
-	cfb.XORKeyStream(ciphertext, plaintext)
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return "", err
+	}
+	nonce := gcmNonce(HashTo32B(key))
+	ciphertext := gcm.Seal(nil, nonce, []byte(text), nil)
 	return EncodeBase64(ciphertext), nil
 }
 
@@ -209,13 +199,19 @@ func Decrypt(key, text string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	ciphertext, err := DecodeBase64(text)
+	gcm, err := cipher.NewGCM(block)
 	if err != nil {
 		return "", err
 	}
-	cfb := cipher.NewCFBDecrypter(block, iv)
-	plaintext := make([]byte, len(ciphertext))
-	cfb.XORKeyStream(plaintext, ciphertext)
+	data, err := DecodeBase64(text)
+	if err != nil {
+		return "", err
+	}
+	nonce := gcmNonce(HashTo32B(key))
+	plaintext, err := gcm.Open(nil, nonce, data, nil)
+	if err != nil {
+		return "", errors.New("decrypt failed: wrong key or corrupted journal")
+	}
 	return string(plaintext), nil
 }
 

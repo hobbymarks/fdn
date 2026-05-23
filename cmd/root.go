@@ -57,7 +57,7 @@ var rootCmd = &cobra.Command{
 		printTipFlag := false
 		curHashEncryPre := map[string]string{}
 		if reverse {
-			conn, err := db.ConnectRDDB()
+			conn, err := db.ConnectCFGDB()
 			if err != nil {
 				slog.Error(err.Error())
 				os.Exit(1)

@@ -22,7 +22,7 @@ func FDNFile(currentPath string, toBePath string, reversed bool) error {
 		return err
 	}
 
-	conn, err := db.ConnectRDDB()
+	conn, err := db.ConnectCFGDB()
 	if err != nil {
 		slog.Error(err.Error())
 		return err

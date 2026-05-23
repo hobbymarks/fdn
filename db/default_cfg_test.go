@@ -79,7 +79,7 @@ func TestEnsureDefaultCFG_userOverridesProtected(t *testing.T) {
 	lo := "wikipedia"
 	keyHash := utils.KeyHash(lo)
 	conn.Model(&TermWord{}).Where("key_hash = ?", keyHash).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"target_word": "wiki",
 			"source":      UserSource,
 		})

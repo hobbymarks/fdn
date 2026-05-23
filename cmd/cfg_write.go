@@ -36,7 +36,7 @@ func ConfigTermWords(keyValueMap map[string]string) error {
 		} else {
 			result := conn.Model(&db.TermWord{}).
 				Where("key_hash = ?", termWord.KeyHash).
-				Updates(map[string]interface{}{
+				Updates(map[string]any{
 					"target_word": value,
 					"source":      db.UserSource,
 				})
@@ -46,7 +46,7 @@ func ConfigTermWords(keyValueMap map[string]string) error {
 			slog.Debug(fmt.Sprintf("updated:%s -> %s", termWord.OriginalLower, value))
 		}
 	}
-	invalidateTermWordRegexCache()
+	InvalidateCaches()
 	return nil
 }
 
@@ -68,7 +68,7 @@ func DeleteTermWords(keys []string) error {
 			slog.Error(result.Error.Error())
 		}
 	}
-	invalidateTermWordRegexCache()
+	InvalidateCaches()
 	return nil
 }
 
@@ -92,7 +92,7 @@ func ConfigToSepWords(words []string) error {
 		} else {
 			result := conn.Model(&db.ToSepWord{}).
 				Where("key_hash = ?", toSepWord.KeyHash).
-				Updates(map[string]interface{}{
+				Updates(map[string]any{
 					"value":  word,
 					"source": db.UserSource,
 				})
@@ -102,6 +102,7 @@ func ConfigToSepWords(words []string) error {
 			slog.Debug(fmt.Sprintf("updated sepword:%s", word))
 		}
 	}
+	InvalidateCaches()
 	return nil
 }
 
@@ -123,6 +124,7 @@ func DeleteToSepWords(keys []string) error {
 			slog.Error(result.Error.Error())
 		}
 	}
+	InvalidateCaches()
 	return nil
 }
 
@@ -148,7 +150,7 @@ func ConfigSeparator(separator string) error {
 			return result.Error
 		}
 	} else {
-		updateResult := conn.Model(&existing).Updates(map[string]interface{}{
+		updateResult := conn.Model(&existing).Updates(map[string]any{
 			"key_hash": utils.KeyHash(separator),
 			"value":    separator,
 			"source":   db.UserSource,
@@ -158,5 +160,6 @@ func ConfigSeparator(separator string) error {
 		}
 		slog.Debug(fmt.Sprintf("updated separator:%s", separator))
 	}
+	InvalidateCaches()
 	return nil
 }

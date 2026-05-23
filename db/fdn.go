@@ -10,14 +10,18 @@ import (
 )
 
 var (
-	sharedDB   *gorm.DB
-	sharedMu   sync.Mutex
+	sharedDB *gorm.DB
+	sharedMu sync.Mutex
 )
 
 func ConnectDB(path ...string) (*gorm.DB, error) {
 	var dbPath string
 	if len(path) == 0 {
-		dbPath = DefaultFDNDBPath()
+		var err error
+		dbPath, err = DefaultFDNDBPath()
+		if err != nil {
+			return nil, err
+		}
 	} else {
 		if err := os.MkdirAll(filepath.Dir(path[0]), os.ModePerm); err != nil {
 			return nil, err

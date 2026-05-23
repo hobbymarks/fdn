@@ -6,14 +6,17 @@ Copyright © 2022 hobbymarks ihobbymarks@gmail.com
 */
 package cmd
 
-import "path/filepath"
+import (
+	"path/filepath"
+	"strings"
+)
 
 // IsHidden check file is hidden
 func IsHidden(abspath string) (bool, error) {
 	abspath = filepath.Clean(abspath)
 	bn := filepath.Base(abspath)
 
-	if bn[0:1] == "." {
+	if strings.HasPrefix(bn, ".") {
 		return true, nil
 	}
 	return false, nil

@@ -20,11 +20,23 @@ var termWordRegexCache struct {
 	re  *regexp.Regexp
 }
 
-func invalidateTermWordRegexCache() {
+var configDataCache struct {
+	sync.Mutex
+	termWords  []db.TermWord
+	separator  db.Separator
+	toSepWords []db.ToSepWord
+	loaded     bool
+}
+
+func InvalidateCaches() {
 	termWordRegexCache.Lock()
-	defer termWordRegexCache.Unlock()
 	termWordRegexCache.pat = ""
 	termWordRegexCache.re = nil
+	termWordRegexCache.Unlock()
+
+	configDataCache.Lock()
+	configDataCache.loaded = false
+	configDataCache.Unlock()
 }
 
 func termWordAlternationRE(pattern string) *regexp.Regexp {
@@ -119,28 +131,30 @@ func getSepCollapseRe(sep string) *regexp.Regexp {
 	return sepReplacerCache.re
 }
 
-func ReplaceWords(inputName string) (string, error) {
+func loadConfigCache() error {
+	configDataCache.Lock()
+	defer configDataCache.Unlock()
+	if configDataCache.loaded {
+		return nil
+	}
+
 	conn, err := db.ConnectCFGDB()
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	var termWords []db.TermWord
-	if result := conn.Find(&termWords); result.Error != nil {
-		return "", fmt.Errorf("retrieve TermWord: %w", result.Error)
+	if result := conn.Find(&configDataCache.termWords); result.Error != nil {
+		return fmt.Errorf("retrieve TermWord: %w", result.Error)
 	}
 
-	var sep db.Separator
-	if result := conn.First(&sep); result.Error != nil {
-		return "", fmt.Errorf("retrieve Separator: %w", result.Error)
+	if result := conn.First(&configDataCache.separator); result.Error != nil {
+		return fmt.Errorf("retrieve Separator: %w", result.Error)
 	}
-	sepStr := sep.Value
 
-	var toSepWords []db.ToSepWord
-	if result := conn.Find(&toSepWords); result.Error != nil {
-		return "", fmt.Errorf("retrieve ToSepWord: %w", result.Error)
+	if result := conn.Find(&configDataCache.toSepWords); result.Error != nil {
+		return fmt.Errorf("retrieve ToSepWord: %w", result.Error)
 	}
-	slices.SortFunc(toSepWords, func(a, b db.ToSepWord) int {
+	slices.SortFunc(configDataCache.toSepWords, func(a, b db.ToSepWord) int {
 		ra := utf8.RuneCountInString(a.Value)
 		rb := utf8.RuneCountInString(b.Value)
 		if ra != rb {
@@ -148,6 +162,19 @@ func ReplaceWords(inputName string) (string, error) {
 		}
 		return strings.Compare(a.Value, b.Value)
 	})
+
+	configDataCache.loaded = true
+	return nil
+}
+
+func ReplaceWords(inputName string) (string, error) {
+	if err := loadConfigCache(); err != nil {
+		return "", err
+	}
+
+	termWords := configDataCache.termWords
+	sepStr := configDataCache.separator.Value
+	toSepWords := configDataCache.toSepWords
 
 	words, wordMasks := maskSegments(inputName, termWords)
 	if len(words) != len(wordMasks) {
@@ -172,7 +199,7 @@ func ReplaceWords(inputName string) (string, error) {
 	outName = rpCNS.ReplaceAllString(outName, sepStr)
 	newWords = newWords[:0]
 
-	for _, wd := range strings.Split(outName, sepStr) {
+	for wd := range strings.SplitSeq(outName, sepStr) {
 		if v, exist := termWordMap[wd]; exist {
 			wd = v
 		}
@@ -184,16 +211,10 @@ func ReplaceWords(inputName string) (string, error) {
 }
 
 func ProcessHeadTail(inputName string) (string, error) {
-	conn, err := db.ConnectCFGDB()
-	if err != nil {
+	if err := loadConfigCache(); err != nil {
 		return "", err
 	}
-
-	var sep db.Separator
-	if result := conn.First(&sep); result.Error != nil {
-		return "", fmt.Errorf("retrieve Separator: %w", result.Error)
-	}
-	sepStr := sep.Value
+	sepStr := configDataCache.separator.Value
 
 	rpHTSeps := regexp.MustCompile("^" + sepStr + "+" + "|" + sepStr + "+" + "$")
 	return rpHTSeps.ReplaceAllString(inputName, ""), nil
