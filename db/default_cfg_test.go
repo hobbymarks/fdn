@@ -36,7 +36,7 @@ func TestEnsureDefaultCFG_seedsOnce(t *testing.T) {
 		t.Fatal(err)
 	}
 	assert.Equal(t, int64(7), ts)
-	assert.Equal(t, int64(6320), sws)
+	assert.Equal(t, int64(6323), sws)
 	assert.Equal(t, int64(1), seps)
 }
 
@@ -63,7 +63,7 @@ func TestEnsureDefaultCFG_marksBuiltinSource(t *testing.T) {
 
 	var sws []ToSepWord
 	require.NoError(t, conn.Where("source = ?", BuiltinSource).Find(&sws).Error)
-	assert.Equal(t, int64(6320), conn.Where("source = ?", BuiltinSource).Find(&[]ToSepWord{}).RowsAffected)
+	assert.Equal(t, int64(6323), conn.Where("source = ?", BuiltinSource).Find(&[]ToSepWord{}).RowsAffected)
 }
 
 func TestEnsureDefaultCFG_userOverridesProtected(t *testing.T) {
