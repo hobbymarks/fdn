@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"sort"
 	"strings"
 
@@ -17,6 +18,18 @@ import (
 )
 
 var version = "dev"
+
+func versionString() string {
+	if version != "dev" {
+		return version
+	}
+	if info, ok := debug.ReadBuildInfo(); ok {
+		if v := info.Main.Version; v != "" && v != "(devel)" {
+			return v
+		}
+	}
+	return "dev"
+}
 
 var (
 	onlyDirectory bool
@@ -36,7 +49,7 @@ var verbose bool
 
 var rootCmd = &cobra.Command{
 	Use:     "fdn",
-	Version: version,
+	Version: versionString(),
 	Short:   "A Tool For Unify File Name",
 	Long:    `A Tool For Unify File Name and Directory Name`,
 	Example: `  fdn mv ./a.txt ./b.txt

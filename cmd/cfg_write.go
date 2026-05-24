@@ -63,7 +63,7 @@ func DeleteTermWords(keys []string) error {
 				slog.Info(fmt.Sprintf("removing built-in term: %s (will be restored on next sync)", tw.OriginalLower))
 			}
 		}
-		result := conn.Unscoped().Delete(&db.TermWord{}, keyHash)
+		result := conn.Unscoped().Where("key_hash = ?", keyHash).Delete(&db.TermWord{})
 		if result.Error != nil {
 			slog.Error(result.Error.Error())
 		}
@@ -119,7 +119,7 @@ func DeleteToSepWords(keys []string) error {
 				slog.Info(fmt.Sprintf("removing built-in sepword: %s (will be restored on next sync)", sw.Value))
 			}
 		}
-		result := conn.Unscoped().Delete(&db.ToSepWord{}, keyHash)
+		result := conn.Unscoped().Where("key_hash = ?", keyHash).Delete(&db.ToSepWord{})
 		if result.Error != nil {
 			slog.Error(result.Error.Error())
 		}

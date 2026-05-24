@@ -26,6 +26,9 @@ var defaultTermWordDefs = []struct{ orig, target string }{
 }
 
 var defaultPunctWords = []string{
+	"\n",
+	"\r",
+	"\t",
 	"-",
 	" ",
 	"\u201C",
